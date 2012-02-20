@@ -3,6 +3,10 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
+/**
+ * The base component is the foundation for all components.
+ * It provides base functionality for instance counting and default 'toString'
+ */
 define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	var COUNT = 0;
 
