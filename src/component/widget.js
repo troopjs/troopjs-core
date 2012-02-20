@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "./base", "jquery" ], function WidgetModule(Compose, Component, $) {
+define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadget, $) {
 	var UNDEFINED = undefined;
 	var FUNCTION = Function;
 	var $ELEMENT = "$element";
@@ -64,7 +64,7 @@ define([ "compose", "./base", "jquery" ], function WidgetModule(Compose, Compone
 		return render;
 	}
 
-	return Compose(Component, function Widget(element, displayName) {
+	return Compose(Gadget, function Widget(element, displayName) {
 		var self = this;
 		self[$ELEMENT] = $(element);
 		self[DISPLAYNAME] = name || "component/widget";
