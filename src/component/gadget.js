@@ -35,10 +35,10 @@ define([ "./base", "pubsub/hub", "pubsub/topic", "deferred" ], function GadgetCo
 			return self;
 		},
 
-		request : function request(setting, deferred) {
+		ajax : function ajax(setting, deferred) {
 			var self = this;
 
-			self.publish(new Topic("app/request", self), setting, deferred);
+			self.publish(new Topic("app/ajax", self), setting, deferred);
 
 			return self;
 		},
