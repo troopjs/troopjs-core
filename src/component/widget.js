@@ -3,9 +3,10 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadget, $) {
+define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 	var UNDEFINED = undefined;
 	var FUNCTION = Function;
+	var REFRESH = "widget/refresh";
 	var $ELEMENT = "$element";
 	var DISPLAYNAME = "displayName";
 	var ATTR_WEAVE = "[data-weave]";
@@ -21,10 +22,9 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 		/**
 		 * Renders contents into element
 		 * 
-		 * @param contents Template/String to render
-		 * @param data If contents is a template, the data to render template
-		 *        with
-		 * @param deferred Deferred (optional)
+		 * @param contents (Function | String) Template/String to render
+		 * @param data (Object) If contents is a template - template data
+		 * @param deferred (Deferred) Deferred (optional)
 		 * @returns Self
 		 */
 		function render(contents, data, deferred) {
@@ -51,7 +51,7 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 			})
 			.done(function renderDone() {
 				// After render is complete, trigger "widget/refresh" with woven components
-				$element.trigger("widget/refresh", arguments);
+				$element.trigger(REFRESH, arguments);
 			});
 
 			if (deferred) {
@@ -64,7 +64,7 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 		return render;
 	}
 
-	return Compose(Gadget, function Widget(element, displayName) {
+	return Gadget.extend(function Widget(element, displayName) {
 		var self = this;
 		self[$ELEMENT] = $(element);
 		self[DISPLAYNAME] = name || "component/widget";
@@ -75,6 +75,12 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 		append : renderProxy($.fn.append),
 		prepend : renderProxy($.fn.prepend),
 
+		/**
+		 * Weaves all children of $element
+		 * @param $element (jQuery) Element to weave
+		 * @param deferred (Deferred) Deferred (optional)
+		 * @returns self
+		 */
 		weave : function weave($element, deferred) {
 			var self = this;
 
@@ -83,6 +89,11 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 			return self;
 		},
 
+		/**
+		 * Unweaves all children of $element _and_ self
+		 * @param $element (jQuery) Element to unweave
+		 * @returns self
+		 */
 		unweave : function unweave($element) {
 			var self = this;
 
@@ -91,6 +102,11 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 			return self;
 		},
 
+		/**
+		 * Empties widget
+		 * @param deferred (Deferred) Deferred (optional)
+		 * @returns self
+		 */
 		empty : function empty(deferred) {
 			var self = this;
 
@@ -103,7 +119,7 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 				var $contents = $element.contents().detach();
 
 				// Trigger refresh
-				$element.trigger("widget/refresh", arguments);
+				$element.trigger(REFRESH, arguments);
 
 				// Get DOM elements
 				var contents = $contents.get();
