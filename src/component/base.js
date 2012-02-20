@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "config" ], function BaseComponentModule(Compose, config) {
+define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	var COUNT = 0;
 
 	return Compose(function Component() {

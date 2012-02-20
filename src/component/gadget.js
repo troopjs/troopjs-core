@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "./base", "pubsub/hub", "pubsub/topic", "deferred" ], function GadgetComponentModule(Component, hub, Topic, Deferred) {
+define([ "./base", "pubsub/hub", "pubsub/topic", "deferred" ], function GadgetModule(Component, hub, Topic, Deferred) {
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
