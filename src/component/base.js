@@ -13,9 +13,16 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	return Compose(function Component() {
 		this.instanceCount = COUNT++;
 	}, {
+		// Application configuration
 		config : config,
+
+		// Default display name for components
 		displayName : "component/base",
 
+		/**
+		 * Combines displayName and instanceCount
+		 * @returns
+		 */
 		toString : function toString() {
 			var self = this;
 
