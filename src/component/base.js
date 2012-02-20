@@ -4,8 +4,8 @@
  * Released under the MIT license.
  */
 /**
- * The base component is the foundation for all components.
- * It provides base functionality for instance counting and default 'toString'
+ * The base trait provides functionality for instance counting
+ * and a default 'toString' method.
  */
 define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	var COUNT = 0;
