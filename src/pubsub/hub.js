@@ -3,10 +3,10 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "component/gadget", "./topic" ], function HubModule(Compose, Gadget, Topic) {
+define([ "compose", "component/base", "./topic" ], function HubModule(Compose, Component, Topic) {
 	var UNDEFINED = undefined;
 
-	return Compose.create(Gadget, function Hub() {
+	return Compose.create(Component, function Hub() {
 		var self = this;
 
 		self.re = /\/\w+(?=\/)|\*{1,2}$/g;
