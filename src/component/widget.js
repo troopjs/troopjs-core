@@ -1,11 +1,15 @@
 /*!
- * TroopJS gadget component
+ * TroopJS widget component
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
+ */
+/**
+ * The widget trait provides common UI related logic
  */
 define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 	var UNDEFINED = undefined;
 	var FUNCTION = Function;
+	var SLICE = Array.prototype.slice;
 	var REFRESH = "widget/refresh";
 	var $ELEMENT = "$element";
 	var DISPLAYNAME = "displayName";
@@ -21,7 +25,6 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 	function renderProxy(op) {
 		/**
 		 * Renders contents into element
-		 * 
 		 * @param contents (Function | String) Template/String to render
 		 * @param data (Object) If contents is a template - template data
 		 * @param deferred (Deferred) Deferred (optional)
@@ -69,12 +72,6 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		self[$ELEMENT] = $(element);
 		self[DISPLAYNAME] = name || "component/widget";
 	}, {
-		before : renderProxy($.fn.before),
-		after : renderProxy($.fn.after),
-		html : renderProxy($.fn.html),
-		append : renderProxy($.fn.append),
-		prepend : renderProxy($.fn.prepend),
-
 		/**
 		 * Weaves all children of $element
 		 * @param $element (jQuery) Element to weave
@@ -82,11 +79,9 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		 * @returns self
 		 */
 		weave : function weave($element, deferred) {
-			var self = this;
-
 			$element.find(ATTR_WEAVE).weave(deferred);
 
-			return self;
+			return this;
 		},
 
 		/**
@@ -95,12 +90,46 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		 * @returns self
 		 */
 		unweave : function unweave($element) {
-			var self = this;
-
 			$element.find(ATTR_WOVEN).andSelf().unweave();
 
-			return self;
+			return this;
 		},
+
+		/**
+		 * Triggers event on $element
+		 * @param $event (jQuery.Event | String) Event to trigger
+		 * @returns self
+		 */
+		trigger : function trigger($event) {
+			$element.trigger($event, SLICE.call(arguments, 1));
+
+			return this;
+		},
+
+		/**
+		 * Renders content and inserts it before $element
+		 */
+		before : renderProxy($.fn.before),
+
+		/**
+		 * Renders content and inserts it after $element
+		 */
+		after : renderProxy($.fn.after),
+
+		/**
+		 * Renders content and replaces $element contents
+		 */
+		html : renderProxy($.fn.html),
+
+		/**
+		 * Renders content and appends it to $element
+		 */
+		append : renderProxy($.fn.append),
+
+		/**
+		 * Renders content and prepends it to $element
+		 */
+		prepend : renderProxy($.fn.prepend),
 
 		/**
 		 * Empties widget
