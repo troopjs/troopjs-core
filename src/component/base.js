@@ -16,8 +16,8 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 		// Application configuration
 		config : config,
 
-		// Default display name for components
-		displayName : "component/base",
+		// Require compositions to provide a displayName
+		displayName : Compose.required,
 
 		/**
 		 * Generates string representation of this object
