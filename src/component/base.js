@@ -20,8 +20,8 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 		displayName : "component/base",
 
 		/**
-		 * Combines displayName and instanceCount
-		 * @returns
+		 * Generates string representation of this object
+		 * @returns Combination displayName and instanceCount
 		 */
 		toString : function toString() {
 			var self = this;
