@@ -70,8 +70,16 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 	return Gadget.extend(function Widget(element, displayName) {
 		var self = this;
 		self[$ELEMENT] = $(element);
-		self[DISPLAYNAME] = name || "component/widget";
+
+		if (displayName !== undefined) {
+			self[DISPLAYNAME] = name;
+		}
 	}, {
+		/**
+		 * Default display name
+		 */
+		displayName: "component/widget",
+
 		/**
 		 * Weaves all children of $element
 		 * @param $element (jQuery) Element to weave
