@@ -13,7 +13,9 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	return Compose(function Component() {
 		this.instanceCount = COUNT++;
 	}, {
-		// Application configuration
+		/**
+		 * Application configuration
+		 */
 		config : config,
 
 		// Require compositions to provide a displayName
