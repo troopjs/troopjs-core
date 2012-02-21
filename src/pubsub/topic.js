@@ -13,10 +13,18 @@ define([ "compose", "component/base" ], function TopicModule(Compose, Component)
 		self.publisher = publisher;
 		self.parent = parent;
 	}, {
+		/**
+		 * Generates string representation of this object
+		 * @returns Instance topic
+		 */
 		toString : function toString() {
 			return this.topic;
 		},
 
+		/**
+		 * Traces topic origin to root
+		 * @returns String representation of all topics traced down to root
+		 */
 		trace : function trace() {
 			var current = this;
 			var constructor = current.constructor;
@@ -41,7 +49,9 @@ define([ "compose", "component/base" ], function TopicModule(Compose, Component)
 				}
 
 				parent = current.parent;
-				stack += parent ? current.publisher + ":" : current.publisher;
+				stack += parent
+					? current.publisher + ":"
+					: current.publisher;
 				current = parent;
 			}
 
