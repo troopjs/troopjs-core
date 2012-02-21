@@ -3,10 +3,10 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "component/base" ], function TopicModule(Compose, Component) {
+define([ "component/base" ], function TopicModule(Component) {
 	var ARRAY = Array;
 
-	return Compose(Component, function Topic(topic, publisher, parent) {
+	return Component.extend(function Topic(topic, publisher, parent) {
 		var self = this;
 
 		self.topic = topic;
