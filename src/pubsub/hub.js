@@ -13,6 +13,8 @@ define([ "compose", "component/base", "./topic" ], function HubModule(Compose, C
 		self.context = {};
 		self.topics = {};
 	}, {
+		displayName: "pubsub/hub",
+
 		/**
 		 * Subscribe to a topic
 		 * 

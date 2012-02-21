@@ -13,6 +13,8 @@ define([ "compose", "component/base" ], function TopicModule(Compose, Component)
 		self.publisher = publisher;
 		self.parent = parent;
 	}, {
+		displayName : "pubsub/topic",
+
 		/**
 		 * Generates string representation of this object
 		 * @returns Instance topic
