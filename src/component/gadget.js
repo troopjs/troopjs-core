@@ -13,9 +13,6 @@ define([ "./base", "pubsub/hub", "pubsub/topic", "deferred" ], function GadgetMo
 	var UNSUBSCRIBE = hub.unsubscribe;
 
 	return Component.extend({
-		// Default display name for gadgets
-		displayName : "component/gadget",
-
 		/**
 		 * Calls hub.publish in self context
 		 * @returns self
