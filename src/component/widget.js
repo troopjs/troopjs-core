@@ -72,7 +72,7 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		self[$ELEMENT] = $(element);
 
 		if (displayName !== undefined) {
-			self[DISPLAYNAME] = name;
+			self[DISPLAYNAME] = displayName;
 		}
 	}, {
 		/**
