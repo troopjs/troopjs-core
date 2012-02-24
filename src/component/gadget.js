@@ -7,7 +7,7 @@
  * The gadget trait provides convenient access to common application
  * logic such as pubsub* and ajax
  */
-define([ "./base", "pubsub/hub", "pubsub/topic", "deferred" ], function GadgetModule(Component, hub, Topic, Deferred) {
+define([ "./base", "../pubsub/hub", "../pubsub/topic", "../deferred" ], function GadgetModule(Component, hub, Topic, Deferred) {
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
