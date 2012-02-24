@@ -186,6 +186,9 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 			return self;
 		},
 
+		"dom/action": function onAction(topic, $event) {
+		},
+
 		"dom/destroy" : function onDestroy(topic, $event) {
 			var self = this;
 			var destructor = self.destructor;
