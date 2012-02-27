@@ -28,7 +28,7 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		 * @param contents (Function | String) Template/String to render
 		 * @param data (Object) If contents is a template - template data
 		 * @param deferred (Deferred) Deferred (optional)
-		 * @returns Self
+		 * @returns self
 		 */
 		function render(contents, data, deferred) {
 			var self = this;
@@ -186,9 +186,17 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 			return self;
 		},
 
+		/**
+		 * Generic action handler.
+		 * NOTE - if you don't have this empty handler, the action event
+		 * won't be attached.
+		 */
 		"dom/action": function onAction(topic, $event) {
 		},
 
+		/**
+		 * Generic destroy handler.
+		 */
 		"dom/destroy" : function onDestroy(topic, $event) {
 			var self = this;
 			var destructor = self.destructor;
@@ -199,6 +207,7 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 				result = destructor.call(self);
 			}
 
+			// If the destructor does not return false, unweave
 			if (result !== false) {
 				self.unweave(self[$ELEMENT]);
 			}
