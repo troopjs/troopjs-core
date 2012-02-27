@@ -5,6 +5,7 @@
  */
 define([ "compose", "../component/base", "./topic" ], function HubModule(Compose, Component, Topic) {
 	var UNDEFINED = undefined;
+	var RECURSIVE = "\/" + "**";
 
 	return Compose.create(Component, function Hub() {
 		var self = this;
@@ -184,7 +185,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 
 			// Create initial set of candidates
 			while (re.test(string)) {
-				candidates[length++] = string.substr(0, re.lastIndex) + "/**";
+				candidates[length++] = string.substr(0, re.lastIndex) + RECURSIVE;
 			}
 
 			// Are sub-topics even possible?
