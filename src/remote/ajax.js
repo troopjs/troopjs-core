@@ -18,7 +18,7 @@ define([ "compose", "../component/base", "./topic", "../pubsub/hub", "jquery" ],
 	}
 
 	return Compose.create(Component, function Ajax() {
-		hub.subscribe("app/ajax", this, request);
+		hub.subscribe("hub/ajax", this, request);
 	}, {
 		displayName : "remote/ajax"
 	});
