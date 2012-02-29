@@ -61,6 +61,6 @@ define([ "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function Ga
 			self.publish(new Topic("app/ajax", self), setting, deferred);
 
 			return self;
-		},
+		}
 	});
 });
