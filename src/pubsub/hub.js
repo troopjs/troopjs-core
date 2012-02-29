@@ -209,7 +209,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					candidate = candidates[length];
 
 					// Fail fast if there are no handlers for candidate
-					if (!candidate in topics) {
+					if (!(candidate in topics)) {
 						continue;
 					}
 
@@ -230,7 +230,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					candidate = candidates[length];
 
 					// Fail fast if there are no handlers for candidate
-					if (!candidate in topics) {
+					if (!(candidate in topics)) {
 						continue;
 					}
 
