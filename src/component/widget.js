@@ -187,13 +187,6 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		},
 
 		/**
-		 * Generic action handler.
-		 * NOTE - if you don't have this empty handler, the action event
-		 * won't be attached.
-		 */
-		"dom/action.click": function onAction(topic, $event) {},
-
-		/**
 		 * Generic destroy handler.
 		 */
 		"dom/destroy" : function onDestroy(topic, $event) {
