@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "./base", "json" ], function StoreSessionModule(Compose, Store, json) {
+define([ "compose", "./base" ], function StoreSessionModule(Compose, Store) {
 
 	// Grab session storage
 	var STORAGE = window.sessionStorage;
@@ -13,7 +13,7 @@ define([ "compose", "./base", "json" ], function StoreSessionModule(Compose, Sto
 
 		set : function set(key, value, deferred) {
 			// JSON encoded 'value' then store as 'key'
-			STORAGE.setItem(key, json.stringify(value));
+			STORAGE.setItem(key, JSON.stringify(value));
 
 			// Resolve deferred
 			if (deferred && deferred.resolve instanceof Function) {
@@ -23,7 +23,7 @@ define([ "compose", "./base", "json" ], function StoreSessionModule(Compose, Sto
 
 		get : function get(key, deferred) {
 			// Get value from 'key', parse JSON
-			var value = json.parse(STORAGE.getItem(key));
+			var value = JSON.parse(STORAGE.getItem(key));
 
 			// Resolve deferred
 			if (deferred && deferred.resolve instanceof Function) {
