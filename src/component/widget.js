@@ -67,9 +67,9 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		return render;
 	}
 
-	return Gadget.extend(function Widget(element, displayName) {
+	return Gadget.extend(function Widget($element, displayName) {
 		var self = this;
-		self[$ELEMENT] = $(element);
+		self[$ELEMENT] = $element;
 
 		if (displayName !== undefined) {
 			self[DISPLAYNAME] = displayName;
