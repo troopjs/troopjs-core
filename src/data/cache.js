@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define( [ "compose", "../component/base" ], function CacheModule(Compose, Component) {
+define( [ "compose", "../component/gadget" ], function CacheModule(Compose, Gadget) {
 	var UNDEFINED = undefined;
 	var FALSE = false;
 	var NULL = null;
@@ -189,7 +189,7 @@ define( [ "compose", "../component/base" ], function CacheModule(Compose, Compon
 		return result;
 	}
 
-	return Compose.create(Component, function Cache() {
+	return Compose.create(Gadget, function Cache() {
 		this.flush();
 	}, {
 		"displayName" : "data/cache",
