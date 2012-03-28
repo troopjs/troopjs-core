@@ -23,7 +23,8 @@ define( [ "compose", "../component/base" ], function CacheModule(Compose, Compon
 	var _MAXAGE = "maxAge";
 	var _EXPIRES = "expires";
 	var _INDEXED = "indexed";
-	var SHIFT = 16;
+	var SHIFT = 16; // Magic number to use for calculating next generation
+	var MSEC = 1 << SHIFT; // Calculate 'duration' of a generation
 
 	/**
 	 * Internal method to put a node in the cache
@@ -280,7 +281,7 @@ define( [ "compose", "../component/base" ], function CacheModule(Compose, Compon
 
 				// Reset head
 				generations[HEAD] = current;
-			}, 1 << SHIFT /* And MAGIC */);
+			}, MSEC);
 
 			return self;
 		}
