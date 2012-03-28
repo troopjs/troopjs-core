@@ -47,20 +47,6 @@ define([ "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function Ga
 			UNSUBSCRIBE.apply(hub, arguments);
 
 			return self;
-		},
-
-		/**
-		 * Dispatches call to ajax module
-		 * @param setting (Object or URL) Ajax settings
-		 * @param deferred (Deferred)
-		 * @returns self
-		 */
-		ajax : function ajax(setting, deferred) {
-			var self = this;
-
-			self.publish(new Topic("app/ajax", self), setting, deferred);
-
-			return self;
 		}
 	});
 });
