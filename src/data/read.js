@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "deferred"], function ReadModule(Compose, Gadget, Topic, cache, Deferred) {
+define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "deferred", "../util/merge"], function ReadModule(Compose, Gadget, Topic, cache, Deferred, merge) {
 	var ARRAY_PROTO = Array.prototype;
 	var SLICE = ARRAY_PROTO.slice;
 	var CONCAT = ARRAY_PROTO.concat;
@@ -14,7 +14,7 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 	var NEWLINE = "\n";
 	var RE_ID = /^(\w+![\w\d\-_]+)/gm;
 
-	function read(topic, query, /*, query, query, .., */ deferred) {
+	function read(topic, query /*, query, query, .., */, deferred) {
 		var self = this;
 		var length = arguments.length - 1;
 		var batches = self[BATCHES];
@@ -116,7 +116,7 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 			}
 
 			// Publish hub/ajax
-			self.publish(new Topic("hub/ajax", self, _topic), Compose.call({
+			self.publish(new Topic("hub/ajax", self, _topic), merge.call({
 				"data": {
 					"q": _query
 				}
