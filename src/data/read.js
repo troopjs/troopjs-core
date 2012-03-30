@@ -118,7 +118,7 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 			// Publish hub/ajax
 			self.publish(new Topic("hub/ajax", self, _topic), merge.call({
 				"data": {
-					"q": _query
+					"q": _query.join("|")
 				}
 			}, self.config.data.read), requestDeferred);
 		}
