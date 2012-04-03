@@ -4,6 +4,8 @@
  * Released under the MIT license.
  */
 define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Compose, Widget, $) {
+	var ARRAY = Array;
+	var ARRAY_PROTO = ARRAY.prototype;
 	var UNDEFINED = undefined;
 	var DATA_HOLDING = "data-holding";
 
@@ -12,6 +14,12 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 		var _widget = UNDEFINED;
 
 		function release(deferred) {
+			// Make arguments into a real array
+			var argv  = ARRAY.apply(ARRAY_PROTO, arguments);
+
+			// Update deferred to the last argument
+			deferred = argv.pop();
+
 			// Initialize deferred
 			var dfd = $.Deferred()
 				.done(function done(widget) {
@@ -33,8 +41,18 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 			}
 			else try {
 				require([ _name ], function required(widget) {
-					// Instantiate widget
-					widget = widget($element, _name);
+					// If no additional arguments, do simple instantiation
+					if (argv.length === 0) {
+						widget = widget($element, _name);
+					}
+					// Otherwise, do a complicated one
+					else {
+						// Add $element and _name to the beginning of argv
+						argv.unshift($element, _name);
+
+						// Instantiate
+						widget = widget.apply(widget, argv);
+					}
 
 					// Wire widget
 					$element.wire(widget);
