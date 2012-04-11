@@ -108,9 +108,11 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		 * @returns self
 		 */
 		trigger : function trigger($event) {
-			$element.trigger($event, SLICE.call(arguments, 1));
+			var self = this;
 
-			return this;
+			self[$ELEMENT].trigger($event, SLICE.call(arguments, 1));
+
+			return self;
 		},
 
 		/**
