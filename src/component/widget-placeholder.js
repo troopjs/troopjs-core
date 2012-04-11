@@ -86,9 +86,9 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 
 		// Extend instance
 		Compose.call(self, {
-			release: release,
-			hold: hold,
-			destructor: hold
+			release : release,
+			hold : hold,
+			destructor : hold
 		});
 	});
 });

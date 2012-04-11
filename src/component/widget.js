@@ -18,9 +18,8 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 
 	/**
 	 * Creates a proxy of the inner method 'render' with the 'op' parameter set
-	 * 
 	 * @param op name of jQuery method call
-	 * @returns proxied render
+	 * @returns {Function} proxied render
 	 */
 	function renderProxy(op) {
 		/**
