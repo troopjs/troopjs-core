@@ -4,8 +4,8 @@
  * Released under the MIT license.
  */
 /**
- * The base trait provides functionality for instance counting
- * and a default 'toString' method.
+ * The base trait provides functionality for instance counting,
+ * configuration and a default 'toString' method.
  */
 define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	var COUNT = 0;
