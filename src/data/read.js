@@ -120,7 +120,7 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 				"data": {
 					"q": _query.join("|")
 				}
-			}, self.config.data.read), requestDeferred);
+			}, self.config.api.read), requestDeferred);
 		}
 
 		return interval;
