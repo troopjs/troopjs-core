@@ -18,9 +18,6 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 		 */
 		config : config,
 
-		// Require compositions to provide a displayName
-		displayName : Compose.required,
-
 		/**
 		 * Generates string representation of this object
 		 * @returns Combination displayName and instanceCount
@@ -28,7 +25,7 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 		toString : function toString() {
 			var self = this;
 
-			return self.displayName + "@" + self.instanceCount;
+			return (self.displayName || "component") + "@" + self.instanceCount;
 		}
 	});
 });
