@@ -12,7 +12,7 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 	var BUILD = "build";
 	var DESTROY = "destroy";
 	var RE_SCAN = new RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
-	var RE_HUB = /^hub\/.+/;
+	var RE_HUB = /^hub\/(.+)/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
@@ -106,19 +106,26 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 			"build/hub" : function build() {
 				var key = NULL;
 				var value;
+				var matches;
+				var topic;
 
 				// Loop over each property in gadget
 				for (key in self) {
 					// Match signature in key
-					if (RE_HUB.test(key)) {
+					matches = RE_HUB.exec(key);
+
+					if (matches !== NULL) {
+						// Get topic
+						topic = matches[1];
+
 						// Get value
 						value = self[key];
 
 						// Subscribe
-						hub.subscribe(new Topic(key, self), self, value);
+						hub.subscribe(new Topic(topic, self), self, value);
 
 						// Store in subscriptions
-						subscriptions[subscriptions.length] = [key, value];
+						subscriptions[subscriptions.length] = [topic, value];
 
 						// Remove value from self
 						delete self[key];
