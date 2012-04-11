@@ -14,36 +14,6 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 	var NEWLINE = "\n";
 	var RE_ID = /^(\w+![\w\d\-_]+)/gm;
 
-	function read(topic, query /*, query, query, .., */, deferred) {
-		var self = this;
-		var length = arguments.length - 1;
-		var batches = self[BATCHES];
-
-		// Update (multi) query
-		query = CONCAT.apply(ARRAY_PROTO, SLICE.call(arguments, 1, length));
-
-		// Update deferred
-		deferred = arguments[length];
-
-		// Deferred read
-		Deferred(function readDeferred(dfd) {
-			var matches;
-			var guids = dfd.guids = [];
-
-			// Get all id's from queries
-			while(matches = RE_ID.exec(query.join(NEWLINE))) {
-				guids.push(matches[1]);
-			}
-
-			// Add batch to batches
-			batches.push({
-				topic: topic,
-				query: query,
-				deferred: dfd
-			});
-		}).then(deferred.resolve, deferred.reject);
-	}
-
 	/**
 	 * Creates a scoped proxy for interval
 	 * @param self Self
@@ -131,11 +101,42 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 
 		self[BATCHES] = [];
 
+		// Build and Start
 		self
-			.subscribe("hub/read", self, read)
+			.build()
 			.start();
 	}, {
 		displayName : "data/read",
+
+		"hub/read" : function read(topic, query /*, query, query, .., */, deferred) {
+			var self = this;
+			var length = arguments.length - 1;
+			var batches = self[BATCHES];
+
+			// Update (multi) query
+			query = CONCAT.apply(ARRAY_PROTO, SLICE.call(arguments, 1, length));
+
+			// Update deferred
+			deferred = arguments[length];
+
+			// Deferred read
+			Deferred(function readDeferred(dfd) {
+				var matches;
+				var guids = dfd.guids = [];
+
+				// Get all id's from queries
+				while(matches = RE_ID.exec(query.join(NEWLINE))) {
+					guids.push(matches[1]);
+				}
+
+				// Add batch to batches
+				batches.push({
+					topic: topic,
+					query: query,
+					deferred: dfd
+				});
+			}).then(deferred.resolve, deferred.reject);
+		},
 
 		start : function start(millisec) {
 			var self = this;
