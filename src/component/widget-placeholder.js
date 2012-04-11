@@ -54,8 +54,8 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 						widget = widget.apply(widget, argv);
 					}
 
-					// Wire widget
-					$element.wire(widget);
+					// Build
+					widget.build();
 
 					// Resolve
 					dfd.resolve(widget);
@@ -71,11 +71,12 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 		function hold() {
 			// First check that we're holding
 			if (_widget !== UNDEFINED) {
-				$element
-					// Unwire
-					.unwire(_widget)
-					// Remove DATA_HOLDING attribute
-					.removeAttr(DATA_HOLDING);
+
+				// Destroy
+				_widget.destroy();
+
+				// Remove DATA_HOLDING attribute
+				$element.removeAttr(DATA_HOLDING);
 
 				// Reset _widget
 				_widget = UNDEFINED;

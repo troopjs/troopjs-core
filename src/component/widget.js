@@ -6,15 +6,40 @@
 /**
  * The widget trait provides common UI related logic
  */
-define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
-	var UNDEFINED = undefined;
+define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadget, $) {
+	var NULL = null;
 	var FUNCTION = Function;
-	var SLICE = Array.prototype.slice;
+	var ARRAY_PROTO = Array.prototype;
+	var SLICE = ARRAY_PROTO.slice;
+	var UNSHIFT = ARRAY_PROTO.unshift;
+	var RE = /^dom(?::(\w+))?\/([^\.]+(?:\.(.+))?)/;
 	var REFRESH = "widget/refresh";
 	var $ELEMENT = "$element";
-	var DISPLAYNAME = "displayName";
+	var ONE = "one";
+	var BIND = "bind";
 	var ATTR_WEAVE = "[data-weave]";
 	var ATTR_WOVEN = "[data-woven]";
+
+	/**
+	 * Creates a proxy of the inner method 'handlerProxy' with the 'topic', 'widget' and handler parameters set
+	 * @param topic event topic
+	 * @param widget target widget
+	 * @param handler target handler
+	 * @returns {Function} proxied handler
+	 */
+	function eventProxy(topic, widget, handler) {
+		/**
+		 * Creates a proxy of the outer method 'handler' that first adds 'topic' to the arguments passed
+		 * @returns result of proxied hanlder invocation
+		 */
+		return function handlerProxy() {
+			// Add topic to front of arguments
+			UNSHIFT.call(arguments, topic);
+
+			// Apply with shifted arguments to handler
+			return handler.apply(widget, arguments);
+		};
+	}
 
 	/**
 	 * Creates a proxy of the inner method 'render' with the 'op' parameter set
@@ -68,17 +93,61 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 
 	return Gadget.extend(function Widget($element, displayName) {
 		var self = this;
-		self[$ELEMENT] = $element;
+		var $proxies = new Array();
 
-		if (displayName !== undefined) {
-			self[DISPLAYNAME] = displayName;
-		}
+		// Extend self
+		Compose.call(self, {
+			"build/dom" : function build() {
+				var key = NULL;
+				var value;
+				var matches;
+				var topic;
+
+				// Loop over each property in widget
+				for (key in self) {
+					// Match signature in key
+					matches = RE.exec(key);
+
+					if (matches !== NULL) {
+						// Get topic
+						topic = matches[2];
+
+						// Replace value with a scoped proxy
+						value = eventProxy(topic, self, self[key]);
+
+						// Either ONE or BIND element
+						$element[matches[2] === ONE ? ONE : BIND](topic, self, value);
+
+						// Store in $proxies
+						$proxies[$proxies.length] = [topic, value];
+
+						// Remove value from self
+						delete self[key];
+					}
+				}
+
+				return self;
+			},
+
+			/**
+			 * Destructor for dom events
+			 * @returns self
+			 */
+			"destroy/dom" : function destroy() {
+				var $proxy;
+
+				// Loop over subscriptions
+				while ($proxy = $proxies.shift()) {
+					$element.unbind($proxy[0], $proxy[1]);
+				}
+
+				return self;
+			},
+
+			"$element" : $element,
+			"displayName" : displayName || "component/widget"
+		});
 	}, {
-		/**
-		 * Default display name
-		 */
-		displayName: "component/widget",
-
 		/**
 		 * Weaves all children of $element
 		 * @param $element (jQuery) Element to weave
@@ -191,21 +260,7 @@ define([ "./gadget", "jquery" ], function WidgetModule(Gadget, $) {
 		 * Generic destroy handler.
 		 */
 		"dom/destroy" : function onDestroy(topic, $event) {
-			var self = this;
-			var destructor = self.destructor;
-			var result = UNDEFINED;
-
-			// Check if we have a destructor, then call it
-			if (destructor instanceof FUNCTION) {
-				result = destructor.call(self);
-			}
-
-			// If the destructor does not return false, unweave
-			if (result !== false) {
-				self.unweave(self[$ELEMENT]);
-			}
-
-			return result;
+			return this.destroy();
 		}
 	});
 });

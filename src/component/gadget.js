@@ -7,12 +7,143 @@
  * The gadget trait provides convenient access to common application
  * logic such as pubsub* and ajax
  */
-define([ "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function GadgetModule(Component, hub, Topic, Deferred) {
+define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function GadgetModule(Compose, Component, hub, Topic, Deferred) {
+	var NULL = null;
+	var BUILD = "build";
+	var DESTROY = "destroy";
+	var RE_SCAN = new RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
+	var RE_HUB = /^hub\/.+/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
 
-	return Component.extend({
+	return Component.extend(function Gadget() {
+		var self = this;
+		var builder = NULL;
+		var destructor = NULL;
+		var subscriptions = new Array();
+
+		Compose.call(self, {
+			/**
+			 * Iterates builders and executes them in reverse order
+			 * @returns self
+			 */
+			build : function build() {
+				var key = NULL;
+				var value;
+				var matches;
+				var current;
+
+				// Loop over each property in component
+				for (key in self) {
+					// Get matches
+					matches = RE_SCAN.exec(key);
+
+					// Make sure we have matches
+					match: if (matches !== NULL) {
+						// Get value
+						value = self[key];
+
+						switch (matches[1]) {
+						case BUILD:
+							// Update next
+							value.next = builder;
+							// Update current
+							builder = value;
+							break;
+
+						case DESTROY:
+							// Update next
+							value.next = destructor;
+							// Update current
+							destructor = value;
+							break;
+
+						default:
+							break match;
+						}
+
+						// Update topic
+						value.topic = key;
+
+						// Remove value from self
+						delete self[key];
+					}
+				}
+
+				// Set current
+				current = builder;
+
+				while (current !== NULL) {
+					current.call(self);
+
+					current = current.next;
+				}
+
+				return self;
+			},
+
+			/**
+			 * Iterates destructors and executes them in reverse order
+			 * @returns self
+			 */
+			destroy : function iterator() {
+				var current = destructor;
+
+				while (current !== NULL) {
+					current.call(self);
+
+					current = current.next;
+				}
+
+				return self;
+			},
+
+			/**
+			 * Builder for hub subscriptions
+			 * @returns self
+			 */
+			"build/hub" : function build() {
+				var key = NULL;
+				var value;
+
+				// Loop over each property in gadget
+				for (key in self) {
+					// Match signature in key
+					if (RE_HUB.test(key)) {
+						// Get value
+						value = self[key];
+
+						// Subscribe
+						hub.subscribe(new Topic(key, self), self, value);
+
+						// Store in subscriptions
+						subscriptions[subscriptions.length] = [key, value];
+
+						// Remove value from self
+						delete self[key];
+					}
+				}
+
+				return self;
+			},
+
+			/**
+			 * Destructor for hub subscriptions
+			 * @returns self
+			 */
+			"destroy/hub": function destroy() {
+				var subscription;
+
+				// Loop over subscriptions
+				while (subscription = subscriptions.shift()) {
+					hub.unsubscribe(subscription[0], subscription[1]);
+				}
+
+				return self;
+			},
+		});
+	}, {
 		/**
 		 * Calls hub.publish in self context
 		 * @returns self
