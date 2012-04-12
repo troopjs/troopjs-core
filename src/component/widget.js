@@ -254,13 +254,6 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 			}
 
 			return self;
-		},
-
-		/**
-		 * Generic destroy handler.
-		 */
-		"dom/destroy" : function onDestroy(topic, $event) {
-			return this.destroy();
 		}
 	});
 });
