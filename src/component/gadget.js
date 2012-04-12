@@ -9,6 +9,7 @@
  */
 define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function GadgetModule(Compose, Component, hub, Topic, Deferred) {
 	var NULL = null;
+	var FUNCTION = Function;
 	var BUILD = "build";
 	var DESTROY = "destroy";
 	var RE_SCAN = new RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
@@ -37,14 +38,20 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 
 				// Loop over each property in component
 				for (key in self) {
+					// Get value
+					value = self[key];
+
+					// Continue if value is not a function
+					if (!(value instanceof FUNCTION)) {
+						continue;
+					}
+
 					// Get matches
 					matches = RE_SCAN.exec(key);
 
 					// Make sure we have matches
-					match: if (matches !== NULL) {
-						// Get value
-						value = self[key];
-
+					if (matches !== NULL) {
+						// Switch on prefix
 						switch (matches[1]) {
 						case BUILD:
 							// Update next
@@ -61,14 +68,14 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 							break;
 
 						default:
-							break match;
+							continue;
 						}
 
 						// Update topic
 						value.topic = key;
 
-						// Remove value from self
-						delete self[key];
+						// NULL value
+						self[key] = NULL;
 					}
 				}
 
@@ -112,6 +119,14 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 
 				// Loop over each property in gadget
 				for (key in self) {
+					// Get value
+					value = self[key];
+
+					// Continue if value is not a function
+					if (!(value instanceof FUNCTION)) {
+						continue;
+					}
+
 					// Match signature in key
 					matches = RE_HUB.exec(key);
 
@@ -119,17 +134,14 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 						// Get topic
 						topic = matches[1];
 
-						// Get value
-						value = self[key];
-
 						// Subscribe
 						hub.subscribe(new Topic(topic, self), self, value);
 
 						// Store in subscriptions
 						subscriptions[subscriptions.length] = [topic, value];
 
-						// Remove value from self
-						delete self[key];
+						// NULL value
+						self[key] = NULL;
 					}
 				}
 

@@ -105,6 +105,14 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 
 				// Loop over each property in widget
 				for (key in self) {
+					// Get value
+					value = self[key];
+
+					// Continue if value is not a function
+					if (!(value instanceof FUNCTION)) {
+						continue;
+					}
+
 					// Match signature in key
 					matches = RE.exec(key);
 
@@ -113,7 +121,7 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 						topic = matches[2];
 
 						// Replace value with a scoped proxy
-						value = eventProxy(topic, self, self[key]);
+						value = eventProxy(topic, self, value);
 
 						// Either ONE or BIND element
 						$element[matches[2] === ONE ? ONE : BIND](topic, self, value);
@@ -121,8 +129,8 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 						// Store in $proxies
 						$proxies[$proxies.length] = [topic, value];
 
-						// Remove value from self
-						delete self[key];
+						// NULL value
+						self[key] = NULL;
 					}
 				}
 
