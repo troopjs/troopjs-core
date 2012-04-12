@@ -25,7 +25,8 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 
 		Compose.call(self, {
 			/**
-			 * Iterates builders and executes them in reverse order
+			 * First scans for build/destroy signatures and pushes them on the stack
+			 * then iterates builders and executes them in reverse order
 			 * @returns self
 			 */
 			build : function build() {
