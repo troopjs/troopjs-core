@@ -4,8 +4,7 @@
  * Released under the MIT license.
  */
 /**
- * The gadget trait provides convenient access to common application
- * logic such as pubsub* and ajax
+ * The gadget trait provides convenient access to common application logic
  */
 define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function GadgetModule(Compose, Component, hub, Topic, Deferred) {
 	var NULL = null;
