@@ -151,7 +151,7 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 			 * Destructor for hub subscriptions
 			 * @returns self
 			 */
-			"destroy/hub": function destroy() {
+			"destroy/hub" : function destroy() {
 				var subscription;
 
 				// Loop over subscriptions
