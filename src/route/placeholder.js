@@ -1,3 +1,8 @@
+/*!
+ * TroopJS route/placeholder module
+ * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * Released under the MIT license.
+ */
 define([ "../component/placeholder" ], function RoutePlaceholderModule(Placeholder) {
 	return Placeholder.extend(function RoutePlaceholderWidget($element, name) {
 		var self = this;
