@@ -6,7 +6,7 @@
 /**
  * The widget trait provides common UI related logic
  */
-define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadget, $) {
+define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Compose, Gadget, $, Deferred) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
@@ -69,7 +69,7 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 			var $element = self[$ELEMENT];
 
 			// Defer render (as weaving it may need to load async)
-			var deferredRender = $.Deferred(function deferredRender(dfdRender) {
+			var deferredRender = Deferred(function deferredRender(dfdRender) {
 				// Call render
 				op.call($element, contents);
 
@@ -228,7 +228,7 @@ define([ "compose", "./gadget", "jquery" ], function WidgetModule(Compose, Gadge
 			var $element = self[$ELEMENT];
 
 			// Create deferred for emptying
-			var emptyDeferred = $.Deferred(function emptyDeferred(dfd) {
+			var emptyDeferred = Deferred(function emptyDeferred(dfd) {
 
 				// Detach contents
 				var $contents = $element.contents().detach();

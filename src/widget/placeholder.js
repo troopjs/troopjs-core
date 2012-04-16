@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../component/widget", "jquery" ], function WidgetPlaceholderModule(Compose, Widget, $) {
+define([ "compose", "../component/widget", "jquery", "deferred" ], function WidgetPlaceholderModule(Compose, Widget, $, Deferred) {
 	var NULL = null;
 	var UNDEFINED = undefined;
 	var ARRAY = Array;
@@ -16,7 +16,7 @@ define([ "compose", "../component/widget", "jquery" ], function WidgetPlaceholde
 
 		function release(/* arg, arg, arg, */ deferred) {
 			// Internal deferred
-			$.Deferred(function deferredRelease(dfd) {
+			Deferred(function deferredRelease(dfd) {
 				// Make arguments into a real array
 				var argv  = ARRAY.apply(ARRAY_PROTO, arguments);
 
@@ -82,7 +82,7 @@ define([ "compose", "../component/widget", "jquery" ], function WidgetPlaceholde
 
 		function hold(deferred) {
 			// Internal deferred
-			$.Deferred(function deferredHold(dfd) {
+			Deferred(function deferredHold(dfd) {
 				// First check that we're holding
 				if (_widget === UNDEFINED || _widget === NULL) {
 					dfd.reject(_widget);
