@@ -8,7 +8,7 @@ define([ "compose", "../component/widget", "../util/uri", "callbacks" ], functio
 
 	return Widget.extend(function RouteRouterWidget($element, name) {
 		var self = this;
-		var callbacks = Callbacks("memory");
+		var callbacks = Callbacks("memory unique");
 		var oldUri = NULL;
 		var newUri = NULL;
 
