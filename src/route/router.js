@@ -31,9 +31,11 @@ define([ "compose", "../component/widget", "../util/uri", "callbacks" ], functio
 				callbacks.remove(callback);
 			}
 		});
-
-		self.trigger("hashchange");
 	}, {
+		"hub/start" : function start(topic) {
+			this.trigger("hashchange");
+		},
+
 		"dom/hashchange" : function onHashChange(topic, $event) {
 			this.publish("route", URI($event.target.location.hash.replace(/^#/, "")));
 		}

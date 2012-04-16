@@ -1,9 +1,9 @@
 /*!
- * TroopJS widget placeholder component
+ * TroopJS widget/placeholder component
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Compose, Widget, $) {
+define([ "compose", "../component/widget", "jquery" ], function WidgetPlaceholderModule(Compose, Widget, $) {
 	var NULL = null;
 	var UNDEFINED = undefined;
 	var ARRAY = Array;

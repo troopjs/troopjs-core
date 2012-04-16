@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../component/placeholder" ], function RoutePlaceholderModule(Compose, Placeholder) {
+define([ "compose", "../widget/placeholder" ], function RoutePlaceholderModule(Compose, Placeholder) {
 	return Placeholder.extend(function RoutePlaceholderWidget($element, name) {
 		var self = this;
 		var re = RegExp($element.data("route"));
