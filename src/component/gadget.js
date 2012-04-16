@@ -11,7 +11,7 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 	var FUNCTION = Function;
 	var BUILD = "build";
 	var DESTROY = "destroy";
-	var RE_SCAN = new RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
+	var RE_SCAN = RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
 	var RE_HUB = /^hub\/(.+)/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
@@ -21,7 +21,7 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 		var self = this;
 		var builder = NULL;
 		var destructor = NULL;
-		var subscriptions = new Array();
+		var subscriptions = Array();
 
 		Compose.call(self, {
 			/**
@@ -134,7 +134,7 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 						topic = matches[1];
 
 						// Subscribe
-						hub.subscribe(new Topic(topic, self), self, value);
+						hub.subscribe(Topic(topic, self), self, value);
 
 						// Store in subscriptions
 						subscriptions[subscriptions.length] = [topic, value];

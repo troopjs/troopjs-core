@@ -178,7 +178,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					? topic.toString()
 					: topic;
 			var re = self.re;
-			var candidates = new Array();
+			var candidates = Array();
 			var candidate;
 			var length = 0;
 			var handler;
