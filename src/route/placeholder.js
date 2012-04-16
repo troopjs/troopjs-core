@@ -8,7 +8,7 @@ define([ "../component/placeholder" ], function RoutePlaceholderModule(Placehold
 		var self = this;
 		var re = new RegExp($element.data("route"));
 
-		self.publish("route:add", function onRoute(uri) {
+		self.publish("route/add", function onRoute(uri) {
 			if (re.test(uri.path)) {
 				self.release();
 			}

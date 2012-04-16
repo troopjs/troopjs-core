@@ -17,11 +17,11 @@ define([ "../component/widget", "../util/uri", "callbacks" ], function RouterMod
 			this[CALLBACKS].fire(uri);
 		},
 
-		"hub/route:add" : function addRoute(topic, callback) {
+		"hub/route/add" : function addRoute(topic, callback) {
 			this[CALLBACKS].add(callback);
 		},
 
-		"hub/route:remove" : function removeRoute(topic, callback) {
+		"hub/route/remove" : function removeRoute(topic, callback) {
 			this[CALLBACKS].remove(callback);
 		}
 	});
