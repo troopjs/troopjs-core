@@ -3,10 +3,10 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "../component/widget", "../util/uri", "callbacks" ], function RouterModule(Widget, URI, Callbacks) {
+define([ "../component/widget", "../util/uri", "callbacks" ], function RouteRouterModule(Widget, URI, Callbacks) {
 	var CALLBACKS = "callbacks";
 
-	return Widget.extend(function Router($element, name) {
+	return Widget.extend(function RouteRouterWidget($element, name) {
 		this[CALLBACKS] = Callbacks("memory");
 	}, {
 		"dom/hashchange" : function onHashChange(topic, $event) {
