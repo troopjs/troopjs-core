@@ -13,16 +13,28 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 		var self = this;
 		var _widget = UNDEFINED;
 
-		function release(deferred) {
+		function release(/* arg, arg, arg, */ deferred) {
 			// Make arguments into a real array
 			var argv  = ARRAY.apply(ARRAY_PROTO, arguments);
 
 			// Update deferred to the last argument
 			deferred = argv.pop();
 
-			// Initialize deferred
-			var dfd = $.Deferred()
-				.done(function done(widget) {
+			// Add internal deferred
+			var dfd = $.Deferred();
+
+			// Link deferred
+			if (deferred) {
+				dfd.when(deferred.resolve, deferred.reject);
+			}
+
+			// We're already holding something, reject
+			if (_widget !== UNDEFINED) {
+				dfd.reject(_widget);
+			}
+			else try {
+				// Initialize deferred
+				dfd.done(function done(widget) {
 					// Update _widget
 					_widget = widget;
 
@@ -30,16 +42,7 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 					$element.attr(DATA_HOLDING, widget);
 				});
 
-			// Link deferred
-			if (deferred) {
-				dfd.when(deferred.resolve, deferred.reject);
-			}
-
-			// We're already holding something, reject and return
-			if (_widget !== UNDEFINED) {
-				dfd.reject(_widget);
-			}
-			else try {
+				// Require widget by _name
 				require([ _name ], function required(widget) {
 					// If no additional arguments, do simple instantiation
 					if (argv.length === 0) {
@@ -68,18 +71,37 @@ define([ "compose", "./widget", "jquery" ], function WidgetPlaceholderModule(Com
 			return this;
 		}
 
-		function hold() {
+		function hold(deferred) {
+			// Add internal deferred
+			var dfd = $.Deferred();
+
+			// Link deferred
+			if (deferred) {
+				dfd.when(deferred.resolve, deferred.reject);
+			}
+
 			// First check that we're holding
-			if (_widget !== UNDEFINED) {
+			if (_widget === UNDEFINED) {
+				dfd.reject(UNDEFINED);
+			}
+			else try {
+				// Initialize deferred
+				dfd.done(function done(widget) {
+					// Remove DATA_HOLDING attribute
+					$element.removeAttr(DATA_HOLDING);
+
+					// Reset _widget
+					_widget = UNDEFINED;
+				});
 
 				// Destroy
 				_widget.destroy();
 
-				// Remove DATA_HOLDING attribute
-				$element.removeAttr(DATA_HOLDING);
-
-				// Reset _widget
-				_widget = UNDEFINED;
+				// Resolve
+				dfd.resolve(_widget);
+			}
+			catch (e) {
+				dfd.reject(UNDEFINED);
 			}
 
 			return this;
