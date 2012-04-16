@@ -13,7 +13,7 @@ define([ "compose", "../component/widget", "../util/uri", "callbacks" ], functio
 		var newUri = NULL;
 
 		Compose.call(self, {
-			"hub/route" : function fireRoute(topic, uri) {
+			"hub/route" : function fireRouteCallbacks(topic, uri) {
 				newUri = uri.toString();
 
 				if (newUri !== oldUri) {
@@ -23,15 +23,19 @@ define([ "compose", "../component/widget", "../util/uri", "callbacks" ], functio
 				}
 			},
 
-			"hub/route/add" : function addRoute(topic, callback) {
+			"hub/route/add" : function addRouteCallback(topic, callback) {
 				callbacks.add(callback);
 			},
 
-			"hub/route/remove" : function removeRoute(topic, callback) {
+			"hub/route/remove" : function removeRouteCallback(topic, callback) {
 				callbacks.remove(callback);
 			}
 		});
 	}, {
+		"hub/start" : function start() {
+			this.trigger("hashchange");
+		},
+
 		"dom/hashchange" : function onHashChange(topic, $event) {
 			this.publish("route", URI($event.target.location.hash.replace(/^#/, "")));
 		}
