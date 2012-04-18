@@ -3,24 +3,67 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../component/widget" ], function ApplicationModule(Compose, Widget) {
-	return Widget.extend(function ApplicationWidget($element, name) {
-		var self = this;
+define([ "compose", "../component/widget", "deferred" ], function ApplicationModule(Compose, Widget, Deferred) {
+	var STARTING = "starting";
+	var STARTED = "started";
+	var STOPPING = "stopping";
+	var STOPPED = "stopped";
+	var APPLICATION_STATE = "application/state";
 
-		Compose.call(self, {
-			"build/application" : function build() {
-				self
-					.weave($element)
-					.publish("start", name);
-			},
+	return Widget.extend({
+		start : function start(deferred) {
+			var self = this;
 
-			"destroy/application" : function destroy() {
-				var self = this;
+			Deferred(function deferredStart(dfd) {
+				try {
+					self.publish(APPLICATION_STATE, STARTING);
 
-				self
-					.publish("stop", name)
-					.unweave($element);
+					self.weave(self.$element);
+
+					dfd.resolve(STARTED);
+				}
+				catch (e) {
+					dfd.reject(e);
+				}
+			})
+			.done(function doneStart(state) {
+				self.publish(APPLICATION_STATE, state);
+			})
+			.fail(function failStart(e) {
+				self.publish(APPLICATION_STATE, e);
+			});
+
+			if (deferred) {
+				dfd.then(deferred.resolve, deferred.reject);
 			}
-		});
+
+			return self;
+		},
+
+		stop : function stop(deferred) {
+			var self = this;
+
+			Deferred(function deferredStop(dfd) {
+				try {
+					self.publish(APPLICATION_STATE, STOPPING);
+					dfd.resolve(STOPPED);
+				}
+				catch (e) {
+					dfd.reject(e);
+				}
+			})
+			.done(function doneStop(state) {
+				self.publish(APPLICATION_STATE, state);
+			})
+			.fail(function failStop(e) {
+				self.publish(APPLICATION_STATE, e);
+			});
+
+			if (deferred) {
+				dfd.then(deferred.resolve, deferred.reject);
+			}
+
+			return self;
+		}
 	});
 });
