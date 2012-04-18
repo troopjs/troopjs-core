@@ -5,10 +5,9 @@
  */
 define([ "compose", "../component/base", "./topic" ], function HubModule(Compose, Component, Topic) {
 	var UNDEFINED = undefined;
-	var RECURSIVE = "\/" + "**";
-	var RE = /\/\w+(?=\/)|\*{1,2}$/g;
 	var CONTEXT = {};
 	var HANDLERS = {};
+	var MEMORY = "memory";
 
 	return Compose.create({
 		displayName: "pubsub/hub",
@@ -18,43 +17,106 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 		 * 
 		 * @param topic Topic to subscribe to
 		 * @param context (optional) context to scope callbacks to
+		 * @param memory (optional) do we want the last value applied to callbacks
 		 * @param callback Callback for this topic
 		 * @returns self
 		 */
-		subscribe : function subscribe(topic, context, callback /*, callback, ..*/) {
-			var offset = 1;
+		subscribe : function subscribe(topic /*, context, memory, callback, callback, ..*/) {
+			var self = this;
 			var length = arguments.length;
+			var context = arguments[1];
+			var memory = arguments[2];
+			var callback = arguments[3];
+			var offset;
 			var handlers;
+			var handler;
 			var head;
 			var tail;
 
-			// No provided context, set default one
+			// No context or memory was supplied
 			if (context instanceof Function) {
+				callback = context;
+				memory = false;
 				context = CONTEXT;
+				offset = 1;
 			}
-			// Context was provided, increase offset
+			// Only memory was supplied
+			else if (context === true || context === false) {
+				callback = memory;
+				memory = context;
+				context = CONTEXT;
+				offset = 2;
+			}
+			// Context was supplied, but not memory
+			else if (memory instanceof Function) {
+				callback = memory;
+				memory = false;
+				offset = 2;
+			}
+			// All arguments were supplied
+			else if (callback instanceof Function){
+				offset = 3;
+			}
+			// Something is wrong, return fast
 			else {
-				offset++;
+				return self;
 			}
 
-			// Do we have handlers
+			// Have handlers
 			if (topic in HANDLERS) {
+
 				// Get handlers
 				handlers = HANDLERS[topic];
 
 				// Get last handler
-				tail = handlers.tail;
+				handler = tail = handlers.tail;
 
-				for (; offset < length; offset++) {
+				// No tail, need to create
+				if (tail === UNDEFINED) {
+					// Create head and tail
+					handlers.head = handler = tail = {
+						"callback" : arguments[offset++],
+						"context" : context
+					};
+				}
+
+				// Iterate handlers from offset
+				while (offset < length) {
 					// Set last -> last.next -> handler
 					tail = tail.next = {
 						"callback" : arguments[offset],
 						"context" : context
 					};
+
+					// Increment offset
+					offset++;
 				}
 
 				// Set last handler
 				handlers.tail = tail;
+
+				// Want memory and have memory
+				if (memory && MEMORY in handlers) {
+					// Get memory
+					memory = handlers[MEMORY];
+
+					// Loop through handlers, optimize for arguments
+					if (memory.length > 0 ) while(handler) {
+						// Apply handler callback
+						handler.callback.apply(handler.context, memory);
+
+						// Update handler
+						handler = handler.next;
+					}
+					// Loop through handlers, optimize for no arguments
+					else while(handler) {
+						// Call handler callback
+						handler.callback.call(handler.context);
+
+						// Update handler
+						handler = handler.next;
+					}
+				}
 			}
 			// No handlers
 			else {
@@ -64,13 +126,16 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					"context" : context
 				};
 
-				// Loop through arguments
-				for (; offset < length; offset++) {
+				// Iterate handlers from offset
+				while (offset < length) {
 					// Set last -> last.next -> handler
 					tail = tail.next = {
 						"callback" : arguments[offset],
 						"context" : context
 					};
+
+					// Increment offset
+					offset++;
 				}
 
 				// Create topic list
@@ -80,7 +145,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				};
 			}
 
-			return this;
+			return self;
 		},
 
 		/**
@@ -168,68 +233,45 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 		 * @returns self
 		 */
 		publish : function publish(topic /*, arg, arg, ..*/) {
-			var string = topic instanceof Topic
-					? topic.toString()
-					: topic;
-			var candidates = Array();
-			var candidate;
-			var length = 0;
+			var handlers;
 			var handler;
 
-			// Create initial set of candidates
-			while (RE.test(string)) {
-				candidates[length++] = string.substr(0, RE.lastIndex) + RECURSIVE;
-			}
+			// Have handlers
+			if (topic in HANDLERS) {
+				// Get handlers
+				handlers = HANDLERS[topic];
 
-			// Are sub-topics even possible?
-			if (length > 0) {
-				// Copy second to last candidate to last, minus the last
-				// char
-				candidates[length] = candidates[length - 1].slice(0, -1);
-
-				// Increase length
-				length++;
-			}
-
-			// Add original topic to the candidates
-			candidates[length] = string;
-
-			// Loop backwards over candidates, optimize for no arguments
-			if (arguments.length === 0) do {
-				// Get candidate
-				candidate = candidates[length];
-
-				// Fail fast if there are no handlers for candidate
-				if (!(candidate in HANDLERS)) {
-					continue;
-				}
+				// Remember arguments
+				handlers[MEMORY] = arguments;
 
 				// Get first handler
-				handler = HANDLERS[candidate].head;
+				handler = handlers.head;
 
-				// Loop through and call handlers
-				do {
-					handler.callback.call(handler.context);
-				} while (handler = handler.next);
-			} while (length-- > 0)
-			// Loop backwards over candidates, optimize for arguments
-			else do {
-				// Get candidate
-				candidate = candidates[length];
-
-				// Fail fast if there are no handlers for candidate
-				if (!(candidate in HANDLERS)) {
-					continue;
-				}
-
-				// Get first handler
-				handler = HANDLERS[candidate].head;
-
-				// Loop through and apply handlers
-				do {
+				// Loop through handlers, optimize for arguments
+				if (arguments.length > 0) while(handler) {
+					// Apply handler callback
 					handler.callback.apply(handler.context, arguments);
-				} while (handler = handler.next);
-			} while (length-- > 0);
+
+					// Update handler
+					handler = handler.next;
+				}
+				// Loop through handlers, optimize for no arguments
+				else while(handler) {
+					// Call handler callback
+					handler.callback.call(handler.context);
+
+					// Update handler
+					handler = handler.next;
+				}
+			}
+			// No handlers
+			else if (arguments.length > 0){
+				// Create handlers and store with topic
+				HANDLERS[topic] = handlers = {};
+
+				// Remember arguments
+				handlers[MEMORY] = arguments;
+			}
 
 			return this;
 		}
