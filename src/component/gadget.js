@@ -12,10 +12,11 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 	var BUILD = "build";
 	var DESTROY = "destroy";
 	var RE_SCAN = RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
-	var RE_HUB = /^hub\/(.+)/;
+	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
+	var MEMORY = "memory";
 
 	return Component.extend(function Gadget() {
 		var self = this;
@@ -131,10 +132,10 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], 
 
 					if (matches !== NULL) {
 						// Get topic
-						topic = matches[1];
+						topic = matches[2];
 
 						// Subscribe
-						hub.subscribe(Topic(topic, self), self, value);
+						hub.subscribe(Topic(topic, self), self, matches[1] === MEMORY, value);
 
 						// Store in subscriptions
 						subscriptions[subscriptions.length] = [topic, value];
