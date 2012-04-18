@@ -8,22 +8,15 @@ define([ "compose", "../widget/placeholder" ], function RoutePlaceholderModule(C
 		var self = this;
 		var re = RegExp($element.data("route"));
 
-		function onRoute(uri) {
-			if (re.test(uri.path)) {
-				self.release();
-			}
-			else {
-				self.hold();
-			}
-		}
-
 		Compose.call(self, {
-			"build/route" : function build() {
-				self.publish("route/add", onRoute);
-			},
-
-			"destroy/route" : function destroy() {
-				self.publish("route/remove", onRoute);
+			"hub:memory/route" : function onRoute(topic, uri) {
+				console.info(arguments);
+				if (re.test(uri.path)) {
+					self.release();
+				}
+				else {
+					self.hold();
+				}
 			}
 		});
 	});
