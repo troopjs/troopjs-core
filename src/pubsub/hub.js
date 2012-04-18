@@ -6,14 +6,11 @@
 define([ "compose", "../component/base", "./topic" ], function HubModule(Compose, Component, Topic) {
 	var UNDEFINED = undefined;
 	var RECURSIVE = "\/" + "**";
+	var RE = /\/\w+(?=\/)|\*{1,2}$/g;
+	var CONTEXT = {};
+	var HANDLERS = {};
 
-	return Compose.create(Component, function Hub() {
-		var self = this;
-
-		self.re = /\/\w+(?=\/)|\*{1,2}$/g;
-		self.context = {};
-		self.topics = {};
-	}, {
+	return Compose.create({
 		displayName: "pubsub/hub",
 
 		/**
@@ -24,18 +21,16 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 		 * @param callback Callback for this topic
 		 * @returns self
 		 */
-		subscribe : function subscribe(topic /*, context, callback,* callback, ..*/) {
-			var self = this;
-			var topics = self.topics;
+		subscribe : function subscribe(topic, context, callback /*, callback, ..*/) {
 			var offset = 1;
 			var length = arguments.length;
-			var context = arguments[offset];
+			var handlers;
 			var head;
 			var tail;
 
 			// No provided context, set default one
 			if (context instanceof Function) {
-				context = self.context;
+				context = CONTEXT;
 			}
 			// Context was provided, increase offset
 			else {
@@ -43,9 +38,12 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 			}
 
 			// Do we have handlers
-			if (topic in topics) {
+			if (topic in HANDLERS) {
+				// Get handlers
+				handlers = HANDLERS[topic];
+
 				// Get last handler
-				tail = topics[topic].tail;
+				tail = handlers.tail;
 
 				for (; offset < length; offset++) {
 					// Set last -> last.next -> handler
@@ -56,7 +54,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				}
 
 				// Set last handler
-				topics[topic].tail = tail;
+				handlers.tail = tail;
 			}
 			// No handlers
 			else {
@@ -76,13 +74,13 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				}
 
 				// Create topic list
-				topics[topic] = {
+				HANDLERS[topic] = {
 					"head" : head,
 					"tail" : tail
 				};
 			}
 
-			return self;
+			return this;
 		},
 
 		/**
@@ -94,8 +92,6 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 		 * @returns self
 		 */
 		unsubscribe : function unsubscribe(topic /*, callback, callback, ..*/) {
-			var self = this;
-			var topics = self.topics;
 			var offset;
 			var length = arguments.length;
 			var head;
@@ -105,18 +101,18 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 
 			unsubscribe: {
 				// Fast fail if we don't have subscribers
-				if (!topic in topics) {
+				if (!topic in HANDLERS) {
 					break unsubscribe;
 				}
 
 				// Simply delete list if there is no callback to match
 				if (length === 1) {
-					delete topics[topic];
+					delete HANDLERS[topic];
 					break unsubscribe;
 				}
 
 				// Get head
-				head = topics[topic].head;
+				head = HANDLERS[topic].head;
 
 				// Loop over remaining arguments
 				for (offset = 1; offset < length; offset++) {
@@ -149,19 +145,19 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 
 					// Delete list if we've deleted all handlers
 					if (head === UNDEFINED) {
-						delete topics[topic];
+						delete HANDLERS[topic];
 						break unsubscribe;
 					}
 				}
 
 				// Update head and tail
-				topics[topic] = {
+				HANDLERS[topic] = {
 					"head" : head,
 					"tail" : previous
 				};
 			}
 
-			return self;
+			return this;
 		},
 
 		/**
@@ -172,20 +168,17 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 		 * @returns self
 		 */
 		publish : function publish(topic /*, arg, arg, ..*/) {
-			var self = this;
-			var topics = self.topics;
-			var string = topic.constructor === Topic
+			var string = topic instanceof Topic
 					? topic.toString()
 					: topic;
-			var re = self.re;
 			var candidates = Array();
 			var candidate;
 			var length = 0;
 			var handler;
 
 			// Create initial set of candidates
-			while (re.test(string)) {
-				candidates[length++] = string.substr(0, re.lastIndex) + RECURSIVE;
+			while (RE.test(string)) {
+				candidates[length++] = string.substr(0, RE.lastIndex) + RECURSIVE;
 			}
 
 			// Are sub-topics even possible?
@@ -201,51 +194,44 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 			// Add original topic to the candidates
 			candidates[length] = string;
 
-			// Optimise of no arguments
-			if (arguments.length === 0) {
-				// Loop backwards over candidates
+			// Loop backwards over candidates, optimize for no arguments
+			if (arguments.length === 0) do {
+				// Get candidate
+				candidate = candidates[length];
+
+				// Fail fast if there are no handlers for candidate
+				if (!(candidate in HANDLERS)) {
+					continue;
+				}
+
+				// Get first handler
+				handler = HANDLERS[candidate].head;
+
+				// Loop through and call handlers
 				do {
-					// Get candidate
-					candidate = candidates[length];
+					handler.callback.call(handler.context);
+				} while (handler = handler.next);
+			} while (length-- > 0)
+			// Loop backwards over candidates, optimize for arguments
+			else do {
+				// Get candidate
+				candidate = candidates[length];
 
-					// Fail fast if there are no handlers for candidate
-					if (!(candidate in topics)) {
-						continue;
-					}
+				// Fail fast if there are no handlers for candidate
+				if (!(candidate in HANDLERS)) {
+					continue;
+				}
 
-					// Get first handler
-					handler = topics[candidate].head;
+				// Get first handler
+				handler = HANDLERS[candidate].head;
 
-					// Loop through handlers
-					do {
-						handler.callback.call(handler.context);
-					} while (handler = handler.next);
-				} while (length-- > 0);
-			}
-			// Optimise for arguments
-			else {
-				// Loop backwards over candidates
+				// Loop through and apply handlers
 				do {
-					// Get candidate
-					candidate = candidates[length];
+					handler.callback.apply(handler.context, arguments);
+				} while (handler = handler.next);
+			} while (length-- > 0);
 
-					// Fail fast if there are no handlers for candidate
-					if (!(candidate in topics)) {
-						continue;
-					}
-
-					// Get first handler
-					handler = topics[candidate].head;
-
-					// Loop through handlers
-					do {
-						handler.callback
-								.apply(handler.context, arguments);
-					} while (handler = handler.next);
-				} while (length-- > 0);
-			}
-
-			return self;
+			return this;
 		}
 	});
 });
