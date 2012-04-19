@@ -4,113 +4,124 @@
  * Released under the MIT license.
  */
 define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "deferred", "../util/merge"], function ReadModule(Compose, Gadget, Topic, cache, Deferred, merge) {
+	var UNDEFINED = undefined;
 	var ARRAY_PROTO = Array.prototype;
 	var SLICE = ARRAY_PROTO.slice;
 	var CONCAT = ARRAY_PROTO.concat;
 	var PUSH = ARRAY_PROTO.push;
 	var LENGTH = "length";
-	var INTERVAL = "interval";
 	var BATCHES = "batches";
 	var NEWLINE = "\n";
 	var RE_ID = /^(\w+![\w\d\-_]+)/gm;
 
-	/**
-	 * Creates a scoped proxy for interval
-	 * @param self Self
-	 * @returns Scoped interval
-	 */
-	function intervalProxy(self) {
-		function interval() {
-			var batches = self[BATCHES];
-
-			// Return fast if there is nothing to do
-			if (batches[LENGTH] === 0) {
-				return;
-			}
-
-			// Reset batches
-			self[BATCHES] = [];
-
-			var deferred = [];
-
-			Deferred(function deferredRequest(dfdRequest) {
-				var queries = [];
-				var topics = [];
-				var batch;
-				var dfd;
-				var i;
-				var iMax;
-
-				// Step through batches
-				for (i = 0, iMax = batches[LENGTH]; i < iMax; i++) {
-					// Get batch
-					batch = batches[i];
-
-					// Get deferred
-					dfd = batch.deferred;
-
-					// Add reject to dfdRequest
-					dfdRequest.fail(dfd.reject);
-
-					// Add batch.query to queries
-					PUSH.apply(queries, batch.query);
-
-					// Add batch.topic to topics
-					PUSH.call(topics, batch.topic);
-
-					// Add dfd to deferred
-					PUSH.call(deferred, dfd);
-				}
-
-				// Publish ajax
-				self.publish(Topic("ajax", self, topics), merge.call({
-					"data": {
-						"q": queries.join("|")
-					}
-				}, self.config.api.read), dfdRequest);
-			})
-			.done(function requestDone(data, textStatus, jqXHR) {
-				var dfd;
-				var guids;
-				var i;
-				var j;
-				var iMax;
-				var jMax;
-
-				// Add all new data to cache
-				cache.put(data);
-
-				// Step through deferred
-				for (i = 0, iMax = deferred[LENGTH]; i < iMax; i++) {
-					// Get deferred
-					dfd = deferred[i];
-
-					// Get guids
-					guids = dfd.guids;
-
-					// Fill guids from cache
-					for (j = 0, jMax = guids[LENGTH]; j < jMax; j++) {
-						guids[j] = cache[guids[j]];
-					}
-
-					// Resolve original deferred
-					dfd.resolve.apply(dfd, guids);
-				}
-			});
-		}
-
-		return interval;
-	}
-
 	return Compose.create(Gadget, function Read() {
 		var self = this;
+		var interval = UNDEFINED;
 
-		self[BATCHES] = [];
+		// Initialize batches
+		self[BATCHES] = Array();
 
-		// Build and Start
-		self
-			.build()
-			.start();
+		Compose.call(self, {
+			"build/read" : function build() {
+				// Return fast if we already have an interval
+				if (interval !== UNDEFINED) {
+					return
+				}
+
+				// Set interval
+				interval = setInterval(function interval() {
+					var batches = self[BATCHES];
+
+					// Return fast if there is nothing to do
+					if (batches[LENGTH] === 0) {
+						return;
+					}
+
+					// Reset batches
+					self[BATCHES] = Array();
+
+					var deferred = Array();
+
+					Deferred(function deferredRequest(dfdRequest) {
+						var queries = Array();
+						var topics = Array();
+						var batch;
+						var dfd;
+						var i;
+						var iMax;
+
+						// Step through batches
+						for (i = 0, iMax = batches[LENGTH]; i < iMax; i++) {
+							// Get batch
+							batch = batches[i];
+
+							// Get deferred
+							dfd = batch.deferred;
+
+							// Add reject to dfdRequest
+							dfdRequest.fail(dfd.reject);
+
+							// Add batch.query to queries
+							PUSH.apply(queries, batch.query);
+
+							// Add batch.topic to topics
+							PUSH.call(topics, batch.topic);
+
+							// Add dfd to deferred
+							PUSH.call(deferred, dfd);
+						}
+
+						// Publish ajax
+						self.publish(Topic("ajax", self, topics), merge.call({
+							"data": {
+								"q": queries.join("|")
+							}
+						}, self.config.api.read), dfdRequest);
+					})
+					.done(function requestDone(data, textStatus, jqXHR) {
+						var dfd;
+						var guids;
+						var i;
+						var j;
+						var iMax;
+						var jMax;
+
+						// Add all new data to cache
+						cache.put(data);
+
+						// Step through deferred
+						for (i = 0, iMax = deferred[LENGTH]; i < iMax; i++) {
+							// Get deferred
+							dfd = deferred[i];
+
+							// Get guids
+							guids = dfd.guids;
+
+							// Fill guids from cache
+							for (j = 0, jMax = guids[LENGTH]; j < jMax; j++) {
+								guids[j] = cache[guids[j]];
+							}
+
+							// Resolve original deferred
+							dfd.resolve.apply(dfd, guids);
+						}
+					});
+				}, 200);
+			},
+
+			"destroy/read" : function destroy() {
+				// Return fast if no interval
+				if (interval === UNDEFINED) {
+					return
+				}
+
+				// Clear interval
+				clearInterval(interval);
+
+				// Reset interval
+				interval = UNDEFINED;
+			}
+		});
 	}, {
 		displayName : "data/read",
 
@@ -142,29 +153,6 @@ define([ "compose" , "../component/gadget", "../pubsub/topic", "./cache", "defer
 					deferred: dfd
 				});
 			}).then(deferred.resolve, deferred.reject);
-		},
-
-		start : function start(millisec) {
-			var self = this;
-
-			if (self.hasOwnProperty(INTERVAL)) {
-				self.stop();
-			}
-
-			self[INTERVAL] = setInterval(intervalProxy(self), millisec | 200);
-
-			return self;
-		},
-
-		stop : function stop() {
-			var self = this;
-
-			if (self.hasOwnProperty(INTERVAL)) {
-				clearInterval(self[INTERVAL]);
-				delete self[INTERVAL];
-			}
-
-			return self;
 		}
 	});
 });
