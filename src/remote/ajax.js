@@ -4,11 +4,7 @@
  * Released under the MIT license.
  */
 define([ "compose", "../component/gadget", "../pubsub/topic", "jquery", "../util/merge" ], function AjaxModule(Compose, Gadget, Topic, $, merge) {
-
-	return Compose.create(Gadget, function Ajax() {
-		// Build
-		this.build();
-	}, {
+	return Compose.create(Gadget, {
 		displayName : "remote/ajax",
 
 		"hub/ajax" : function request(topic, settings, deferred) {
