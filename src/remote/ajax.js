@@ -12,7 +12,7 @@ define([ "compose", "../component/gadget", "../pubsub/topic", "jquery", "../util
 			$.ajax(merge.call({
 				"headers": {
 					"x-request-id": new Date().getTime(),
-					"x-components": topic.constructor === Topic ? topic.trace() : topic
+					"x-components": topic instanceof Topic ? topic.trace() : topic
 				}
 			}, settings)).then(deferred.resolve, deferred.reject);
 		}
