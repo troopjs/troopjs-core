@@ -31,7 +31,7 @@ define([ "compose", "../component/widget", "../util/uri" ], function RouteRouter
 		});
 	}, {
 		"hub:memory/application/state" : function onState(topic, state) {
-			if (state === "started") {
+			if (state === "starting") {
 				this.trigger("hashchange");
 			}
 		}
