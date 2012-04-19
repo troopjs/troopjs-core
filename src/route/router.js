@@ -16,11 +16,15 @@ define([ "compose", "../component/widget", "../util/uri" ], function RouteRouter
 				// Create URI
 				uri = URI($event.target.location.hash.replace(/^#/, ""));
 
+				// Convert to string
 				newUri = uri.toString();
 
+				// Did anything change?
 				if (newUri !== oldUri) {
+					// Store new value
 					oldUri = newUri;
 
+					// Publish route
 					self.publish("route", uri);
 				}
 			}
