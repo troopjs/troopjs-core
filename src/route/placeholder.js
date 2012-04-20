@@ -10,7 +10,6 @@ define([ "compose", "../widget/placeholder" ], function RoutePlaceholderModule(C
 
 		Compose.call(self, {
 			"hub:memory/route" : function onRoute(topic, uri) {
-				console.info(arguments);
 				if (re.test(uri.path)) {
 					self.release();
 				}
