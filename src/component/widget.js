@@ -15,6 +15,7 @@ define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Co
 	var RE = /^dom(?::(\w+))?\/([^\.]+(?:\.(.+))?)/;
 	var REFRESH = "widget/refresh";
 	var $ELEMENT = "$element";
+	var $PROXIES = "$proxies";
 	var ONE = "one";
 	var BIND = "bind";
 	var ATTR_WEAVE = "[data-weave]";
@@ -92,70 +93,69 @@ define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Co
 	}
 
 	return Gadget.extend(function Widget($element, displayName) {
-		var self = this;
-		var $proxies = new Array();
-
 		// Extend self
-		Compose.call(self, {
-			"build/dom" : function build() {
-				var key = NULL;
-				var value;
-				var matches;
-				var topic;
-
-				// Loop over each property in widget
-				for (key in self) {
-					// Get value
-					value = self[key];
-
-					// Continue if value is not a function
-					if (!(value instanceof FUNCTION)) {
-						continue;
-					}
-
-					// Match signature in key
-					matches = RE.exec(key);
-
-					if (matches !== NULL) {
-						// Get topic
-						topic = matches[2];
-
-						// Replace value with a scoped proxy
-						value = eventProxy(topic, self, value);
-
-						// Either ONE or BIND element
-						$element[matches[2] === ONE ? ONE : BIND](topic, self, value);
-
-						// Store in $proxies
-						$proxies[$proxies.length] = [topic, value];
-
-						// NULL value
-						self[key] = NULL;
-					}
-				}
-
-				return self;
-			},
-
-			/**
-			 * Destructor for dom events
-			 * @returns self
-			 */
-			"destroy/dom" : function destroy() {
-				var $proxy;
-
-				// Loop over subscriptions
-				while ($proxy = $proxies.shift()) {
-					$element.unbind($proxy[0], $proxy[1]);
-				}
-
-				return self;
-			},
-
+		Compose.call(this, {
 			"$element" : $element,
 			"displayName" : displayName || "component/widget"
 		});
 	}, {
+		finalize : function finalize() {
+			var self = this;
+			var $proxies = self[$PROXIES] = [];
+			var $element = self[$ELEMENT];
+			var key = NULL;
+			var value;
+			var matches;
+			var topic;
+
+			// Loop over each property in widget
+			for (key in self) {
+				// Get value
+				value = self[key];
+
+				// Continue if value is not a function
+				if (!(value instanceof FUNCTION)) {
+					continue;
+				}
+
+				// Match signature in key
+				matches = RE.exec(key);
+
+				if (matches !== NULL) {
+					// Get topic
+					topic = matches[2];
+
+					// Replace value with a scoped proxy
+					value = eventProxy(topic, self, value);
+
+					// Either ONE or BIND element
+					$element[matches[2] === ONE ? ONE : BIND](topic, self, value);
+
+					// Store in $proxies
+					$proxies[$proxies.length] = [topic, value];
+
+					// NULL value
+					self[key] = NULL;
+				}
+			}
+
+			return self;
+		},
+
+		destroy : function destroy() {
+			var self = this;
+			var $proxies = self[$PROXIES];
+			var $element = self[$ELEMENT];
+			var $proxy;
+
+			// Loop over subscriptions
+			while ($proxy = $proxies.shift()) {
+				$element.unbind($proxy[0], $proxy[1]);
+			}
+
+			return self;
+		},
+
 		/**
 		 * Weaves all children of $element
 		 * @param $element (jQuery) Element to weave
