@@ -9,161 +9,136 @@
 define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function GadgetModule(Compose, Component, hub, Topic, Deferred) {
 	var NULL = null;
 	var FUNCTION = Function;
-	var BUILD = "build";
-	var DESTROY = "destroy";
-	var RE_SCAN = RegExp("^(" + [BUILD, DESTROY].join("|") + ")/.+");
-	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
+	var RE = /^hub(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var MEMORY = "memory";
+	var SUBSCRIPTIONS = "subscriptions";
+
+	function protoExecProxy(property) {
+		function protoExec() {
+			var self = this;
+			var proto;
+			var callback;
+			var current;
+			var head = NULL;
+			var tail = NULL;
+
+			// Get prototype of instance
+			proto = self.__proto__;
+
+			// Iterate proto stack
+			while(proto) {
+				// Make sure property exists on proto
+				if (proto.hasOwnProperty(property)) {
+					// Get callback
+					callback = proto[property];
+
+					// Add to list block
+					add : {
+						current = head;
+
+						// Iterate callback stack to make sure we don't have this callback in there
+						while(current) {
+							if (current === callback) {
+								break add;
+							}
+							current = current.next;
+						}
+
+						// If we already have a tail, update tail.next, otherwise update head - then set tail to callback
+						tail = tail
+							? tail.next = callback
+							: head = callback;
+					}
+				}
+
+				// Update proto
+				proto = proto.__proto__;
+			}
+
+			// Start from head
+			current = head;
+
+			// Iterate callback stack
+			while (current) {
+				// Apply callback
+				current.apply(self, arguments);
+
+				// Update current
+				current = current.next;
+			}
+
+			return self;
+		}
+
+		return protoExec;
+	}
 
 	return Component.extend(function Gadget() {
 		var self = this;
-		var builder = NULL;
-		var destructor = NULL;
-		var subscriptions = Array();
 
 		Compose.call(self, {
-			/**
-			 * First scans for build/destroy signatures and pushes them on the stack
-			 * then iterates builders and executes them in reverse order
-			 * @returns self
-			 */
-			build : function build() {
-				var key = NULL;
-				var value;
-				var matches;
-				var current;
-
-				// Loop over each property in component
-				for (key in self) {
-					// Get value
-					value = self[key];
-
-					// Continue if value is not a function
-					if (!(value instanceof FUNCTION)) {
-						continue;
-					}
-
-					// Get matches
-					matches = RE_SCAN.exec(key);
-
-					// Make sure we have matches
-					if (matches !== NULL) {
-						// Switch on prefix
-						switch (matches[1]) {
-						case BUILD:
-							// Update next
-							value.next = builder;
-							// Update current
-							builder = value;
-							break;
-
-						case DESTROY:
-							// Update next
-							value.next = destructor;
-							// Update current
-							destructor = value;
-							break;
-
-						default:
-							continue;
-						}
-
-						// Update topic
-						value.topic = key;
-
-						// NULL value
-						self[key] = NULL;
-					}
-				}
-
-				// Set current
-				current = builder;
-
-				while (current !== NULL) {
-					current.call(self);
-
-					current = current.next;
-				}
-
-				return self;
-			},
-
-			/**
-			 * Iterates destructors and executes them in reverse order
-			 * @returns self
-			 */
-			destroy : function iterator() {
-				var current = destructor;
-
-				while (current !== NULL) {
-					current.call(self);
-
-					current = current.next;
-				}
-
-				return self;
-			},
-
-			/**
-			 * Builder for hub subscriptions
-			 * @returns self
-			 */
-			"build/hub" : function build() {
-				var key = NULL;
-				var value;
-				var matches;
-				var topic;
-
-				// Loop over each property in gadget
-				for (key in self) {
-					// Get value
-					value = self[key];
-
-					// Continue if value is not a function
-					if (!(value instanceof FUNCTION)) {
-						continue;
-					}
-
-					// Match signature in key
-					matches = RE_HUB.exec(key);
-
-					if (matches !== NULL) {
-						// Get topic
-						topic = matches[2];
-
-						// Subscribe
-						hub.subscribe(Topic(topic, self), self, matches[1] === MEMORY, value);
-
-						// Store in subscriptions
-						subscriptions[subscriptions.length] = [topic, value];
-
-						// NULL value
-						self[key] = NULL;
-					}
-				}
-
-				return self;
-			},
-
-			/**
-			 * Destructor for hub subscriptions
-			 * @returns self
-			 */
-			"destroy/hub" : function destroy() {
-				var subscription;
-
-				// Loop over subscriptions
-				while (subscription = subscriptions.shift()) {
-					hub.unsubscribe(subscription[0], subscription[1]);
-				}
-
-				return self;
-			},
+			finalize : protoExecProxy("finalize"),
+			destroy : protoExecProxy("destroy"),
 		});
 	}, {
+		finalize : function finalize() {
+			var self = this;
+			var subscriptions = self[SUBSCRIPTIONS] = [];
+			var key = NULL;
+			var value;
+			var matches;
+			var topic;
+
+			// Loop over each property in gadget
+			for (key in self) {
+				// Get value
+				value = self[key];
+
+				// Continue if value is not a function
+				if (!(value instanceof FUNCTION)) {
+					continue;
+				}
+
+				// Match signature in key
+				matches = RE.exec(key);
+
+				if (matches !== NULL) {
+					// Get topic
+					topic = matches[2];
+
+					// Subscribe
+					hub.subscribe(Topic(topic, self), self, matches[1] === MEMORY, value);
+
+					// Store in subscriptions
+					subscriptions[subscriptions.length] = [topic, value];
+
+					// NULL value
+					self[key] = NULL;
+				}
+			}
+
+			return self;
+		},
+
+		/**
+		 * Destructor for hub subscriptions
+		 * @returns self
+		 */
+		destroy : function destroy() {
+			var subscriptions = self[SUBSCRIPTIONS];
+			var subscription;
+
+			// Loop over subscriptions
+			while (subscription = subscriptions.shift()) {
+				hub.unsubscribe(subscription[0], subscription[1]);
+			}
+
+			return self;
+		},
+
 		/**
 		 * Calls hub.publish in self context
 		 * @returns self
