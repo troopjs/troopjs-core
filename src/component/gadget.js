@@ -6,7 +6,7 @@
 /**
  * The gadget trait provides convenient access to common application logic
  */
-define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic"  ], function GadgetModule(Compose, Component, hub, Topic) {
+define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub", "../pubsub/topic" ], function GadgetModule(Compose, proto, Component, hub, Topic) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE = /^hub(?::(\w+))?\/(.+)/;
@@ -16,57 +16,12 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic"  ], function Ga
 	var MEMORY = "memory";
 	var SUBSCRIPTIONS = "subscriptions";
 
-	function protoExecProxy(property) {
-		function protoExec() {
-			var self = this;
-			var proto;
-			var callback;
-			var callbacks = [];
-			var i;
-
-			// Get prototype of instance
-			proto = self.__proto__;
-
-			// Iterate proto stack
-			while(proto) {
-				// Make sure property exists on proto
-				exec: if (proto.hasOwnProperty(property)) {
-					// Get callback
-					callback = proto[property];
-
-					// Add to list block
-					i = callbacks.length;
-
-					// Iterate callbacks and make sure this is the first time
-					while (i--) {
-						if (callback === callbacks[i]) {
-							break exec;
-						}
-					}
-
-					// Store callback
-					callbacks[callbacks.length] = callback;
-
-					// Apply callback
-					callback.apply(self, arguments);
-				}
-
-				// Update proto
-				proto = proto.__proto__;
-			}
-
-			return self;
-		}
-
-		return protoExec;
-	}
-
 	return Component.extend(function Gadget() {
 		var self = this;
 
 		Compose.call(self, {
-			finalize : protoExecProxy("finalize"),
-			destroy : protoExecProxy("destroy"),
+			finalize : proto(self.finalize),
+			destroy: proto(self.destroy)
 		});
 	}, {
 		finalize : function finalize() {
