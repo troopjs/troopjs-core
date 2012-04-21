@@ -6,7 +6,7 @@
 /**
  * The gadget trait provides convenient access to common application logic
  */
-define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic", "deferred" ], function GadgetModule(Compose, Component, hub, Topic, Deferred) {
+define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic"  ], function GadgetModule(Compose, Component, hub, Topic) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE = /^hub(?::(\w+))?\/(.+)/;
