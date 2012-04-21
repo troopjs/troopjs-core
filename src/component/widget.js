@@ -225,10 +225,16 @@ define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Co
 		empty : function empty(deferred) {
 			var self = this;
 
-			var $element = self[$ELEMENT];
 
 			// Create deferred for emptying
-			var emptyDeferred = Deferred(function emptyDeferred(dfd) {
+			Deferred(function emptyDeferred(dfd) {
+				// If a deferred was passed, add resolve/reject
+				if (deferred) {
+					dfd.then(deferred.resolve, deferred.reject);
+				}
+
+				// Get element
+				var $element = self[$ELEMENT];
 
 				// Detach contents
 				var $contents = $element.contents().detach();
@@ -255,11 +261,6 @@ define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Co
 					}
 				}, 0);
 			});
-
-			// If a deferred was passed, add resolve/reject
-			if (deferred) {
-				emptyDeferred.then(deferred.resolve, deferred.reject);
-			}
 
 			return self;
 		}
