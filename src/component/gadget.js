@@ -21,9 +21,8 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic"  ], function Ga
 			var self = this;
 			var proto;
 			var callback;
-			var current;
-			var head = NULL;
-			var tail = NULL;
+			var callbacks = [];
+			var i;
 
 			// Get prototype of instance
 			proto = self.__proto__;
@@ -31,43 +30,29 @@ define([ "compose", "./base", "../pubsub/hub", "../pubsub/topic"  ], function Ga
 			// Iterate proto stack
 			while(proto) {
 				// Make sure property exists on proto
-				if (proto.hasOwnProperty(property)) {
+				exec: if (proto.hasOwnProperty(property)) {
 					// Get callback
 					callback = proto[property];
 
 					// Add to list block
-					add : {
-						current = head;
+					i = callbacks.length;
 
-						// Iterate callback stack to make sure we don't have this callback in there
-						while(current) {
-							if (current === callback) {
-								break add;
-							}
-							current = current.next;
+					// Iterate callbacks and make sure this is the first time
+					while (i--) {
+						if (callback === callbacks[i]) {
+							break exec;
 						}
-
-						// If we already have a tail, update tail.next, otherwise update head - then set tail to callback
-						tail = tail
-							? tail.next = callback
-							: head = callback;
 					}
+
+					// Store callback
+					callbacks[callbacks.length] = callback;
+
+					// Apply callback
+					callback.apply(self, arguments);
 				}
 
 				// Update proto
 				proto = proto.__proto__;
-			}
-
-			// Start from head
-			current = head;
-
-			// Iterate callback stack
-			while (current) {
-				// Apply callback
-				current.apply(self, arguments);
-
-				// Update current
-				current = current.next;
 			}
 
 			return self;
