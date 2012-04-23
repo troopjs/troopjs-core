@@ -6,7 +6,7 @@
 /**
  * The gadget trait provides convenient access to common application logic
  */
-define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub", "../pubsub/topic" ], function GadgetModule(Compose, proto, Component, hub, Topic) {
+define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub" ], function GadgetModule(Compose, proto, Component, hub) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE = /^hub(?::(\w+))?\/(.+)/;
@@ -50,7 +50,7 @@ define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub", "../pubs
 					topic = matches[2];
 
 					// Subscribe
-					hub.subscribe(Topic(topic, self), self, matches[1] === MEMORY, value);
+					hub.subscribe(topic, self, matches[1] === MEMORY, value);
 
 					// Store in subscriptions
 					subscriptions[subscriptions.length] = [topic, value];
