@@ -3,7 +3,7 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "./gadget" ], function ServiceModule(Gadget) {
+define([ "./gizmo" ], function ServiceModule(Gizmo) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE = /^state\/(starting|started|stopping|stopped)(?:\/.+)*/;
@@ -27,7 +27,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 		}
 	}
 
-	return Gadget.extend({
+	return Gizmo.extend({
 		initialize : function initialize() {
 			var self = this;
 			var key = NULL;
