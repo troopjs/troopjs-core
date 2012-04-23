@@ -26,6 +26,7 @@ define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub" ], functi
 	}, {
 		begin : function begin() {
 			var self = this;
+
 			var subscriptions = self[SUBSCRIPTIONS] = [];
 			var key = NULL;
 			var value;
@@ -64,6 +65,8 @@ define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub" ], functi
 		},
 
 		finalize : function finalize() {
+			var self = this;
+
 			var subscriptions = self[SUBSCRIPTIONS];
 			var subscription;
 
