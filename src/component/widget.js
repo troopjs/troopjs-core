@@ -187,6 +187,22 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			return this;
 		},
 
+		/**
+		 * Binds event from $element, exactly once
+		 * @returns self
+		 */
+		one : function one() {
+			var self = this;
+
+			$ONE.apply(self[$ELEMENT], arguments);
+
+			return self;
+		},
+
+		/**
+		 * Binds event to $element
+		 * @returns self
+		 */
 		bind : function bind() {
 			var self = this;
 
@@ -195,6 +211,10 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			return self;
 		},
 
+		/**
+		 * Unbinds event from $element
+		 * @returns self
+		 */
 		unbind : function unbind() {
 			var self = this;
 
@@ -205,10 +225,9 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 
 		/**
 		 * Triggers event on $element
-		 * @param $event (jQuery.Event | String) Event to trigger
 		 * @returns self
 		 */
-		trigger : function trigger($event) {
+		trigger : function trigger() {
 			var self = this;
 
 			$TRIGGER.apply(self[$ELEMENT], arguments);
