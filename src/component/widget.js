@@ -10,14 +10,16 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	var NULL = null;
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
-	var SLICE = ARRAY_PROTO.slice;
 	var UNSHIFT = ARRAY_PROTO.unshift;
+	var $TRIGGER = $.fn.trigger;
+	var $ONE = $.fn.one;
+	var $BIND = $.fn.bind;
+	var $UNBIND = $.fn.unbind;
 	var RE = /^dom(?::(\w+))?\/([^\.]+(?:\.(.+))?)/;
 	var REFRESH = "widget/refresh";
 	var $ELEMENT = "$element";
 	var $PROXIES = "$proxies";
 	var ONE = "one";
-	var BIND = "bind";
 	var ATTR_WEAVE = "[data-weave]";
 	var ATTR_WOVEN = "[data-woven]";
 
@@ -43,11 +45,11 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	}
 
 	/**
-	 * Creates a proxy of the inner method 'render' with the 'op' parameter set
-	 * @param op name of jQuery method call
+	 * Creates a proxy of the inner method 'render' with the '$fn' parameter set
+	 * @param $fn jQuery method
 	 * @returns {Function} proxied render
 	 */
-	function renderProxy(op) {
+	function renderProxy($fn) {
 		/**
 		 * Renders contents into element
 		 * @param contents (Function | String) Template/String to render
@@ -72,13 +74,13 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			// Defer render (as weaving it may need to load async)
 			var deferredRender = Deferred(function deferredRender(dfdRender) {
 				// Call render
-				op.call($element, contents);
+				$fn.call($element, contents);
 
 				// Weave element
-				self.weave($element, dfdRender);
+				$element.find(ATTR_WEAVE).weave(dfdRender);
 			})
 			.done(function renderDone() {
-				// After render is complete, trigger "widget/refresh" with woven components
+				// After render is complete, trigger REFRESH with woven components
 				$element.trigger(REFRESH, arguments);
 			});
 
@@ -133,7 +135,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 					value = eventProxy(topic, self, value);
 
 					// Either ONE or BIND element
-					$element[matches[2] === ONE ? ONE : BIND](topic, self, value);
+					(matches[2] === ONE ? $ONE : $BIND).call($element, topic, self, value);
 
 					// Store in $proxies
 					$proxies[$proxies.length] = [topic, value];
@@ -162,25 +164,43 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 
 		/**
 		 * Weaves all children of $element
-		 * @param $element (jQuery) Element to weave
 		 * @param deferred (Deferred) Deferred (optional)
 		 * @returns self
 		 */
-		weave : function weave($element, deferred) {
-			$element.find(ATTR_WEAVE).weave(deferred);
+		weave : function weave(deferred) {
+			var self = this;
 
-			return this;
+			self[$ELEMENT].find(ATTR_WEAVE).weave(deferred);
+
+			return self;
 		},
 
 		/**
 		 * Unweaves all children of $element _and_ self
-		 * @param $element (jQuery) Element to unweave
 		 * @returns self
 		 */
-		unweave : function unweave($element) {
-			$element.find(ATTR_WOVEN).andSelf().unweave();
+		unweave : function unweave() {
+			var self = this;
+
+			self[$ELEMENT].find(ATTR_WOVEN).andSelf().unweave();
 
 			return this;
+		},
+
+		bind : function bind() {
+			var self = this;
+
+			$BIND.apply(self[$ELEMENT], arguments);
+
+			return self;
+		},
+
+		unbind : function unbind() {
+			var self = this;
+
+			$UNBIND.apply(self[$ELEMENT], arguments);
+
+			return self;
 		},
 
 		/**
@@ -191,7 +211,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 		trigger : function trigger($event) {
 			var self = this;
 
-			self[$ELEMENT].trigger($event, SLICE.call(arguments, 1));
+			$TRIGGER.apply(self[$ELEMENT], arguments);
 
 			return self;
 		},
