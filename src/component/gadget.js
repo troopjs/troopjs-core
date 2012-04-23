@@ -20,11 +20,11 @@ define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub" ], functi
 		var self = this;
 
 		Compose.call(self, {
-			finalize : proto(self.finalize),
-			destroy: proto(self.destroy)
+			begin : proto(self.begin),
+			finalize : proto(self.finalize)
 		});
 	}, {
-		finalize : function finalize() {
+		begin : function begin() {
 			var self = this;
 			var subscriptions = self[SUBSCRIPTIONS] = [];
 			var key = NULL;
@@ -63,11 +63,7 @@ define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub" ], functi
 			return self;
 		},
 
-		/**
-		 * Destructor for hub subscriptions
-		 * @returns self
-		 */
-		destroy : function destroy() {
+		finalize : function finalize() {
 			var subscriptions = self[SUBSCRIPTIONS];
 			var subscription;
 

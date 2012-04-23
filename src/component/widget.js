@@ -101,7 +101,9 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			self.displayName = displayName;
 		}
 	}, {
-		finalize : function finalize() {
+		displayName : "component/widget",
+
+		begin : function begin() {
 			var self = this;
 			var $proxies = self[$PROXIES] = [];
 			var $element = self[$ELEMENT];
@@ -144,7 +146,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			return self;
 		},
 
-		destroy : function destroy() {
+		finalize : function finalize() {
 			var self = this;
 			var $proxies = self[$PROXIES];
 			var $element = self[$ELEMENT];

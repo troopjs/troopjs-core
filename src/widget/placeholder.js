@@ -60,8 +60,8 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 							widget = widget.apply(widget, argv);
 						}
 
-						// Finalize
-						widget.finalize();
+						// Begin
+						widget.begin();
 
 						// Resolve
 						dfd.resolve(widget);
@@ -102,8 +102,8 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 							_widget = UNDEFINED;
 						});
 
-					// Destroy
-					_widget.destroy();
+					// Finalize
+					_widget.finalize();
 
 					// Resolve
 					dfd.resolve(_widget);
@@ -125,7 +125,7 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 		Compose.call(self, {
 			release : release,
 			hold : hold,
-			destructor : hold
+			finalize : hold
 		});
 	});
 });

@@ -9,6 +9,7 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 	var STOPPING = "stopping";
 	var STOPPED = "stopped";
 	var APPLICATION_STATE = "application/state";
+	var $ELEMENT = "$element";
 
 	return Widget.extend({
 		start : function start(deferred) {
@@ -18,12 +19,16 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 				try {
 					self.publish(APPLICATION_STATE, STARTING);
 
-					self.weave(self.$element);
+					self.weave(self[$ELEMENT]);
 
 					dfd.resolve(STARTED);
 				}
 				catch (e) {
 					dfd.reject(e);
+				}
+
+				if (deferred) {
+					dfd.then(deferred.resolve, deferred.reject);
 				}
 			})
 			.done(function doneStart(state) {
@@ -32,10 +37,6 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 			.fail(function failStart(e) {
 				self.publish(APPLICATION_STATE, e);
 			});
-
-			if (deferred) {
-				dfd.then(deferred.resolve, deferred.reject);
-			}
 
 			return self;
 		},
@@ -46,10 +47,17 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 			Deferred(function deferredStop(dfd) {
 				try {
 					self.publish(APPLICATION_STATE, STOPPING);
+
+					self.unweave(self[$ELEMENT]);
+
 					dfd.resolve(STOPPED);
 				}
 				catch (e) {
 					dfd.reject(e);
+				}
+
+				if (deferred) {
+					dfd.then(deferred.resolve, deferred.reject);
 				}
 			})
 			.done(function doneStop(state) {
@@ -58,10 +66,6 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 			.fail(function failStop(e) {
 				self.publish(APPLICATION_STATE, e);
 			});
-
-			if (deferred) {
-				dfd.then(deferred.resolve, deferred.reject);
-			}
 
 			return self;
 		}
