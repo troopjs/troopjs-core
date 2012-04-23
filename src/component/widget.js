@@ -105,7 +105,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	}, {
 		displayName : "component/widget",
 
-		begin : function begin() {
+		initialize : function initialize() {
 			var self = this;
 			var $proxies = self[$PROXIES] = [];
 			var $element = self[$ELEMENT];

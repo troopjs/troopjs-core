@@ -20,11 +20,11 @@ define([ "compose", "troopjs-compose/proto", "./base", "../pubsub/hub" ], functi
 		var self = this;
 
 		Compose.call(self, {
-			begin : proto(self.begin),
+			initialize : proto(self.initialize),
 			finalize : proto(self.finalize)
 		});
 	}, {
-		begin : function begin() {
+		initialize : function initialize() {
 			var self = this;
 
 			var subscriptions = self[SUBSCRIPTIONS] = [];

@@ -28,7 +28,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 	}
 
 	return Gadget.extend({
-		begin : function begin() {
+		initialize : function initialize() {
 			var self = this;
 			var key = NULL;
 			var value;

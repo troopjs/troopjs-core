@@ -60,8 +60,8 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 							widget = widget.apply(widget, argv);
 						}
 
-						// Begin
-						widget.begin();
+						// Initialize
+						widget.initialize();
 
 						// Resolve
 						dfd.resolve(widget);
