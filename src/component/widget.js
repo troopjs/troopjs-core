@@ -6,7 +6,7 @@
 /**
  * The widget trait provides common UI related logic
  */
-define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Compose, Gadget, $, Deferred) {
+define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, Deferred) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
@@ -93,11 +93,13 @@ define([ "compose", "./gadget", "jquery", "deferred" ], function WidgetModule(Co
 	}
 
 	return Gadget.extend(function Widget($element, displayName) {
-		// Extend self
-		Compose.call(this, {
-			"$element" : $element,
-			"displayName" : displayName || "component/widget"
-		});
+		var self = this;
+
+		self[$ELEMENT] = $element;
+
+		if (displayName) {
+			self.displayName = displayName;
+		}
 	}, {
 		finalize : function finalize() {
 			var self = this;
