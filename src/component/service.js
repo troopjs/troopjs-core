@@ -6,7 +6,7 @@
 define([ "./gadget" ], function ServiceModule(Gadget) {
 	var NULL = null;
 	var FUNCTION = Function;
-	var RE = /^state\/(starting|started|stopping|stopped).*/;
+	var RE = /^state\/(starting|started|stopping|stopped)(?:\/.+)*/;
 	var APPLICATION_STATE = "application/state";
 	var STATES = "states";
 
@@ -22,7 +22,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 			i = values.length;
 
 			while (i--) {
-				states[i].apply(self, arguments);
+				values[i].apply(self, arguments);
 			}
 		}
 	}
@@ -56,7 +56,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 						states[state].push(value);
 					}
 					else {
-						states[level] = [ value ];
+						states[state] = [ value ];
 					}
 
 					// NULL value
@@ -64,14 +64,17 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 				}
 			}
 
-			// Subscribe to INIT
 			self.subscribe(APPLICATION_STATE, self, true, onApplicationState);
 
 			return self;
 		},
 
 		finalize : function finalize() {
-			this.unsubscribe(APPLICATION_STATE, onApplicationState);
+			var self = this;
+
+			self.unsubscribe(APPLICATION_STATE, onApplicationState);
+
+			return self;
 		}
 	});
 });
