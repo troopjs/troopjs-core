@@ -4,19 +4,21 @@
  * Released under the MIT license.
  */
 define([ "compose", "../widget/placeholder" ], function RoutePlaceholderModule(Compose, Placeholder) {
-	return Placeholder.extend(function RoutePlaceholderWidget($element, name) {
-		var self = this;
-		var re = RegExp($element.data("route"));
+	var ROUTE = "route";
 
-		Compose.call(self, {
-			"hub:memory/route" : function onRoute(topic, uri) {
-				if (re.test(uri.path)) {
-					self.release();
-				}
-				else {
-					self.hold();
-				}
+	return Placeholder.extend(function RoutePlaceholderWidget($element, name) {
+		this[ROUTE] = RegExp($element.data("route"));
+	}, {
+		"hub:memory/route" : function onRoute(topic, uri) {
+			var self = this;
+			var re = self[ROUTE];
+
+			if (re.test(uri.path)) {
+				self.release();
 			}
-		});
+			else {
+				self.hold();
+			}
+		}
 	});
 });

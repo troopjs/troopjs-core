@@ -68,17 +68,18 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				// Get handlers
 				handlers = HANDLERS[topic];
 
-				// Get last handler
-				handler = tail = handlers.tail;
+				// Create new handler
+				handler = {
+					"callback" : arguments[offset++],
+					"context" : context
+				};
 
-				// No tail, need to create
-				if (tail === UNDEFINED) {
-					// Create head and tail
-					handlers.head = handler = tail = {
-						"callback" : arguments[offset++],
-						"context" : context
-					};
-				}
+				// Get last handler
+				tail = "tail" in handlers
+					// Have tail, update handlers.tail.next to point to handler
+					? handlers.tail.next = handler
+					// Have no tail, update handlers.head to point to handler
+					: handlers.head = handler;
 
 				// Iterate handlers from offset
 				while (offset < length) {

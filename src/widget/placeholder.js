@@ -16,7 +16,7 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 
 		function release(/* arg, arg, arg, */ deferred) {
 			// Internal deferred
-			Deferred(function deferredRelease(dfd) {
+			var deferredRelease = Deferred(function deferredRelease(dfd) {
 				// Make arguments into a real array
 				var argv  = ARRAY.apply(ARRAY_PROTO, arguments);
 
@@ -31,25 +31,11 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 					// Set _widget to NULL to indicate that we're in progress
 					_widget = NULL;
 
-					// Initialize deferred
-					dfd
-						.done(function done(widget) {
-							// Update _widget
-							_widget = widget;
-
-							// Set DATA_HOLDING attribute
-							$element.attr(DATA_HOLDING, widget);
-						})
-						.fail(function fail(widget) {
-							// Update _widget
-							_widget = widget;
-						});
-
 					// Require widget by _name
-					require([ _name ], function required(widget) {
+					require([ _name ], function required(Widget) {
 						// If no additional arguments, do simple instantiation
 						if (argv.length === 0) {
-							widget = widget($element, _name);
+							widget = Widget($element, _name);
 						}
 						// Otherwise, do a complicated one
 						else {
@@ -57,7 +43,7 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 							argv.unshift($element, _name);
 
 							// Instantiate
-							widget = widget.apply(widget, argv);
+							widget = Widget.apply(widget, argv);
 						}
 
 						// Initialize
@@ -70,41 +56,38 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 				catch (e) {
 					dfd.reject(UNDEFINED);
 				}
-
-				// Link deferred
-				if (deferred) {
-					dfd.then(deferred.resolve, deferred.reject);
-				}
 			})
-			.done(function doneRequire(widget) {
+			.done(function doneRelease(widget) {
 				widget.state("starting").state("started");
+			})
+			.done(function doneRelease(widget) {
+				// Update _widget
+				_widget = widget;
+
+				// Set DATA_HOLDING attribute
+				$element.attr(DATA_HOLDING, widget);
+			})
+			.fail(function failRelease(widget) {
+				// Update _widget
+				_widget = widget;
 			});
+
+			// Link deferred
+			if (deferred) {
+				deferredRelease.then(deferred.resolve, deferred.reject);
+			}
 
 			return this;
 		}
 
 		function hold(deferred) {
 			// Internal deferred
-			Deferred(function deferredHold(dfd) {
+			var deferredHold = Deferred(function deferredHold(dfd) {
 				// First check that we're holding
 				if (_widget === UNDEFINED || _widget === NULL) {
 					dfd.reject(_widget);
 				}
 				else try {
-					// Initialize deferred
-					dfd
-						.done(function done(widget) {
-							// Remove DATA_HOLDING attribute
-							$element.removeAttr(DATA_HOLDING);
-
-							// Update _widget
-							_widget = UNDEFINED;
-						})
-						.fail(function fail(widget) {
-							// Update _widget
-							_widget = UNDEFINED;
-						});
-
 					// Finalize
 					_widget.state("stopping").state("stopped").finalize();
 
@@ -114,12 +97,23 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 				catch (e) {
 					dfd.reject(_widget);
 				}
+			})
+			.done(function done(widget) {
+				// Remove DATA_HOLDING attribute
+				$element.removeAttr(DATA_HOLDING);
 
-				// Link deferred
-				if (deferred) {
-					dfd.then(deferred.resolve, deferred.reject);
-				}
+				// Update _widget
+				_widget = UNDEFINED;
+			})
+			.fail(function fail(widget) {
+				// Update _widget
+				_widget = UNDEFINED;
 			});
+
+			// Link deferred
+			if (deferred) {
+				deferredHold.then(deferred.resolve, deferred.reject);
+			}
 
 			return this;
 		}
