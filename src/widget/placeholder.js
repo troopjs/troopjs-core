@@ -75,6 +75,9 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 				if (deferred) {
 					dfd.then(deferred.resolve, deferred.reject);
 				}
+			})
+			.done(function doneRequire(widget) {
+				widget.state("starting").state("started");
 			});
 
 			return this;
@@ -103,7 +106,7 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 						});
 
 					// Finalize
-					_widget.finalize();
+					_widget.state("stopping").state("stopped").finalize();
 
 					// Resolve
 					dfd.resolve(_widget);

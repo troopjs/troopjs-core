@@ -9,7 +9,7 @@
 define([ "compose", "troopjs-compose/proto", "./base" ], function GadgetModule(Compose, proto, Component) {
 	var NULL = null;
 	var FUNCTION = Function;
-	var RE = /^state\/(starting|started|stopping|stopped)(?:\/.+)*/;
+	var RE = /^state\/(starting|started|stopping|stopped)(?:\/.*)?/;
 	var STATES = "states";
 
 	return Component.extend(function Gadget() {
