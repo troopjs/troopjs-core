@@ -33,6 +33,8 @@ define([ "compose", "../component/widget", "jquery", "deferred" ], function Widg
 
 					// Require widget by _name
 					require([ _name ], function required(Widget) {
+						var widget;
+
 						// If no additional arguments, do simple instantiation
 						if (argv.length === 0) {
 							widget = Widget($element, _name);
