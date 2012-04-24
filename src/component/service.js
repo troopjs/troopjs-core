@@ -4,77 +4,19 @@
  * Released under the MIT license.
  */
 define([ "./gizmo" ], function ServiceModule(Gizmo) {
-	var NULL = null;
-	var FUNCTION = Function;
-	var RE = /^state\/(starting|started|stopping|stopped)(?:\/.+)*/;
-	var APPLICATION_STATE = "application/state";
-	var STATES = "states";
-
-	function onApplicationState(topic, state) {
-		var self = this;
-		var states = self[STATES];
-		var i;
-		var values;
-
-		if (state in states) {
-			values = states[state];
-
-			i = values.length;
-
-			while (i--) {
-				values[i].apply(self, arguments);
-			}
-		}
+	function onState(topic, state) {
+		this.state(state);
 	}
 
 	return Gizmo.extend({
 		initialize : function initialize() {
 			var self = this;
-			var key = NULL;
-			var value;
-			var matches;
-			var states = self[STATES] = {};
-			var state;
 
-			// Loop over each property in service
-			for (key in self) {
-				// Get value
-				value = self[key];
-
-				// Continue if value is not a function
-				if (!(value instanceof FUNCTION)) {
-					continue;
-				}
-
-				// Match signature in key
-				matches = RE.exec(key);
-
-				if (matches !== NULL) {
-					state = matches[1];
-
-					if (state in states) {
-						states[state].push(value);
-					}
-					else {
-						states[state] = [ value ];
-					}
-
-					// NULL value
-					self[key] = NULL;
-				}
-			}
-
-			self.subscribe(APPLICATION_STATE, self, true, onApplicationState);
-
-			return self;
+			return self.subscribe("state", self, true, onState);
 		},
 
 		finalize : function finalize() {
-			var self = this;
-
-			self.unsubscribe(APPLICATION_STATE, onApplicationState);
-
-			return self;
+			return self.unsubscribe("state", onState);
 		}
 	});
 });

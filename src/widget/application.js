@@ -4,25 +4,25 @@
  * Released under the MIT license.
  */
 define([ "compose", "../component/widget", "deferred" ], function ApplicationModule(Compose, Widget, Deferred) {
-	var STARTING = "starting";
-	var STARTED = "started";
-	var STOPPING = "stopping";
-	var STOPPED = "stopped";
-	var APPLICATION_STATE = "application/state";
+	var after = Compose.after;
 
 	return Widget.extend({
+		state : after(function state(state) {
+			return this.publish("state", state);
+		}),
+
 		start : function start(deferred) {
 			var self = this;
 
 			Deferred(function deferredStart(dfdStart) {
 				try {
-					self.publish(APPLICATION_STATE, STARTING);
+					self.state("starting");
 
 					Deferred(function deferredWeave(dfdWeave) {
 						self.weave(dfdWeave);
 					})
 					.done(function weaveDone() {
-						dfdStart.resolve(STARTED);
+						dfdStart.resolve("started");
 					})
 					.fail(dfdStart.reject);
 
@@ -36,10 +36,10 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 				}
 			})
 			.done(function doneStart(state) {
-				self.publish(APPLICATION_STATE, state);
+				self.state(state);
 			})
 			.fail(function failStart(e) {
-				self.publish(APPLICATION_STATE, e);
+				self.state(e);
 			});
 
 			return self;
@@ -50,11 +50,11 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 
 			Deferred(function deferredStop(dfdStop) {
 				try {
-					self.publish(APPLICATION_STATE, STOPPING);
+					self.state("stopping");
 
 					self.unweave();
 
-					dfdStop.resolve(STOPPED);
+					dfdStop.resolve("stopped");
 				}
 				catch (e) {
 					dfdStop.reject(e);
@@ -65,10 +65,10 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 				}
 			})
 			.done(function doneStop(state) {
-				self.publish(APPLICATION_STATE, state);
+				self.state(state);
 			})
 			.fail(function failStop(e) {
-				self.publish(APPLICATION_STATE, e);
+				self.state(e);
 			});
 
 			return self;
