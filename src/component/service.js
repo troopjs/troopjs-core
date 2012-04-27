@@ -4,6 +4,8 @@
  * Released under the MIT license.
  */
 define([ "./gizmo" ], function ServiceModule(Gizmo) {
+	var STATE = "state";
+
 	function onState(topic, state) {
 		this.state(state);
 	}
@@ -12,11 +14,13 @@ define([ "./gizmo" ], function ServiceModule(Gizmo) {
 		initialize : function initialize() {
 			var self = this;
 
-			return self.subscribe("state", self, true, onState);
+			return self.subscribe(STATE, self, true, onState);
 		},
 
 		finalize : function finalize() {
-			return self.unsubscribe("state", onState);
+			var self = this;
+
+			return self.unsubscribe(STATE, self, onState);
 		}
 	});
 });
