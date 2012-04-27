@@ -47,7 +47,7 @@ define([ "./gadget", "../pubsub/hub" ], function GizmoModule(Gadget, hub) {
 					hub.subscribe(topic, self, matches[1] === MEMORY, value);
 
 					// Store in subscriptions
-					subscriptions[subscriptions.length] = [topic, value];
+					subscriptions[subscriptions.length] = [topic, self, value];
 
 					// NULL value
 					self[key] = NULL;
@@ -65,7 +65,7 @@ define([ "./gadget", "../pubsub/hub" ], function GizmoModule(Gadget, hub) {
 
 			// Loop over subscriptions
 			while (subscription = subscriptions.shift()) {
-				hub.unsubscribe(subscription[0], subscription[1]);
+				hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
 			}
 
 			return self;

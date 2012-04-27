@@ -153,17 +153,34 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 		 * Unsubscribes from topic
 		 * 
 		 * @param topic Topic to unsubscribe from
+		 * @param context (optional) context to scope callbacks to
 		 * @param callback (optional) Callback to unsubscribe, if none
 		 *        are provided all callbacks are unsubscribed
 		 * @returns self
 		 */
-		unsubscribe : function unsubscribe(topic /*, callback, callback, ..*/) {
-			var offset;
+		unsubscribe : function unsubscribe(topic /*, context, callback, callback, ..*/) {
 			var length = arguments.length;
+			var context = arguments[1];
+			var callback = arguments[2];
+			var offset;
+			var handler;
 			var head;
 			var previous = null;
-			var handler;
-			var callback;
+
+			// No context or memory was supplied
+			if (context instanceof Function) {
+				callback = context;
+				context = CONTEXT;
+				offset = 1;
+			}
+			// All arguments were supplied
+			else if (callback instanceof Function){
+				offset = 2;
+			}
+			// Something is wrong, return fast
+			else {
+				return self;
+			}
 
 			unsubscribe: {
 				// Fast fail if we don't have subscribers
@@ -181,9 +198,9 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				head = HANDLERS[topic].head;
 
 				// Loop over remaining arguments
-				for (offset = 1; offset < length; offset++) {
+				while (offset < length) {
 					// Store callback
-					callback = arguments[offset];
+					callback = arguments[offset++];
 
 					// Get first handler
 					handler = previous = head;
@@ -191,7 +208,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					// Loop through handlers
 					do {
 						// Check if this handler should be unlinked
-						if (handler.callback === callback) {
+						if (handler.callback === callback && handler.context === context) {
 							// Is this the first handler
 							if (handler === head) {
 								// Re-link head and previous, then
