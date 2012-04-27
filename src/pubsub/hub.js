@@ -85,12 +85,9 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				while (offset < length) {
 					// Set last -> last.next -> handler
 					tail = tail.next = {
-						"callback" : arguments[offset],
+						"callback" : arguments[offset++],
 						"context" : context
 					};
-
-					// Increment offset
-					offset++;
 				}
 
 				// Set last handler
@@ -131,12 +128,9 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				while (offset < length) {
 					// Set last -> last.next -> handler
 					tail = tail.next = {
-						"callback" : arguments[offset],
+						"callback" : arguments[offset++],
 						"context" : context
 					};
-
-					// Increment offset
-					offset++;
 				}
 
 				// Create topic list
