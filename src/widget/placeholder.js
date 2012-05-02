@@ -3,128 +3,114 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../component/widget", "jquery", "deferred" ], function WidgetPlaceholderModule(Compose, Widget, $, Deferred) {
-	var NULL = null;
+define([ "../component/widget", "jquery", "deferred" ], function WidgetPlaceholderModule(Widget, $, Deferred) {
 	var UNDEFINED = undefined;
 	var ARRAY = Array;
 	var ARRAY_PROTO = ARRAY.prototype;
-	var DATA_HOLDING = "data-holding";
+	var HOLDING = "holding";
+	var DATA_HOLDING = "data-" + HOLDING;
+	var $ELEMENT = "$element";
+	var TARGET = "target";
 
-	return Widget.extend(function WidgetPlaceholder($element, name, _name) {
+	var depth = 0;
+
+	function release(/* arg, arg, arg, deferred*/) {
 		var self = this;
-		var _widget = UNDEFINED;
 
-		function release(/* arg, arg, arg, */ deferred) {
-			// Internal deferred
-			var deferredRelease = Deferred(function deferredRelease(dfd) {
-				// Make arguments into a real array
-				var argv  = ARRAY.apply(ARRAY_PROTO, arguments);
+		// Make arguments into a real array
+		var argx  = ARRAY.apply(ARRAY_PROTO, arguments);
 
-				// Update deferred to the last argument
-				deferred = argv.pop();
+		// Update deferred to the last argument
+		var deferred = argx.pop();
 
-				// We're already holding something, reject
-				if (_widget !== UNDEFINED) {
-					dfd.reject(_widget);
+		if (depth++ > 10) {
+			throw new Error("fucked");
+		}
+
+		Deferred(function deferredRelease(dfd) {
+			var i;
+			var iMax;
+			var name;
+			var argv;
+
+			// We're already holding something, resolve with cache
+			if (HOLDING in self) {
+				dfd.resolve(self[HOLDING]);
+			}
+			else {
+				// Set something in HOLDING
+				self[HOLDING] = UNDEFINED;
+
+				// Add done handler to release
+				dfd.done(function doneRelease(widget) {
+					// Set DATA_HOLDING attribute
+					self[$ELEMENT].attr(DATA_HOLDING, widget);
+
+					// Start and store widget
+					self[HOLDING] = widget
+						.state("starting")
+						.state("started");
+				});
+
+				// Get widget name
+				name = self[TARGET];
+
+				// Set initial argv
+				argv = [ self[$ELEMENT], name ];
+
+				// Append values from argx to argv
+				for (i = 0, iMax = argx.length; i < iMax; i++) {
+					argv[i + 2] = argx[i];
 				}
-				else try {
-					// Set _widget to NULL to indicate that we're in progress
-					_widget = NULL;
 
-					// Require widget by _name
-					require([ _name ], function required(Widget) {
-						var widget;
-
-						// If no additional arguments, do simple instantiation
-						if (argv.length === 0) {
-							widget = Widget($element, _name);
-						}
-						// Otherwise, do a complicated one
-						else {
-							// Add $element and _name to the beginning of argv
-							argv.unshift($element, _name);
-
-							// Instantiate
-							widget = Widget.apply(widget, argv);
-						}
-
-						// Initialize
-						widget.initialize();
-
-						// Resolve
-						dfd.resolve(widget);
-					});
-				}
-				catch (e) {
-					dfd.reject(UNDEFINED);
-				}
-			})
-			.done(function doneRelease(widget) {
-				widget.state("starting").state("started");
-			})
-			.done(function doneRelease(widget) {
-				// Update _widget
-				_widget = widget;
-
-				// Set DATA_HOLDING attribute
-				$element.attr(DATA_HOLDING, widget);
-			})
-			.fail(function failRelease(widget) {
-				// Update _widget
-				_widget = widget;
-			});
+				// Require widget by name
+				require([ name ], function required(Widget) {
+					// Resolve with constructed and initialized instance
+					dfd.resolve(Widget
+						.apply(Widget, argv)
+						.initialize());
+				});
+			}
 
 			// Link deferred
 			if (deferred) {
-				deferredRelease.then(deferred.resolve, deferred.reject);
+				dfd.then(deferred.resolve, deferred.reject);
 			}
-
-			return this;
-		}
-
-		function hold(deferred) {
-			// Internal deferred
-			var deferredHold = Deferred(function deferredHold(dfd) {
-				// First check that we're holding
-				if (_widget === UNDEFINED || _widget === NULL) {
-					dfd.reject(_widget);
-				}
-				else try {
-					// Finalize
-					_widget.state("stopping").state("stopped").finalize();
-
-					// Resolve
-					dfd.resolve(_widget);
-				}
-				catch (e) {
-					dfd.reject(_widget);
-				}
-			})
-			.done(function done(widget) {
-				// Remove DATA_HOLDING attribute
-				$element.removeAttr(DATA_HOLDING);
-
-				// Update _widget
-				_widget = UNDEFINED;
-			})
-			.fail(function fail(widget) {
-				// Update _widget
-				_widget = UNDEFINED;
-			});
-
-			// Link deferred
-			if (deferred) {
-				deferredHold.then(deferred.resolve, deferred.reject);
-			}
-
-			return this;
-		}
-
-		// Extend instance
-		Compose.call(self, {
-			release : release,
-			hold : hold,
-			finalize : hold
 		});
+
+		return self;
+	}
+
+	function hold() {
+		var self = this;
+		var holding;
+
+		// Check that we are holding
+		if (HOLDING in self) {
+			// Get what we're holding
+			holding = self[HOLDING];
+
+			// Cleanup
+			delete self[HOLDING];
+
+			// State and finalize
+			holding
+				.state("stopping")
+				.state("stopped")
+				.finalize();
+
+			// Remove DATA_HOLDING attribute
+			self[$ELEMENT].removeAttr(DATA_HOLDING);
+		}
+
+		return self;
+	}
+
+	return Widget.extend(function WidgetPlaceholder($element, name, target) {
+		this[TARGET] = target;
+	}, {
+		release : release,
+		hold : hold,
+		finalize : hold
 	});
 });

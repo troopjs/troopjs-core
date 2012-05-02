@@ -6,77 +6,60 @@
 /**
  * The gadget trait provides life cycle management
  */
-define([ "compose", "troopjs-compose/proto", "./base" ], function GadgetModule(Compose, proto, Component) {
-	var NULL = null;
-	var FUNCTION = Function;
-	var RE = /^state\/(starting|started|stopping|stopped)(?:\/.*)?/;
-	var STATES = "states";
+define([ "compose", "troopjs-compose/topdown", "deferred", "./base" ], function GadgetModule(Compose, topdown, Deferred, Component) {
+	var STATE = "state";
 
 	return Component.extend(function Gadget() {
 		var self = this;
 
 		Compose.call(self, {
-			initialize : proto(self.initialize),
-			finalize : proto(self.finalize)
+			initialize : topdown(self.initialize),
+			finalize : topdown(self.finalize),
+			state : function state(state, deferred) {
+				var _self = this;
+				var __proto__ = self;
+				var callback;
+				var callbacks = [];
+				var i;
+				var iMax = 0;
+
+				add: while (__proto__ = __proto__.__proto__) {
+					if (STATE in __proto__) {
+						callback = __proto__[STATE];
+
+						i = iMax;
+
+						while (i--)
+							if (callback === callbacks[i]) {
+								continue add;
+							}
+
+						callbacks[iMax++] = callback;
+					}
+				}
+
+				if (iMax !== 0) {
+					i = iMax;
+
+					while (--i) {
+						callbacks[i] = Deferred(function (dfd) {
+							var callback = callbacks[i];
+							var _deferred = callbacks[i + 1] || deferred;
+
+							dfd.done(function done() {
+								callback.call(_self, state, _deferred);
+							});
+						});
+					}
+
+					callbacks[0].call(_self, state, callbacks[1] || deferred);
+				}
+				else if (deferred) {
+					deferred.resolve();
+				}
+
+				return _self;
+			}
 		});
-	}, {
-		initialize : function initialize() {
-			var self = this;
-			var key = NULL;
-			var value;
-			var matches;
-			var states = self[STATES] = {};
-			var state;
-
-			// Loop over each property in service
-			for (key in self) {
-				// Get value
-				value = self[key];
-
-				// Continue if value is not a function
-				if (!(value instanceof FUNCTION)) {
-					continue;
-				}
-
-				// Match signature in key
-				matches = RE.exec(key);
-
-				if (matches !== NULL) {
-					state = matches[1];
-
-					if (state in states) {
-						states[state].push(value);
-					}
-					else {
-						states[state] = [ value ];
-					}
-
-					// NULL value
-					self[key] = NULL;
-				}
-			}
-
-			return self;
-		},
-
-		state : function state(state) {
-			var self = this;
-
-			var states = self[STATES];
-			var i;
-			var values;
-
-			if (state in states) {
-				values = states[state];
-
-				i = values.length;
-
-				while (i--) {
-					values[i].apply(self, arguments);
-				}
-			}
-
-			return self;
-		}
 	});
 });

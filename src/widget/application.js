@@ -3,43 +3,48 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../component/widget", "deferred" ], function ApplicationModule(Compose, Widget, Deferred) {
-	var after = Compose.after;
+define([ "../component/widget", "deferred" ], function ApplicationModule(Widget, Deferred) {
+	var STARTED = "started";
+	var STOPPED = "stopped";
 
 	return Widget.extend({
-		state : after(function state(state) {
-			return this.publish("state", state);
-		}),
+		state : function state(state, deferred) {
+			var self = this;
+
+			// Publish state to services
+			self.publish("state", state);
+
+			switch (state) {
+			case STARTED:
+				self.weave(deferred);
+				break;
+
+			case STOPPED:
+				self.unweave();
+
+			default:
+				if (deferred) {
+					deferred.resolve();
+				}
+			}
+
+			return self;
+		},
 
 		start : function start(deferred) {
 			var self = this;
 
 			Deferred(function deferredStart(dfdStart) {
-				try {
-					self.state("starting");
-
-					Deferred(function deferredWeave(dfdWeave) {
-						self.weave(dfdWeave);
-					})
-					.done(function weaveDone() {
-						dfdStart.resolve("started");
-					})
-					.fail(dfdStart.reject);
-
-				}
-				catch (e) {
-					dfdStart.reject(e);
-				}
+				Deferred(function deferredStarting(dfdStarting) {
+					self.state("starting", dfdStarting);
+				})
+				.done(function doneStarting() {
+					self.state(STARTED, dfdStart);
+				});
 
 				if (deferred) {
 					dfdStart.then(deferred.resolve, deferred.reject);
 				}
-			})
-			.done(function doneStart(state) {
-				self.state(state);
-			})
-			.fail(function failStart(e) {
-				self.state(e);
 			});
 
 			return self;
@@ -49,26 +54,16 @@ define([ "compose", "../component/widget", "deferred" ], function ApplicationMod
 			var self = this;
 
 			Deferred(function deferredStop(dfdStop) {
-				try {
-					self.state("stopping");
-
-					self.unweave();
-
-					dfdStop.resolve("stopped");
-				}
-				catch (e) {
-					dfdStop.reject(e);
-				}
+				Deferred(function deferredStopping(dfdStopping) {
+					self.state("stopping", sfdStopping);
+				})
+				.done(function doneStopping() {
+					self.state(STOPPED, dfdStop);
+				});
 
 				if (deferred) {
 					dfdStop.then(deferred.resolve, deferred.reject);
 				}
-			})
-			.done(function doneStop(state) {
-				self.state(state);
-			})
-			.fail(function failStop(e) {
-				self.state(e);
 			});
 
 			return self;

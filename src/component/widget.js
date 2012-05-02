@@ -69,24 +69,27 @@ define([ "./gizmo", "jquery", "deferred" ], function WidgetModule(Gizmo, $, Defe
 				deferred = data;
 			}
 
+			// Get $element
 			var $element = self[$ELEMENT];
 
 			// Defer render (as weaving it may need to load async)
-			var deferredRender = Deferred(function deferredRender(dfdRender) {
+			Deferred(function deferredRender(dfdRender) {
 				// Call render
 				$fn.call($element, contents);
 
 				// Weave element
 				$element.find(ATTR_WEAVE).weave(dfdRender);
-			})
-			.done(function renderDone() {
-				// After render is complete, trigger REFRESH with woven components
-				$element.trigger(REFRESH, arguments);
-			});
 
-			if (deferred) {
-				deferredRender.then(deferred.resolve, deferred.reject);
-			}
+				// After render is complete, trigger REFRESH with woven components
+				dfdRender.done(function renderDone() {
+					$element.trigger(REFRESH, arguments);
+				});
+
+				// Link deferred
+				if (deferred) {
+					dfdRender.then(deferred.resolve, deferred.reject);
+				}
+			});
 
 			return self;
 		}
@@ -268,7 +271,6 @@ define([ "./gizmo", "jquery", "deferred" ], function WidgetModule(Gizmo, $, Defe
 		empty : function empty(deferred) {
 			var self = this;
 
-
 			// Create deferred for emptying
 			Deferred(function emptyDeferred(dfd) {
 				// If a deferred was passed, add resolve/reject
@@ -283,7 +285,7 @@ define([ "./gizmo", "jquery", "deferred" ], function WidgetModule(Gizmo, $, Defe
 				var $contents = $element.contents().detach();
 
 				// Trigger refresh
-				$element.trigger(REFRESH, arguments);
+				$element.trigger(REFRESH, self);
 
 				// Get DOM elements
 				var contents = $contents.get();
