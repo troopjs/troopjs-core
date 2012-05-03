@@ -8,6 +8,8 @@ define([ "../component/widget", "deferred" ], function ApplicationModule(Widget,
 	var STOPPED = "stopped";
 
 	return Widget.extend({
+		displayName : "widget/application-core",
+
 		state : function state(state, deferred) {
 			var self = this;
 

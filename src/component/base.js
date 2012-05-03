@@ -13,6 +13,8 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	return Compose(function Component() {
 		this.instanceCount = COUNT++;
 	}, {
+		displayName : "component",
+
 		/**
 		 * Application configuration
 		 */
@@ -25,7 +27,7 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 		toString : function toString() {
 			var self = this;
 
-			return (self.displayName || "component") + "@" + self.instanceCount;
+			return self.displayName + "@" + self.instanceCount;
 		}
 	});
 });

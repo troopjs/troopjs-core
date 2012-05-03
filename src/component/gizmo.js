@@ -17,6 +17,8 @@ define([ "./gadget", "../pubsub/hub" ], function GizmoModule(Gadget, hub) {
 	var SUBSCRIPTIONS = "subscriptions";
 
 	return Gadget.extend({
+		displayName : "component/gizmo",
+
 		initialize : function initialize() {
 			var self = this;
 

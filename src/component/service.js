@@ -11,6 +11,8 @@ define([ "./gizmo" ], function ServiceModule(Gizmo) {
 	}
 
 	return Gizmo.extend({
+		displayName : "component/service",
+
 		initialize : function initialize() {
 			var self = this;
 

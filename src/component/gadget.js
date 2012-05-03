@@ -61,5 +61,8 @@ define([ "compose", "troopjs-compose/topdown", "deferred", "./base" ], function 
 				}
 				: noState
 		});
+	}, {
+		displayName : "component/gadget",
+
 	});
 });
