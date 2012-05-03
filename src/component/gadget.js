@@ -31,58 +31,77 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 		var fCount = 0;
 		var i;
 
+		// Iterate prototype chain (while there's a prototype)
 		do {
+			// Check if we have INITIALIZE on __proto__
 			add: if (__proto__.hasOwnProperty(INITIALIZE)) {
+				// Store callback
 				callback = __proto__[INITIALIZE];
 
+				// Reset counter
 				i = iCount;
 
+				// Loop iCallbacks, break add if we've already added this callback
 				while (i--) {
 					if (callback === iCallbacks[i]) {
 						break add;
 					}
 				}
 
+				// Store callback
 				iCallbacks[iCount++] = callback;
 			}
 
+			// Check if we have FINALIZE on __proto__
 			add: if (__proto__.hasOwnProperty(FINALIZE)) {
+				// Store callback
 				callback = __proto__[FINALIZE];
 
+				// Reset counter
 				i = fCount;
 
+				// Loop fCallbacks, break add if we've already added this callback
 				while (i--) {
 					if (callback === fCallbacks[i]) {
 						break add;
 					}
 				}
 
+				// Store callback
 				fCallbacks[fCount++] = callback;
 			}
 
+			// Check if we have STATE on __proto__
 			add: if (__proto__.hasOwnProperty(STATE)) {
+				// Store callback
 				callback = __proto__[STATE];
 
+				// Reset counter
 				i = sCount;
 
+				// Loop sCallbacks, break add if we've already added this callback
 				while (i--) {
 					if (callback === sCallbacks[i]) {
 						break add;
 					}
 				}
 
+				// Store callback
 				sCallbacks[sCount++] = callback;
 			}
 		} while (__proto__ = __proto__.__proto__);
 
+		// Extend self
 		Compose.call(self, {
 			initialize : iCount <= 1
+				// No prototypes, use original
 				? self[INITIALIZE]
 				: function initialize() {
 					var _self = this;
 					var count = -1;
 					var length = iCount;
 
+					// Loop iCallbacks start to end and execute
 					while (++count < length) {
 						iCallbacks[count].apply(_self, arguments);
 					}
@@ -91,12 +110,14 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 				},
 
 			finalize : fCount <= 1
+				// No prototypes, use original
 				? self[FINALIZE]
 				: function finalize() {
 					var _self = this;
 					var count = -1;
 					var length = fCount;
 
+					// Loop fCallbacks start to end and execute
 					while (++count < length) {
 						fCallbacks[count].apply(_self, arguments);
 					}
@@ -105,12 +126,14 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 				},
 
 			state : sCount <= 1
+				// No prototypes, use original
 				? self[STATE]
 				: function state(state, deferred) {
 					var _self = this;
 					var count = sCount;
 					var callbacks = [];
 
+					// Build deferred chain from end to 1
 					while (--count) {
 						callbacks[count] = Deferred(function (dfd) {
 							var callback = sCallbacks[count];
@@ -122,6 +145,7 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 						});
 					}
 
+					// Execute first sCallback, use first deferred or default
 					sCallbacks[0].call(_self, state, callbacks[1] || deferred);
 
 					return _self;
@@ -220,6 +244,12 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 			return self;
 		},
 
+		/**
+		 * Defaul state handler
+		 * @param state state
+		 * @param deferred deferred
+		 * @returns self
+		 */
 		state : function state(state, deferred) {
 			if (deferred) {
 				deferred.resolve();
