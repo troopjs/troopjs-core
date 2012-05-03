@@ -6,7 +6,7 @@
 /**
  * The widget trait provides common UI related logic
  */
-define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gizmo, $, Deferred) {
+define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, Deferred) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
@@ -97,7 +97,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gizmo, $, Def
 		return render;
 	}
 
-	return Gizmo.extend(function Widget($element, displayName) {
+	return Gadget.extend(function Widget($element, displayName) {
 		var self = this;
 
 		self[$ELEMENT] = $element;

@@ -6,7 +6,7 @@
 /**
  * The gadget trait provides life cycle management
  */
-define([ "compose", "deferred", "./base", "../pubsub/hub" ], function GadgetModule(Compose, Deferred, Component, hub) {
+define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE = /^hub(?::(\w+))?\/(.+)/;

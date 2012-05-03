@@ -3,14 +3,14 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "./gadget" ], function ServiceModule(Gizmo) {
+define([ "./gadget" ], function ServiceModule(Gadget) {
 	var STATE = "state";
 
 	function onState(topic, state) {
 		this.state(state);
 	}
 
-	return Gizmo.extend({
+	return Gadget.extend({
 		displayName : "component/service",
 
 		initialize : function initialize() {
