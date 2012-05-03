@@ -7,7 +7,6 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 	var NULL = null;
 	var $ELEMENT = "$element";
 	var HASHCHANGE = "hashchange";
-	var after = Compose.after;
 
 	return Compose.create(Service, function RouterService() {
 		var oldUri = NULL;
@@ -31,7 +30,7 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 		}
 
 		Compose.call(this, {
-			state : after(function state(state) {
+			state : function state(state) {
 				var self = this;
 
 				switch(state) {
@@ -49,7 +48,7 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 				}
 
 				return self;
-			})
+			}
 		});
 	}, {
 		displayName : "service/router",

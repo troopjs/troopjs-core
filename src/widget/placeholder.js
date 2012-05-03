@@ -12,8 +12,6 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 	var $ELEMENT = "$element";
 	var TARGET = "target";
 
-	var depth = 0;
-
 	function release(/* arg, arg, arg, deferred*/) {
 		var self = this;
 
@@ -22,10 +20,6 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 
 		// Update deferred to the last argument
 		var deferred = argx.pop();
-
-		if (depth++ > 10) {
-			throw new Error("fucked");
-		}
 
 		Deferred(function deferredRelease(dfd) {
 			var i;
@@ -46,10 +40,8 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 					// Set DATA_HOLDING attribute
 					self[$ELEMENT].attr(DATA_HOLDING, widget);
 
-					// Start and store widget
-					self[HOLDING] = widget
-						.state("starting")
-						.state("started");
+					// Store widget
+					self[HOLDING] = widget;
 				});
 
 				// Get widget name
@@ -65,10 +57,22 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 
 				// Require widget by name
 				require([ name ], function required(Widget) {
-					// Resolve with constructed and initialized instance
-					dfd.resolve(Widget
+					// Resolve with constructed, bound and initialized instance
+					var widget = Widget
 						.apply(Widget, argv)
-						.initialize());
+						.initialize();
+
+					$.Deferred(function deferredStarted(dfdStarted) {
+						$.Deferred(function deferredStarting(dfdStarting) {
+							widget.state("starting", dfdStarting);
+						})
+						.done(function doneStarting() {
+							widget.state("started", dfdStarted);
+						});
+					})
+					.done(function doneStarted() {
+						dfd.resolve(widget);
+					});
 				});
 			}
 
@@ -83,24 +87,31 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 
 	function hold() {
 		var self = this;
-		var holding;
+		var widget;
 
 		// Check that we are holding
 		if (HOLDING in self) {
 			// Get what we're holding
-			holding = self[HOLDING];
+			widget = self[HOLDING];
 
 			// Cleanup
 			delete self[HOLDING];
 
-			// State and finalize
-			holding
-				.state("stopping")
-				.state("stopped")
-				.finalize();
-
 			// Remove DATA_HOLDING attribute
 			self[$ELEMENT].removeAttr(DATA_HOLDING);
+
+			// State and finalize TODO add a wrapping deferred for the whole uhold
+			$.Deferred(function deferredStopped(dfdStopped) {
+				$.Deferred(function deferredStopping(dfdStopping) {
+					widget.state("stopping", dfdStopping);
+				})
+				.done(function doneStopping() {
+					widget.state("stopped", dfdStopped);
+				});
+			})
+			.done(function doneStopped() {
+				widget.finalize();
+			});
 		}
 
 		return self;
