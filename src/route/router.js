@@ -14,7 +14,7 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 
 		function onHashChange($event) {
 			// Create URI
-			uri = URI($event.target.location.hash.replace(/^#/, ""));
+			var uri = URI($event.target.location.hash.replace(/^#/, ""));
 
 			// Convert to string
 			newUri = uri.toString();
