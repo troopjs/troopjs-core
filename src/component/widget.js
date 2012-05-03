@@ -106,7 +106,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			self.displayName = displayName;
 		}
 	}, {
-		displayName : "component/widget",
+		displayName : "core/component/widget",
 
 		initialize : function initialize() {
 			var self = this;

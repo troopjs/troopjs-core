@@ -13,7 +13,7 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	return Compose(function Component() {
 		this.instanceCount = COUNT++;
 	}, {
-		displayName : "component",
+		displayName : "core/component",
 
 		/**
 		 * Application configuration

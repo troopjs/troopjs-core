@@ -120,7 +120,7 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 	return Widget.extend(function WidgetPlaceholder($element, name, target) {
 		this[TARGET] = target;
 	}, {
-		displayName : "widget/placeholder-core",
+		displayName : "core/widget/placeholder",
 
 		release : release,
 		hold : hold,

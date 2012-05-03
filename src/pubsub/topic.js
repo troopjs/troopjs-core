@@ -13,7 +13,7 @@ define([ "../component/base" ], function TopicModule(Component) {
 		self.publisher = publisher;
 		self.parent = parent;
 	}, {
-		displayName : "pubsub/topic",
+		displayName : "core/pubsub/topic",
 
 		/**
 		 * Generates string representation of this object

@@ -128,7 +128,7 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 				}
 		});
 	}, {
-		displayName : "component/gadget",
+		displayName : "core/component/gadget",
 
 		initialize : function initialize() {
 			var self = this;

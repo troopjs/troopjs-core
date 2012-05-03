@@ -10,7 +10,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 	var MEMORY = "memory";
 
 	return Compose.create({
-		displayName: "pubsub/hub",
+		displayName: "core/pubsub/hub",
 
 		/**
 		 * Subscribe to a topic

@@ -9,7 +9,7 @@ define([ "compose", "../widget/placeholder" ], function RoutePlaceholderModule(C
 	return Placeholder.extend(function RoutePlaceholderWidget($element, name) {
 		this[ROUTE] = RegExp($element.data("route"));
 	}, {
-		"displayName" : "route/placeholder",
+		"displayName" : "core/route/placeholder",
 
 		"hub:memory/route" : function onRoute(topic, uri) {
 			var self = this;

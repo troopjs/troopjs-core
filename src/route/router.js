@@ -51,7 +51,7 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 			}
 		});
 	}, {
-		displayName : "service/router",
+		displayName : "core/route/router",
 
 		initialize : function initialize($element) {
 			var self = this;

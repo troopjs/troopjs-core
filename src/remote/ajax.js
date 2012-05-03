@@ -5,7 +5,7 @@
  */
 define([ "compose", "../component/service", "../pubsub/topic", "jquery", "../util/merge" ], function AjaxModule(Compose, Service, Topic, $, merge) {
 	return Compose.create(Service, {
-		displayName : "remote/ajax",
+		displayName : "core/remote/ajax",
 
 		"hub/ajax" : function request(topic, settings, deferred) {
 			// Request

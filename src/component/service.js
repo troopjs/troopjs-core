@@ -11,7 +11,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 	}
 
 	return Gadget.extend({
-		displayName : "component/service",
+		displayName : "core/component/service",
 
 		initialize : function initialize() {
 			var self = this;
