@@ -62,8 +62,8 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 						.apply(Widget, argv)
 						.initialize();
 
-					$.Deferred(function deferredStarted(dfdStarted) {
-						$.Deferred(function deferredStarting(dfdStarting) {
+					Deferred(function deferredStarted(dfdStarted) {
+						Deferred(function deferredStarting(dfdStarting) {
 							widget.state("starting", dfdStarting);
 						})
 						.done(function doneStarting() {
@@ -101,8 +101,8 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 			self[$ELEMENT].removeAttr(DATA_HOLDING);
 
 			// State and finalize TODO add a wrapping deferred for the whole uhold
-			$.Deferred(function deferredStopped(dfdStopped) {
-				$.Deferred(function deferredStopping(dfdStopping) {
+			Deferred(function deferredStopped(dfdStopped) {
+				Deferred(function deferredStopping(dfdStopping) {
 					widget.state("stopping", dfdStopping);
 				})
 				.done(function doneStopping() {
