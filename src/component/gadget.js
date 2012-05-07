@@ -8,6 +8,7 @@
  */
 define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
 	var NULL = null;
+	var OBJECT = Object;
 	var FUNCTION = Function;
 	var RE = /^hub(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
@@ -18,6 +19,15 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 	var STATE = "state";
 	var INITIALIZE = "initialize";
 	var FINALIZE = "finalize";
+	var __PROTO__ = "__proto__";
+
+	var getPrototypeOf = OBJECT.getPrototypeOf || (__PROTO__ in OBJECT
+		? function getPrototypeOf(object) {
+			return object[__PROTO__];
+		}
+		: function getPrototypeOf(object) {
+			return object.constructor.prototype;
+		});
 
 	return Component.extend(function Gadget() {
 		var self = this;
@@ -89,7 +99,7 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 				// Store callback
 				sCallbacks[sCount++] = callback;
 			}
-		} while (__proto__ = __proto__.__proto__);
+		} while (__proto__ = getPrototypeOf(__proto__));
 
 		// Extend self
 		Compose.call(self, {
