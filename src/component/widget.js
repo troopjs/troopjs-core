@@ -11,6 +11,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
 	var UNSHIFT = ARRAY_PROTO.unshift;
+	var POP = ARRAY_PROTO.pop;
 	var $TRIGGER = $.fn.trigger;
 	var $ONE = $.fn.one;
 	var $BIND = $.fn.bind;
@@ -20,6 +21,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	var $ELEMENT = "$element";
 	var $PROXIES = "$proxies";
 	var ONE = "one";
+	var THEN = "then";
 	var ATTR_WEAVE = "[data-weave]";
 	var ATTR_WOVEN = "[data-woven]";
 
@@ -53,30 +55,25 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 		/**
 		 * Renders contents into element
 		 * @param contents (Function | String) Template/String to render
-		 * @param data (Object) If contents is a template - template data
+		 * @param data (Object) If contents is a template - template data (optional)
 		 * @param deferred (Deferred) Deferred (optional)
 		 * @returns self
 		 */
-		function render(contents, data, deferred) {
+		function render(contents /*, data, deferred */) {
 			var self = this;
-
-			// If contents is a function, call it
-			if (contents instanceof FUNCTION) {
-				contents = contents.call(self, data);
-			}
-			// otherwise data makes no sense
-			else {
-				deferred = data;
-			}
-
-			// Get $element
 			var $element = self[$ELEMENT];
+			var arg = arguments;
+
+			// Check if the last argument looks like a deferred, and in that case set it
+			var deferred = THEN in arg[arg.length - 1]
+				? POP.call(arg)
+				: UNDEFINED;
+
+			// Call render with contents (or result of contents if it's a function)
+			$fn.call($element, contents instanceof FUNCTION ? contents.apply(self, arg) : contents);
 
 			// Defer render (as weaving it may need to load async)
 			Deferred(function deferredRender(dfdRender) {
-				// Call render
-				$fn.call($element, contents);
-
 				// Weave element
 				$element.find(ATTR_WEAVE).weave(dfdRender);
 
