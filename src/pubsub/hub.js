@@ -4,10 +4,12 @@
  * Released under the MIT license.
  */
 define([ "compose", "../component/base", "./topic" ], function HubModule(Compose, Component, Topic) {
-	var UNDEFINED = undefined;
 	var CONTEXT = {};
 	var HANDLERS = {};
 	var MEMORY = "memory";
+	var HEAD = "head";
+	var TAIL = "tail";
+	var NEXT = "next";
 
 	return Compose.create({
 		displayName: "core/pubsub/hub",
@@ -75,23 +77,23 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				};
 
 				// Get last handler
-				tail = "tail" in handlers
+				tail = TAIL in handlers
 					// Have tail, update handlers.tail.next to point to handler
-					? handlers.tail.next = handler
+					? handlers[TAIL][NEXT] = handler
 					// Have no tail, update handlers.head to point to handler
-					: handlers.head = handler;
+					: handlers[HEAD] = handler;
 
 				// Iterate handlers from offset
 				while (offset < length) {
 					// Set last -> last.next -> handler
-					tail = tail.next = {
+					tail = tail[NEXT] = {
 						"callback" : arguments[offset++],
 						"context" : context
 					};
 				}
 
 				// Set last handler
-				handlers.tail = tail;
+				handlers[TAIL] = tail;
 
 				// Want memory and have memory
 				if (memory && MEMORY in handlers) {
@@ -104,7 +106,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 						handler.callback.apply(handler.context, memory);
 
 						// Update handler
-						handler = handler.next;
+						handler = handler[NEXT];
 					}
 					// Loop through handlers, optimize for no arguments
 					else while(handler) {
@@ -112,7 +114,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 						handler.callback.call(handler.context);
 
 						// Update handler
-						handler = handler.next;
+						handler = handler[NEXT];
 					}
 				}
 			}
@@ -127,7 +129,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				// Iterate handlers from offset
 				while (offset < length) {
 					// Set last -> last.next -> handler
-					tail = tail.next = {
+					tail = tail[NEXT] = {
 						"callback" : arguments[offset++],
 						"context" : context
 					};
@@ -157,6 +159,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 			var context = arguments[1];
 			var callback = arguments[2];
 			var offset;
+			var handlers;
 			var handler;
 			var head;
 			var previous = null;
@@ -182,14 +185,11 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					break unsubscribe;
 				}
 
-				// Simply delete list if there is no callback to match
-				if (length === 1) {
-					delete HANDLERS[topic];
-					break unsubscribe;
-				}
+				// Get handlers
+				handlers = HANDLERS[topic];
 
 				// Get head
-				head = HANDLERS[topic].head;
+				head = handlers[HEAD];
 
 				// Loop over remaining arguments
 				while (offset < length) {
@@ -207,31 +207,23 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 							if (handler === head) {
 								// Re-link head and previous, then
 								// continue
-								head = previous = handler.next;
+								head = previous = handler[NEXT];
 								continue;
 							}
 
 							// Unlink current handler, then continue
-							previous.next = handler.next;
+							previous[NEXT] = handler[NEXT];
 							continue;
 						}
 
 						// Update previous pointer
 						previous = handler;
-					} while (handler = handler.next);
-
-					// Delete list if we've deleted all handlers
-					if (head === UNDEFINED) {
-						delete HANDLERS[topic];
-						break unsubscribe;
-					}
+					} while (handler = handler[NEXT]);
 				}
 
 				// Update head and tail
-				HANDLERS[topic] = {
-					"head" : head,
-					"tail" : previous
-				};
+				handlers[HEAD] = head;
+				handlers[TAIL] = previous;
 			}
 
 			return this;
@@ -257,7 +249,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				handlers[MEMORY] = arguments;
 
 				// Get first handler
-				handler = handlers.head;
+				handler = handlers[HEAD];
 
 				// Loop through handlers, optimize for arguments
 				if (arguments.length > 0) while(handler) {
@@ -265,7 +257,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					handler.callback.apply(handler.context, arguments);
 
 					// Update handler
-					handler = handler.next;
+					handler = handler[NEXT];
 				}
 				// Loop through handlers, optimize for no arguments
 				else while(handler) {
@@ -273,7 +265,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					handler.callback.call(handler.context);
 
 					// Update handler
-					handler = handler.next;
+					handler = handler[NEXT];
 				}
 			}
 			// No handlers
