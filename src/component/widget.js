@@ -9,6 +9,7 @@
 define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, Deferred) {
 	var NULL = null;
 	var FUNCTION = Function;
+	var UNDEFINED = undefined;
 	var ARRAY_PROTO = Array.prototype;
 	var UNSHIFT = ARRAY_PROTO.unshift;
 	var POP = ARRAY_PROTO.pop;
