@@ -9,7 +9,7 @@ define([ "compose", "./base" ], function StoreLocalModule(Compose, Store) {
 	var STORAGE = window.localStorage;
 
 	return Compose.create(Store, {
-		displayName : "store/local",
+		displayName : "core/store/local",
 
 		set : function set(key, value, deferred) {
 			// JSON encoded 'value' then store as 'key'

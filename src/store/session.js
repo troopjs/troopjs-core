@@ -9,7 +9,7 @@ define([ "compose", "./base" ], function StoreSessionModule(Compose, Store) {
 	var STORAGE = window.sessionStorage;
 
 	return Compose.create(Store, {
-		displayName : "store/session",
+		displayName : "core/store/session",
 
 		set : function set(key, value, deferred) {
 			// JSON encoded 'value' then store as 'key'
