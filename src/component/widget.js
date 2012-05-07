@@ -11,6 +11,7 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	var FUNCTION = Function;
 	var UNDEFINED = undefined;
 	var ARRAY_PROTO = Array.prototype;
+	var SHIFT = ARRAY_PROTO.shift;
 	var UNSHIFT = ARRAY_PROTO.unshift;
 	var POP = ARRAY_PROTO.pop;
 	var $TRIGGER = $.fn.trigger;
@@ -60,10 +61,13 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 		 * @param deferred (Deferred) Deferred (optional)
 		 * @returns self
 		 */
-		function render(contents /*, data, deferred */) {
+		function render(/* contents, data, ..., deferred */) {
 			var self = this;
 			var $element = self[$ELEMENT];
 			var arg = arguments;
+
+			// Get contents from first argument
+			var contents = SHIFT.call(arg);
 
 			// Check if the last argument looks like a deferred, and in that case set it
 			var deferred = THEN in arg[arg.length - 1]
