@@ -14,10 +14,10 @@ define([ "../widget/placeholder" ], function RoutePlaceholderModule(Placeholder)
 
 		"hub:memory/route" : function onRoute(topic, uri) {
 			var self = this;
-			var re = self[ROUTE];
+			var matches = self[ROUTE].exec(uri.path);
 
-			if (re.test(uri.path)) {
-				self.release();
+			if (matches !== NULL) {
+				self.release.apply(self, matches.slice(1));
 			}
 			else {
 				self.hold();
