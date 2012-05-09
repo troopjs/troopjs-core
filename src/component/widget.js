@@ -69,8 +69,11 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 			// Get contents from first argument
 			var contents = SHIFT.call(arg);
 
+			// Get arg length
+			var argc = arg.length;
+
 			// Check if the last argument looks like a deferred, and in that case set it
-			var deferred = THEN in arg[arg.length - 1]
+			var deferred = argc > 0 && arg[argc - 1][THEN] instanceof FUNCTION
 				? POP.call(arg)
 				: UNDEFINED;
 

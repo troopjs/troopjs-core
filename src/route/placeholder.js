@@ -3,7 +3,8 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../widget/placeholder" ], function RoutePlaceholderModule(Compose, Placeholder) {
+define([ "../widget/placeholder" ], function RoutePlaceholderModule(Placeholder) {
+	var NULL = null;
 	var ROUTE = "route";
 
 	return Placeholder.extend(function RoutePlaceholderWidget($element, name) {

@@ -5,21 +5,25 @@
  */
 define([ "../component/widget", "jquery", "deferred" ], function WidgetPlaceholderModule(Widget, $, Deferred) {
 	var UNDEFINED = undefined;
+	var FUNCTION = Function;
 	var ARRAY = Array;
 	var ARRAY_PROTO = ARRAY.prototype;
+	var POP = ARRAY_PROTO.pop;
 	var HOLDING = "holding";
 	var DATA_HOLDING = "data-" + HOLDING;
 	var $ELEMENT = "$element";
 	var TARGET = "target";
+	var THEN = "then";
 
 	function release(/* arg, arg, arg, deferred*/) {
 		var self = this;
+		var arg = arguments;
+		var argc = arg.length;
 
-		// Make arguments into a real array
-		var argx  = ARRAY.apply(ARRAY_PROTO, arguments);
-
-		// Update deferred to the last argument
-		var deferred = argx.pop();
+		// Check if the last argument looks like a deferred, and in that case set it
+		var deferred = argc > 0 && arg[argc - 1][THEN] instanceof FUNCTION
+			? POP.call(arg)
+			: UNDEFINED;
 
 		Deferred(function deferredRelease(dfd) {
 			var i;
@@ -50,9 +54,9 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 				// Set initial argv
 				argv = [ self[$ELEMENT], name ];
 
-				// Append values from argx to argv
-				for (i = 0, iMax = argx.length; i < iMax; i++) {
-					argv[i + 2] = argx[i];
+				// Append values from arg to argv
+				for (i = 0, iMax = arg.length; i < iMax; i++) {
+					argv[i + 2] = arg[i];
 				}
 
 				// Require widget by name
