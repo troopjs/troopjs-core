@@ -222,8 +222,14 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 				}
 
 				// Update head and tail
-				handlers[HEAD] = head;
-				handlers[TAIL] = previous;
+				if (head && previous) {
+					handlers[HEAD] = head;
+					handlers[TAIL] = previous;
+				}
+				else {
+					delete handlers[HEAD];
+					delete handlers[TAIL];
+				}
 			}
 
 			return this;
