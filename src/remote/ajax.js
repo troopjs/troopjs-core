@@ -3,8 +3,8 @@
  * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "compose", "../component/service", "../pubsub/topic", "jquery", "../util/merge" ], function AjaxModule(Compose, Service, Topic, $, merge) {
-	return Compose.create(Service, {
+define([ "../component/service", "../pubsub/topic", "jquery", "../util/merge" ], function AjaxModule(Service, Topic, $, merge) {
+	return Service.extend({
 		displayName : "core/remote/ajax",
 
 		"hub/ajax" : function request(topic, settings, deferred) {

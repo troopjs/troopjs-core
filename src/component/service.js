@@ -4,25 +4,7 @@
  * Released under the MIT license.
  */
 define([ "./gadget" ], function ServiceModule(Gadget) {
-	var STATE = "state";
-
-	function onState(topic, state) {
-		this.state(state);
-	}
-
 	return Gadget.extend({
 		displayName : "core/component/service",
-
-		initialize : function initialize() {
-			var self = this;
-
-			return self.subscribe(STATE, self, true, onState);
-		},
-
-		finalize : function finalize() {
-			var self = this;
-
-			return self.unsubscribe(STATE, self, onState);
-		}
 	});
 });

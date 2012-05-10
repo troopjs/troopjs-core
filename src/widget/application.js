@@ -4,24 +4,18 @@
  * Released under the MIT license.
  */
 define([ "../component/widget", "deferred" ], function ApplicationModule(Widget, Deferred) {
-	var STARTED = "started";
-	var STOPPED = "stopped";
-
 	return Widget.extend({
 		displayName : "core/widget/application",
 
-		state : function state(state, deferred) {
+		signal : function signal(signal, deferred) {
 			var self = this;
 
-			// Publish state to services
-			self.publish("state", state);
-
-			switch (state) {
-			case STARTED:
+			switch (signal) {
+			case "start":
 				self.weave(deferred);
 				break;
 
-			case STOPPED:
+			case "stop":
 				self.unweave();
 
 			default:
@@ -29,44 +23,6 @@ define([ "../component/widget", "deferred" ], function ApplicationModule(Widget,
 					deferred.resolve();
 				}
 			}
-
-			return self;
-		},
-
-		start : function start(deferred) {
-			var self = this;
-
-			Deferred(function deferredStart(dfdStart) {
-				Deferred(function deferredStarting(dfdStarting) {
-					self.state("starting", dfdStarting);
-				})
-				.done(function doneStarting() {
-					self.state(STARTED, dfdStart);
-				});
-
-				if (deferred) {
-					dfdStart.then(deferred.resolve, deferred.reject);
-				}
-			});
-
-			return self;
-		},
-
-		stop : function stop(deferred) {
-			var self = this;
-
-			Deferred(function deferredStop(dfdStop) {
-				Deferred(function deferredStopping(dfdStopping) {
-					self.state("stopping", sfdStopping);
-				})
-				.done(function doneStopping() {
-					self.state(STOPPED, dfdStop);
-				});
-
-				if (deferred) {
-					dfdStop.then(deferred.resolve, deferred.reject);
-				}
-			});
 
 			return self;
 		}

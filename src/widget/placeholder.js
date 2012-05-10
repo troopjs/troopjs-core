@@ -63,20 +63,15 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 				require([ name ], function required(Widget) {
 					// Resolve with constructed, bound and initialized instance
 					var widget = Widget
-						.apply(Widget, argv)
-						.initialize();
+						.apply(Widget, argv);
 
-					Deferred(function deferredStarted(dfdStarted) {
-						Deferred(function deferredStarting(dfdStarting) {
-							widget.state("starting", dfdStarting);
-						})
-						.done(function doneStarting() {
-							widget.state("started", dfdStarted);
-						});
+					Deferred(function deferredStart(dfdStart) {
+						widget.start(dfdStart);
 					})
 					.done(function doneStarted() {
 						dfd.resolve(widget);
-					});
+					})
+					.fail(dfd.reject);
 				});
 			}
 
@@ -104,17 +99,9 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 			// Remove DATA_HOLDING attribute
 			self[$ELEMENT].removeAttr(DATA_HOLDING);
 
-			// State and finalize TODO add a wrapping deferred for the whole uhold
-			Deferred(function deferredStopped(dfdStopped) {
-				Deferred(function deferredStopping(dfdStopping) {
-					widget.state("stopping", dfdStopping);
-				})
-				.done(function doneStopping() {
-					widget.state("stopped", dfdStopped);
-				});
-			})
-			.done(function doneStopped() {
-				widget.finalize();
+			// Stop TODO add a wrapping deferred for the whole uhold
+			Deferred(function deferredStop(dfdStop) {
+				widget.stop(dfdStop);
 			});
 		}
 

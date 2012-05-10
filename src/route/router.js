@@ -8,9 +8,11 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 	var $ELEMENT = "$element";
 	var HASHCHANGE = "hashchange";
 
-	return Compose.create(Service, function RouterService() {
+	return Service.extend(function RouterService($element) {
 		var oldUri = NULL;
 		var newUri = NULL;
+
+		this[$ELEMENT] = $element;
 
 		function onHashChange($event) {
 			// Create URI
@@ -30,43 +32,31 @@ define([ "compose", "../component/service", "../util/uri" ], function RouterModu
 		}
 
 		Compose.call(this, {
-			state : function state(state) {
+			signal : function signal(signal, deferred) {
 				var self = this;
 
-				switch(state) {
-				case "starting" :
+				switch(signal) {
+				case "initialize" :
 					self[$ELEMENT].bind(HASHCHANGE, self, onHashChange);
 					break;
 
-				case "started" :
+				case "start" :
 					self[$ELEMENT].trigger(HASHCHANGE);
 					break;
 
-				case "stopping" :
+				case "finalize" :
 					self[$ELEMENT].unbind(HASHCHANGE, onHashChange);
 					break;
+				}
+
+				if (deferred) {
+					deferred.resolve();
 				}
 
 				return self;
 			}
 		});
 	}, {
-		displayName : "core/route/router",
-
-		initialize : function initialize($element) {
-			var self = this;
-
-			self[$ELEMENT] = $element;
-
-			return self;
-		},
-
-		finalize : function finalize() {
-			var self = this;
-
-			delete self[$ELEMENT];
-
-			return self;
-		}
+		displayName : "core/route/router"
 	});
 });
