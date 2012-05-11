@@ -113,62 +113,62 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 	}, {
 		displayName : "core/component/widget",
 
-		signal : function signal(signal, deferred) {
+		"sig/initialize" : function initialize(signal, deferred) {
 			var self = this;
 			var $element = self[$ELEMENT];
-			var $proxies;
-			var $proxy;
+			var $proxies = self[$PROXIES] = [];;
 			var key = NULL;
 			var value;
 			var matches;
 			var topic;
 
-			switch (signal) {
-			case "initialize":
-				// Reset proxies
-				$proxies = self[$PROXIES] = [];
+			// Loop over each property in widget
+			for (key in self) {
+				// Get value
+				value = self[key];
 
-				// Loop over each property in widget
-				for (key in self) {
-					// Get value
-					value = self[key];
-
-					// Continue if value is not a function
-					if (!(value instanceof FUNCTION)) {
-						continue;
-					}
-
-					// Match signature in key
-					matches = RE.exec(key);
-
-					if (matches !== NULL) {
-						// Get topic
-						topic = matches[2];
-
-						// Replace value with a scoped proxy
-						value = eventProxy(topic, self, value);
-
-						// Either ONE or BIND element
-						(matches[2] === ONE ? $ONE : $BIND).call($element, topic, self, value);
-
-						// Store in $proxies
-						$proxies[$proxies.length] = [topic, value];
-
-						// NULL value
-						self[key] = NULL;
-					}
+				// Continue if value is not a function
+				if (!(value instanceof FUNCTION)) {
+					continue;
 				}
-				break;
 
-			case "finalize":
-				// Get proxies
-				$proxies = self[$PROXIES];
+				// Match signature in key
+				matches = RE.exec(key);
 
-				// Loop over subscriptions
-				while ($proxy = $proxies.shift()) {
-					$element.unbind($proxy[0], $proxy[1]);
+				if (matches !== NULL) {
+					// Get topic
+					topic = matches[2];
+
+					// Replace value with a scoped proxy
+					value = eventProxy(topic, self, value);
+
+					// Either ONE or BIND element
+					(matches[2] === ONE ? $ONE : $BIND).call($element, topic, self, value);
+
+					// Store in $proxies
+					$proxies[$proxies.length] = [topic, value];
+
+					// NULL value
+					self[key] = NULL;
 				}
-				break;
+			}
+
+			if (deferred) {
+				deferred.resolve();
+			}
+
+			return self;
+		},
+
+		"sig/finalize" : function finalize(signal, deferred) {
+			var self = this;
+			var $element = self[$ELEMENT];
+			var $proxies = self[$PROXIES];
+			var $proxy;
+
+			// Loop over subscriptions
+			while ($proxy = $proxies.shift()) {
+				$element.unbind($proxy[0], $proxy[1]);
 			}
 
 			if (deferred) {

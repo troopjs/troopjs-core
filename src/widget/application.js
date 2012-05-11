@@ -7,21 +7,25 @@ define([ "../component/widget", "deferred" ], function ApplicationModule(Widget,
 	return Widget.extend({
 		displayName : "core/widget/application",
 
-		signal : function signal(signal, deferred) {
+		"sig/initialize" : function initialize(signal, deferred) {
 			var self = this;
 
-			switch (signal) {
-			case "start":
-				self.weave(deferred);
-				break;
+			self.weave(deferred);
 
-			case "stop":
-				self.unweave();
+			if (deferred) {
+				deferred.resolve();
+			}
 
-			default:
-				if (deferred) {
-					deferred.resolve();
-				}
+			return self;
+		},
+
+		"sig/finalize" : function finalize(signal, deferred) {
+			var self = this;
+
+			self.unweave();
+
+			if (deferred) {
+				deferred.resolve();
 			}
 
 			return self;

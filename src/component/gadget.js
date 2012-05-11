@@ -10,13 +10,13 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 	var NULL = null;
 	var OBJECT = Object;
 	var FUNCTION = Function;
-	var RE = /^hub(?::(\w+))?\/(.+)/;
+	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
+	var RE_SIG = /^sig\/(.+)/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var MEMORY = "memory";
 	var SUBSCRIPTIONS = "subscriptions";
-	var SIGNAL = "signal";
 	var START = "start";
 	var STOP = "stop";
 	var INITIALIZE = "initialize";
@@ -34,63 +34,161 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 	return Component.extend(function Gadget() {
 		var self = this;
 		var __proto__ = self;
+		var callbacks;
 		var callback;
-		var sCallbacks = [];
-		var sCount = 0;
 		var i;
+		var iMax;
+
+		var signals = {};
+		var signal;
+		var matches;
+		var key = null;
 
 		// Iterate prototype chain (while there's a prototype)
 		do {
-			// Check if we have SIGNAL on __proto__
-			add: if (__proto__.hasOwnProperty(SIGNAL)) {
-				// Store callback
-				callback = __proto__[SIGNAL];
+			add: for (key in __proto__) {
+				// Get value
+				callback = __proto__[key];
 
-				// Reset counter
-				i = sCount;
-
-				// Loop sCallbacks, break add if we've already added this callback
-				while (i--) {
-					if (callback === sCallbacks[i]) {
-						break add;
-					}
+				// Continue if value is not a function
+				if (!(callback instanceof FUNCTION)) {
+					continue;
 				}
 
-				// Store callback
-				sCallbacks[sCount++] = callback;
+				// Match signature in key
+				matches = RE_SIG.exec(key);
+
+				if (matches !== NULL) {
+					// Get signal
+					signal = matches[1];
+
+					// Have we stored any callbacks for this signal?
+					if (signal in signals) {
+						// Get callbacks (for this signal)
+						callbacks = signals[signal];
+
+						// Reset counters
+						i = iMax = callbacks.length;
+
+						// Loop callbacks, continue add if we've already added this callback
+						while (i--) {
+							if (callback === callbacks[i]) {
+								continue add;
+							}
+						}
+
+						// Add callback to callbacks chain
+						callbacks[iMax] = callback;
+					}
+					else {
+						// First callback
+						signals[signal] = [ callback ];
+					}
+				}
 			}
 		} while (__proto__ = getPrototypeOf(__proto__));
 
 		// Extend self
 		Compose.call(self, {
-			signal : sCount <= 1
-				// No prototypes, use original
-				? self[SIGNAL]
-				: function signal(signal, deferred) {
-					var _self = this;
-					var head = deferred;
-					var count = sCount;
+			signal : function signal(signal, deferred) {
+				var _self = this;
+				var _callbacks;
+				var _i;
+				var head = deferred;
+
+				// Only trigger if we have callbacks for this signal
+				if (signal in signals) {
+					// Get callbacks
+					_callbacks = signals[signal];
+
+					// Reset counter
+					_i = _callbacks.length;
 
 					// Build deferred chain from end to 1
-					while (--count) {
+					while (--_i) {
+						// Create new deferred
 						head = Deferred(function (dfd) {
-							var callback = sCallbacks[count];
+							// Store callback and deferred as they will have changed by the time we exec
+							var _callback = _callbacks[_i];
 							var _deferred = head;
-	
+
+							// Add done handler
 							dfd.done(function done() {
-								callback.call(_self, signal, _deferred);
+								_callback.call(_self, signal, _deferred);
 							});
 						});
 					}
 
 					// Execute first sCallback, use head deferred
-					sCallbacks[0].call(_self, signal, head);
-
-					return _self;
+					_callbacks[0].call(_self, signal, head);
 				}
+
+				return _self;
+			}
 		});
 	}, {
 		displayName : "core/component/gadget",
+
+		"sig/initialize" : function initialize(signal, deferred) {
+			var self = this;
+
+			var subscriptions = self[SUBSCRIPTIONS] = [];
+			var key = NULL;
+			var value;
+			var matches;
+			var topic;
+
+			// Loop over each property in gadget
+			for (key in self) {
+				// Get value
+				value = self[key];
+
+				// Continue if value is not a function
+				if (!(value instanceof FUNCTION)) {
+					continue;
+				}
+
+				// Match signature in key
+				matches = RE_HUB.exec(key);
+
+				if (matches !== NULL) {
+					// Get topic
+					topic = matches[2];
+
+					// Subscribe
+					hub.subscribe(topic, self, matches[1] === MEMORY, value);
+
+					// Store in subscriptions
+					subscriptions[subscriptions.length] = [topic, self, value];
+
+					// NULL value
+					self[key] = NULL;
+				}
+			}
+
+			if (deferred) {
+				deferred.resolve();
+			}
+
+			return self;
+		},
+
+		"sig/finalize" : function finalize(signal, deferred) {
+			var self = this;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var subscription;
+
+			// Loop over subscriptions
+			while (subscription = subscriptions.shift()) {
+				hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
+			}
+
+			if (deferred) {
+				deferred.resolve();
+			}
+
+			return self;
+		},
 
 		/**
 		 * Calls hub.publish in self context
@@ -124,73 +222,6 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 			var self = this;
 
 			UNSUBSCRIBE.apply(hub, arguments);
-
-			return self;
-		},
-
-		/**
-		 * Defaul signal handler
-		 * @param signal Signal
-		 * @param deferred Deferred
-		 * @returns self
-		 */
-		signal : function signal(signal, deferred) {
-			var self = this;
-
-			var subscriptions;
-			var subscription;
-			var key = NULL;
-			var value;
-			var matches;
-			var topic;
-
-			switch (signal) {
-			case INITIALIZE:
-				// Reset subscriptions
-				subscriptions  = self[SUBSCRIPTIONS] = [];
-
-				// Loop over each property in gadget
-				for (key in self) {
-					// Get value
-					value = self[key];
-
-					// Continue if value is not a function
-					if (!(value instanceof FUNCTION)) {
-						continue;
-					}
-
-					// Match signature in key
-					matches = RE.exec(key);
-
-					if (matches !== NULL) {
-						// Get topic
-						topic = matches[2];
-
-						// Subscribe
-						hub.subscribe(topic, self, matches[1] === MEMORY, value);
-
-						// Store in subscriptions
-						subscriptions[subscriptions.length] = [topic, self, value];
-
-						// NULL value
-						self[key] = NULL;
-					}
-				}
-				break;
-
-			case FINALIZE:
-				subscriptions = self[SUBSCRIPTIONS];
-
-				// Loop over subscriptions
-				while (subscription = subscriptions.shift()) {
-					hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
-				}
-				break;
-			}
-
-			if (deferred) {
-				deferred.resolve();
-			}
 
 			return self;
 		},
