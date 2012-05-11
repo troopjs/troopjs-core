@@ -12,10 +12,6 @@ define([ "../component/widget", "deferred" ], function ApplicationModule(Widget,
 
 			self.weave(deferred);
 
-			if (deferred) {
-				deferred.resolve();
-			}
-
 			return self;
 		},
 
