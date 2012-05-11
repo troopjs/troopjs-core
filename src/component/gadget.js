@@ -17,10 +17,6 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var MEMORY = "memory";
 	var SUBSCRIPTIONS = "subscriptions";
-	var START = "start";
-	var STOP = "stop";
-	var INITIALIZE = "initialize";
-	var FINALIZE = "finalize";
 	var __PROTO__ = "__proto__";
 
 	var getPrototypeOf = OBJECT.getPrototypeOf || (__PROTO__ in OBJECT
@@ -234,10 +230,10 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 
 			Deferred(function deferredStart(dfdStart) {
 				Deferred(function deferredInitialize(dfdInitialize) {
-					self.signal(INITIALIZE, dfdInitialize);
+					self.signal("initialize", dfdInitialize);
 				})
 				.done(function doneInitialize() {
-					self.signal(START, dfdStart);
+					self.signal("start", dfdStart);
 				})
 				.fail(dfdStart.reject);
 
@@ -254,10 +250,10 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 
 			Deferred(function deferredFinalize(dfdFinalize) {
 				Deferred(function deferredStop(dfdStop) {
-					self.signal(STOP, dfdStop);
+					self.signal("stop", dfdStop);
 				})
 				.done(function doneStop() {
-					self.signal(FINALIZE, dfdFinalize);
+					self.signal("finalize", dfdFinalize);
 				})
 				.fail(dfdFinalize.reject);
 
