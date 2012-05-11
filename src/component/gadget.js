@@ -122,6 +122,9 @@ define([ "compose", "./base", "deferred", "../pubsub/hub" ], function GadgetModu
 					// Execute first sCallback, use head deferred
 					_callbacks[0].call(_self, signal, head);
 				}
+				else if (deferred) {
+					deferred.resolve();
+				}
 
 				return _self;
 			}
