@@ -81,26 +81,38 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 		return self;
 	}
 
-	function hold() {
+	function hold(deferred) {
 		var self = this;
-		var widget;
 
-		// Check that we are holding
-		if (HOLDING in self) {
-			// Get what we're holding
-			widget = self[HOLDING];
+		Deferred(function deferredHold(dfdHold) {
+			var widget;
 
-			// Cleanup
-			delete self[HOLDING];
+			// Check that we are holding
+			if (HOLDING in self) {
+				// Get what we're holding
+				widget = self[HOLDING];
 
-			// Remove DATA_HOLDING attribute
-			self[$ELEMENT].removeAttr(DATA_HOLDING);
+				// Cleanup
+				delete self[HOLDING];
 
-			// Stop TODO add a wrapping deferred for the whole uhold
-			Deferred(function deferredStop(dfdStop) {
-				widget.stop(dfdStop);
-			});
-		}
+				// Remove DATA_HOLDING attribute
+				self[$ELEMENT].removeAttr(DATA_HOLDING);
+
+				// Stop
+				Deferred(function deferredStop(dfdStop) {
+					widget.stop(dfdStop);
+				})
+				.then(dfdHold.resolve, dfdHold.reject);
+			}
+			else {
+				dfdHold.resolve();
+			}
+
+			// Link deferred
+			if (deferred) {
+				dfd.then(deferred.resolve, deferred.reject);
+			}
+		});
 
 		return self;
 	}
