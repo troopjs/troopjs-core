@@ -18,11 +18,7 @@ define([ "../component/widget", "deferred" ], function ApplicationModule(Widget,
 		"sig/finalize" : function finalize(signal, deferred) {
 			var self = this;
 
-			self.unweave();
-
-			if (deferred) {
-				deferred.resolve();
-			}
+			self.unweave(deferred);
 
 			return self;
 		}
