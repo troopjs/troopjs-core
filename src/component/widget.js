@@ -291,11 +291,6 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 
 			// Create deferred for emptying
 			Deferred(function emptyDeferred(dfd) {
-				// If a deferred was passed, add resolve/reject
-				if (deferred) {
-					dfd.then(deferred.resolve, deferred.reject);
-				}
-
 				// Get element
 				var $element = self[$ELEMENT];
 
@@ -305,24 +300,22 @@ define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, De
 				// Trigger refresh
 				$element.trigger(REFRESH, self);
 
-				// Get DOM elements
-				var contents = $contents.get();
-
 				// Use timeout in order to yield
 				setTimeout(function emptyTimeout() {
-					try {
-						// Remove elements from DOM
-						$contents.remove();
+					// Get DOM elements
+					var contents = $contents.get();
 
-						// Resolve deferred
-						dfd.resolve(contents);
-					}
-					// If there's an error
-					catch (e) {
-						// Reject deferred
-						dfd.reject(contents);
-					}
+					// Remove elements from DOM
+					$contents.remove();
+
+					// Resolve deferred
+					dfd.resolve(contents);
 				}, 0);
+
+				// If a deferred was passed, add resolve/reject
+				if (deferred) {
+					dfd.then(deferred.resolve, deferred.reject);
+				}
 			});
 
 			return self;
