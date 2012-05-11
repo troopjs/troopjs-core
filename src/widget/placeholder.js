@@ -36,9 +36,6 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 				dfd.resolve(self[HOLDING]);
 			}
 			else {
-				// Set something in HOLDING
-				self[HOLDING] = UNDEFINED;
-
 				// Add done handler to release
 				dfd.done(function doneRelease(widget) {
 					// Set DATA_HOLDING attribute
