@@ -98,7 +98,7 @@ define([ "../component/widget", "jquery", "deferred" ], function WidgetPlacehold
 				// Remove DATA_HOLDING attribute
 				self[$ELEMENT].removeAttr(DATA_HOLDING);
 
-				// Stop
+				// Deferred stop
 				Deferred(function deferredStop(dfdStop) {
 					widget.stop(dfdStop);
 				})
