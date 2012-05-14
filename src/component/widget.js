@@ -6,7 +6,7 @@
 /**
  * The widget trait provides common UI related logic
  */
-define([ "./gadget", "jquery", "deferred" ], function WidgetModule(Gadget, $, Deferred) {
+define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadget, $, Deferred) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var UNDEFINED = undefined;
