@@ -8,6 +8,6 @@ define([ "compose", "./base" ], function StoreSessionModule(Compose, Store) {
 	return Compose.create(Store, {
 		displayName : "core/store/session",
 
-		storage: widow.sessionStorage
+		storage: window.sessionStorage
 	});
 });
