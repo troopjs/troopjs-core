@@ -38,7 +38,7 @@ define([ "compose" ], function URIModule(Compose) {
 	Compose.secure = true;
 
 	var Query = Compose(function Query(str) {
-		if (!str) {
+		if (!str || str.length === 0) {
 			return;
 		}
 
@@ -46,7 +46,7 @@ define([ "compose" ], function URIModule(Compose) {
 		var matches;
 		var key;
 		var value;
-		var re = /(?:^|&)([^&=]*)=?([^&]*)/g;
+		var re = /(?:&|^)([^&=]*)=?([^&]*)/g;
 
 		while (matches = re.exec(str)) {
 			key = matches[1];
@@ -70,7 +70,7 @@ define([ "compose" ], function URIModule(Compose) {
 			var self = this;
 			var key = NULL;
 			var value = NULL;
-			var query = Array();
+			var query = [];
 			var i = 0;
 			var j;
 
@@ -131,7 +131,7 @@ define([ "compose" ], function URIModule(Compose) {
 	var URI = Compose(function URI(str) {
 		var self = this;
 		var matches = RE_URI.exec(str);
-		var i = 14;
+		var i = matches.length;
 		var value;
 
 		while (i--) {
