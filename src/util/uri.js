@@ -10,13 +10,11 @@ define([ "compose" ], function URIModule(Compose) {
 	var NULL = null;
 	var FUNCTION = Function;
 	var ARRAY = Array;
-	var RE_URI = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/;
-	var RE_QUERY = /(?:^|&)([^&=]*)=?([^&]*)/g;
+	var ARRAY_PROTO = ARRAY.prototype;
+	var RE_URI = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?(?:([^?#]*)(?:\?([^#]*))?(?:#(.*))?)/;
 
 	var PROTOCOL = "protocol";
 	var AUTHORITY = "authority";
-	var DIRECTORY = "directory";
-	var FILE = "file";
 	var PATH = "path";
 	var QUERY = "query";
 	var ANCHOR = "anchor";
@@ -29,10 +27,7 @@ define([ "compose" ], function URIModule(Compose) {
 		"password",
 		"host",
 		"port",
-		"relative",
 		PATH,
-		DIRECTORY,
-		FILE,
 		QUERY,
 		ANCHOR ];
 
@@ -51,8 +46,9 @@ define([ "compose" ], function URIModule(Compose) {
 		var matches;
 		var key;
 		var value;
+		var re = /(?:^|&)([^&=]*)=?([^&]*)/g;
 
-		while (matches = RE_QUERY.exec(str)) {
+		while (matches = re.exec(str)) {
 			key = matches[1];
 
 			if (key in self) {
@@ -114,11 +110,25 @@ define([ "compose" ], function URIModule(Compose) {
 		}
 	});
 
-	var URI = Compose(function URI(str) {
-		if (!str) {
+	var Path = Compose(ARRAY_PROTO, function Path(str) {
+		if (!str || str.length === 0) {
 			return;
 		}
 
+		var self = this;
+		var matches;
+		var re = /(?:\/|^)([^\/]*)/g;
+
+		while (matches = re.exec(str)) {
+			self.push(matches[1]);
+		}
+	}, {
+		toString : function toString() {
+			return this.join("/");
+		}
+	});
+
+	var URI = Compose(function URI(str) {
 		var self = this;
 		var matches = RE_URI.exec(str);
 		var i = 14;
@@ -136,10 +146,13 @@ define([ "compose" ], function URIModule(Compose) {
 			self[QUERY] = Query(self[QUERY]);
 		}
 
+		if (PATH in self) {
+			self[PATH] = Path(self[PATH]);
+		}
 	}, {
 		toString : function toString() {
 			var self = this;
-			var uri = [ PROTOCOL , "://", AUTHORITY, DIRECTORY, FILE, "?", QUERY, "#", ANCHOR ];
+			var uri = [ PROTOCOL , "://", AUTHORITY, PATH, "?", QUERY, "#", ANCHOR ];
 			var i;
 			var key;
 
@@ -147,11 +160,7 @@ define([ "compose" ], function URIModule(Compose) {
 				uri.splice(0, 3);
 			}
 
-			if (!(DIRECTORY in self)) {
-				uri.splice(0, 1);
-			}
-
-			if (!(FILE in self)) {
+			if (!(PATH in self)) {
 				uri.splice(0, 1);
 			}
 
