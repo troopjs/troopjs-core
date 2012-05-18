@@ -15,6 +15,8 @@ define([ "compose" ], function URIModule(Compose) {
 
 	var PROTOCOL = "protocol";
 	var AUTHORITY = "authority";
+	var DIRECTORY = "directory";
+	var FILE = "file";
 	var PATH = "path";
 	var QUERY = "query";
 	var ANCHOR = "anchor";
@@ -29,8 +31,8 @@ define([ "compose" ], function URIModule(Compose) {
 		"port",
 		"relative",
 		PATH,
-		"directory",
-		"file",
+		DIRECTORY,
+		FILE,
 		QUERY,
 		ANCHOR ];
 
@@ -137,7 +139,7 @@ define([ "compose" ], function URIModule(Compose) {
 	}, {
 		toString : function toString() {
 			var self = this;
-			var uri = [ PROTOCOL , "://", AUTHORITY, PATH, "?", QUERY, "#", ANCHOR ];
+			var uri = [ PROTOCOL , "://", AUTHORITY, DIRECTORY, FILE, "?", QUERY, "#", ANCHOR ];
 			var i;
 			var key;
 
@@ -145,7 +147,11 @@ define([ "compose" ], function URIModule(Compose) {
 				uri.splice(0, 3);
 			}
 
-			if (!(PATH in self)) {
+			if (!(DIRECTORY in self)) {
+				uri.splice(0, 1);
+			}
+
+			if (!(FILE in self)) {
 				uri.splice(0, 1);
 			}
 
