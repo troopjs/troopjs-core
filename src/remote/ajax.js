@@ -4,7 +4,8 @@
  * Released under the MIT license.
  */
 define([ "../component/service", "../pubsub/topic", "jquery", "../util/merge" ], function AjaxModule(Service, Topic, $, merge) {
-	return Service.extend({
+	var instance;
+	var Ctor = Service.extend({
 		displayName : "core/remote/ajax",
 
 		"hub/ajax" : function request(topic, settings, deferred) {
@@ -17,4 +18,12 @@ define([ "../component/service", "../pubsub/topic", "jquery", "../util/merge" ],
 			}, settings)).then(deferred.resolve, deferred.reject);
 		}
 	});
+
+	return function(){
+		if (!instance){
+			instance = Ctor();
+		}
+
+		return instance;
+	};
 });
