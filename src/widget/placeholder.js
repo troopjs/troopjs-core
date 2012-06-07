@@ -110,7 +110,7 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 
 			// Link deferred
 			if (deferred) {
-				dfd.then(deferred.resolve, deferred.reject);
+				dfdHold.then(deferred.resolve, deferred.reject);
 			}
 		});
 
