@@ -77,13 +77,19 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 				? POP.call(arg)
 				: UNDEFINED;
 
+			if (deferred){
+				deferred.notifyWith(this, ['beforeRender']);
+			}
+
 			// Call render with contents (or result of contents if it's a function)
 			$fn.call($element, contents instanceof FUNCTION ? contents.apply(self, arg) : contents);
 
+			if (deferred){
+				deferred.notifyWith(this, ['afterRender']);
+			}
+
 			// Defer render (as weaving it may need to load async)
 			Deferred(function deferredRender(dfdRender) {
-				// Weave element
-				$element.find(ATTR_WEAVE).weave(dfdRender);
 
 				// After render is complete, trigger REFRESH with woven components
 				dfdRender.done(function renderDone() {
@@ -92,8 +98,11 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 
 				// Link deferred
 				if (deferred) {
-					dfdRender.then(deferred.resolve, deferred.reject);
+					dfdRender.then(deferred.resolve, deferred.reject, deferred.notify);
 				}
+
+				// Weave element
+				$element.find(ATTR_WEAVE).weave(dfdRender);
 			});
 
 			return self;
