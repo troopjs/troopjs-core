@@ -8,7 +8,6 @@
  */
 define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
 	var NULL = null;
-	var OBJECT = Object;
 	var FUNCTION = Function;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig\/(.+)/;
@@ -17,34 +16,29 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var MEMORY = "memory";
 	var SUBSCRIPTIONS = "subscriptions";
-	var __PROTO__ = "__proto__";
-
-	var getPrototypeOf = OBJECT.getPrototypeOf || (__PROTO__ in OBJECT
-		? function getPrototypeOf(object) {
-			return object[__PROTO__];
-		}
-		: function getPrototypeOf(object) {
-			return object.constructor.prototype;
-		});
 
 	return Component.extend(function Gadget() {
 		var self = this;
-		var __proto__ = self;
+		var bases = self.constructor._getBases(true);
+		var base;
 		var callbacks;
 		var callback;
 		var i;
-		var iMax;
+		var j;
+		var jMax;
 
 		var signals = {};
 		var signal;
 		var matches;
 		var key = null;
 
-		// Iterate prototype chain (while there's a prototype)
-		do {
-			add: for (key in __proto__) {
+		// Iterate base chain (while there's a prototype)
+		for (i = bases.length; i >= 0; i--) {
+			base = bases[i];
+
+			add: for (key in base) {
 				// Get value
-				callback = __proto__[key];
+				callback = base[key];
 
 				// Continue if value is not a function
 				if (!(callback instanceof FUNCTION)) {
@@ -64,17 +58,17 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 						callbacks = signals[signal];
 
 						// Reset counters
-						i = iMax = callbacks.length;
+						j = jMax = callbacks.length;
 
 						// Loop callbacks, continue add if we've already added this callback
-						while (i--) {
-							if (callback === callbacks[i]) {
+						while (j--) {
+							if (callback === callbacks[j]) {
 								continue add;
 							}
 						}
 
 						// Add callback to callbacks chain
-						callbacks[iMax] = callback;
+						callbacks[jMax] = callback;
 					}
 					else {
 						// First callback
@@ -82,14 +76,14 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 					}
 				}
 			}
-		} while (__proto__ = getPrototypeOf(__proto__));
+		}
 
 		// Extend self
 		Compose.call(self, {
 			signal : function signal(signal, deferred) {
 				var _self = this;
 				var _callbacks;
-				var _i;
+				var _j;
 				var head = deferred;
 
 				// Only trigger if we have callbacks for this signal
@@ -98,14 +92,14 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 					_callbacks = signals[signal];
 
 					// Reset counter
-					_i = _callbacks.length;
+					_j = _callbacks.length;
 
 					// Build deferred chain from end to 1
-					while (--_i) {
+					while (--_j) {
 						// Create new deferred
 						head = Deferred(function (dfd) {
 							// Store callback and deferred as they will have changed by the time we exec
-							var _callback = _callbacks[_i];
+							var _callback = _callbacks[_j];
 							var _deferred = head;
 
 							// Add done handler
