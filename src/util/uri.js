@@ -11,6 +11,8 @@ define([ "compose" ], function URIModule(Compose) {
 	var FUNCTION = Function;
 	var ARRAY = Array;
 	var ARRAY_PROTO = ARRAY.prototype;
+	var TYPEOF_OBJECT = typeof Object.prototype;
+	var TYPEOF_STRING = typeof String.prototype;
 	var RE_URI = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?(?:([^?#]*)(?:\?([^#]*))?(?:#(.*))?)/;
 
 	var PROTOCOL = "protocol";
@@ -37,34 +39,41 @@ define([ "compose" ], function URIModule(Compose) {
 	// Prevent Compose from creating constructor property
 	Compose.secure = true;
 
-	var Query = Compose(function Query(str) {
-		if (!str || str.length === 0) {
-			return;
-		}
-
+	var Query = Compose(function Query(arg) {
 		var self = this;
 		var matches;
-		var key;
+		var key = NULL;
 		var value;
 		var re = /(?:&|^)([^&=]*)=?([^&]*)/g;
 
-		while (matches = re.exec(str)) {
-			key = matches[1];
+		switch (typeof arg) {
+		case TYPEOF_OBJECT:
+			for (key in arg) {
+				self[key] = arg[key];
+			}
+			break;
 
-			if (key in self) {
-				value = self[key];
+		case TYPEOF_STRING:
+			while (matches = re.exec(str)) {
+				key = matches[1];
 
-				if (value instanceof ARRAY) {
-					value[value.length] = matches[2];
+				if (key in self) {
+					value = self[key];
+
+					if (value instanceof ARRAY) {
+						value[value.length] = matches[2];
+					}
+					else {
+						self[key] = [ value, matches[2] ];
+					}
 				}
 				else {
-					self[key] = [ value, matches[2] ];
+					self[key] = matches[2];
 				}
 			}
-			else {
-				self[key] = matches[2];
-			}
+			break;
 		}
+
 	}, {
 		toString : function toString() {
 			var self = this;
@@ -152,7 +161,7 @@ define([ "compose" ], function URIModule(Compose) {
 	}, {
 		toString : function toString() {
 			var self = this;
-			var uri = [ PROTOCOL , "://", AUTHORITY, PATH, "?", QUERY, "#", ANCHOR ];
+			var uri = [ PROTOCOL , "://", AUTHORITY, "/", PATH, "?", QUERY, "#", ANCHOR ];
 			var i;
 			var key;
 
@@ -188,6 +197,9 @@ define([ "compose" ], function URIModule(Compose) {
 
 	// Restore Compose.secure setting
 	Compose.secure = SECURE;
+
+	URI.Path = Path;
+	URI.Query = Query;
 
 	return URI;
 });
