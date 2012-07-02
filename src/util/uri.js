@@ -3,7 +3,7 @@
  * 
  * parts of code from parseUri 1.2.2 Copyright Steven Levithan <stevenlevithan.com>
  * 
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
 define([ "compose" ], function URIModule(Compose) {
