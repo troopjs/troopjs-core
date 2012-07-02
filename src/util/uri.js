@@ -170,7 +170,7 @@ define([ "compose" ], function URIModule(Compose) {
 			}
 
 			if (!(PATH in self)) {
-				uri.splice(0, 1);
+				uri.splice(0, 2);
 			}
 
 			if (!(ANCHOR in self)) {
