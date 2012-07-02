@@ -181,7 +181,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 
 			unsubscribe: {
 				// Fast fail if we don't have subscribers
-				if (!topic in HANDLERS) {
+				if (!(topic in HANDLERS)) {
 					break unsubscribe;
 				}
 
