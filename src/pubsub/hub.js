@@ -80,7 +80,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 					"context" : context
 				};
 
-				// Get last handler
+				// Get tail handler
 				tail = TAIL in handlers
 					// Have tail, update handlers.tail.next to point to handler
 					? handlers[TAIL][NEXT] = handler
@@ -89,14 +89,14 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 
 				// Iterate handlers from offset
 				while (offset < length) {
-					// Set last -> last.next -> handler
+					// Set tail -> tail.next -> handler
 					tail = tail[NEXT] = {
 						"callback" : arguments[offset++],
 						"context" : context
 					};
 				}
 
-				// Set last handler
+				// Set tail handler
 				handlers[TAIL] = tail;
 
 				// Want memory and have memory
@@ -132,7 +132,7 @@ define([ "compose", "../component/base", "./topic" ], function HubModule(Compose
 
 				// Iterate handlers from offset
 				while (offset < length) {
-					// Set last -> last.next -> handler
+					// Set tail -> tail.next -> handler
 					tail = tail[NEXT] = {
 						"callback" : arguments[offset++],
 						"context" : context
