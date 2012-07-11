@@ -317,9 +317,9 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 					dfd.resolve(contents);
 				}, 0);
 
-				// If a deferred was passed, add resolve/reject
+				// If a deferred was passed, add resolve/reject/notify
 				if (deferred) {
-					dfd.then(deferred.resolve, deferred.reject);
+					dfd.then(deferred.resolve, deferred.reject, deferred.notify);
 				}
 			});
 
