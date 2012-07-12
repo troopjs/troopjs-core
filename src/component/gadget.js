@@ -222,18 +222,18 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		start : function start(deferred) {
 			var self = this;
 
-			Deferred(function deferredStart(dfdStart) {
-				Deferred(function deferredInitialize(dfdInitialize) {
-					self.signal("initialize", dfdInitialize);
-				})
-				.done(function doneInitialize() {
-					self.signal("start", dfdStart);
-				})
-				.fail(dfdStart.reject);
+			deferred = deferred || Deferred();
 
-				if (deferred) {
-					dfdStart.then(deferred.resolve, deferred.reject);
-				}
+			Deferred(function deferredStart(dfdStart) {
+				dfdStart.then(deferred.resolve, deferred.reject, deferred.notify);
+
+				Deferred(function deferredInitialize(dfdInitialize) {
+					dfdInitialize.then(function doneInitialize() {
+						self.signal("start", dfdStart);
+					}, dfdStart.reject, dfdStart.notify);
+
+					self.signal("initialize", dfdInitialize);
+				});
 			});
 
 			return self;
@@ -242,18 +242,18 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		stop : function stop(deferred) {
 			var self = this;
 
-			Deferred(function deferredFinalize(dfdFinalize) {
-				Deferred(function deferredStop(dfdStop) {
-					self.signal("stop", dfdStop);
-				})
-				.done(function doneStop() {
-					self.signal("finalize", dfdFinalize);
-				})
-				.fail(dfdFinalize.reject);
+			deferred = deferred || Deferred();
 
-				if (deferred) {
-					dfdFinalize.then(deferred.resolve, deferred.reject);
-				}
+			Deferred(function deferredFinalize(dfdFinalize) {
+				dfdFinalize.then(deferred.resolve, deferred.reject, deferred.notify);
+
+				Deferred(function deferredStop(dfdStop) {
+					dfdStop.then(function doneStop() {
+						self.signal("finalize", dfdStop);
+					}, dfdFinalize.reject, dfdFinalize.notify);
+
+					self.signal("stop", dfdFinalize);
+				});
 			});
 
 			return self;
