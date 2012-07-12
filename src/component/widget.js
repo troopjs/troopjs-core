@@ -197,12 +197,13 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 
 		/**
 		 * Unweaves all children of $element _and_ self
+		 * @param deferred (Deferred) Deferred (optional)
 		 * @returns self
 		 */
-		unweave : function unweave() {
+		unweave : function unweave(deferred) {
 			var self = this;
 
-			self[$ELEMENT].find(ATTR_WOVEN).andSelf().unweave();
+			self[$ELEMENT].find(ATTR_WOVEN).andSelf().unweave(deferred);
 
 			return this;
 		},
