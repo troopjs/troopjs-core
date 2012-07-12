@@ -13,7 +13,6 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 	var ARRAY_PROTO = Array.prototype;
 	var SHIFT = ARRAY_PROTO.shift;
 	var UNSHIFT = ARRAY_PROTO.unshift;
-	var POP = ARRAY_PROTO.pop;
 	var $TRIGGER = $.fn.trigger;
 	var $ONE = $.fn.one;
 	var $BIND = $.fn.bind;
