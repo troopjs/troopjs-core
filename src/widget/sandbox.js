@@ -1,9 +1,9 @@
 /*!
- * TroopJS sandbox component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * TroopJS widget/sandbox component
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define( [ "./widget", "jquery" ], function SandboxModule(Widget, $) {
+define( [ "../component/widget", "jquery" ], function SandboxModule(Widget, $) {
 	var $ELEMENT = "$element";
 	var _$ELEMENT = "_" + $ELEMENT;
 
@@ -26,8 +26,11 @@ define( [ "./widget", "jquery" ], function SandboxModule(Widget, $) {
 		},
 
 		"sig/start" : function onStart(signal, deferred) {
-			// Forward weave
 			this.weave(deferred);
+		},
+
+		"sig/stop" : function onStop(signal, deferred) {
+			this.unweave(deferred);
 		}
 	});
 });
