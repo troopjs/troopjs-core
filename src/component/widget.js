@@ -69,7 +69,7 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 			var contents = SHIFT.call(arg);
 
 			// Assume deferred is the last argument
-			var deferred = arg[arg.length];
+			var deferred = arg[arg.length - 1];
 
 			// If deferred not a true Deferred, make it so
 			if (deferred === UNDEFINED || !(deferred[THEN] instanceof FUNCTION)) {
