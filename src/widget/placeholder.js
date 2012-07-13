@@ -4,8 +4,8 @@
  * Released under the MIT license.
  */
 define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholderModule(Widget, Deferred) {
-	var UNDEFINED = undefined;
 	var FUNCTION = Function;
+	var POP = Array.prototype.pop;
 	var HOLDING = "holding";
 	var DATA_HOLDING = "data-" + HOLDING;
 	var $ELEMENT = "$element";
@@ -16,13 +16,10 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 		var self = this;
 		var arg = arguments;
 
-		// Assume deferred is the last argument
-		var deferred = arg[arg.length - 1];
-
 		// If deferred not a true Deferred, make it so
-		if (deferred === UNDEFINED || !(deferred[THEN] instanceof FUNCTION)) {
-			deferred = Deferred();
-		}
+		var deferred = arg[arg.length - 1][THEN] instanceof FUNCTION
+			? POP.call(arg)
+			: $.Deferred();
 
 		Deferred(function deferredRelease(dfdRelease) {
 			var i;
