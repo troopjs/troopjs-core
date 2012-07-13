@@ -1,6 +1,6 @@
 /*!
  * TroopJS widget/placeholder component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
 define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholderModule(Widget, Deferred) {
