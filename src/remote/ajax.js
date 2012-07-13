@@ -14,7 +14,7 @@ define([ "../component/service", "../pubsub/topic", "jquery", "../util/merge" ],
 					"x-request-id": new Date().getTime(),
 					"x-components": topic instanceof Topic ? topic.trace() : topic
 				}
-			}, settings)).then(deferred.resolve, deferred.reject);
+			}, settings)).then(deferred.resolve, deferred.reject, deferred.notify);
 		}
 	});
 });

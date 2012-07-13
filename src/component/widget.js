@@ -295,8 +295,14 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 		empty : function empty(deferred) {
 			var self = this;
 
+			// Ensure we have deferred
+			deferred = deferred || Deferred();
+
 			// Create deferred for emptying
-			Deferred(function emptyDeferred(dfd) {
+			Deferred(function emptyDeferred(dfdEmpty) {
+				// Link deferred
+				dfdEmpty.then(deferred.resolve, deferred.reject, deferred.notify);
+
 				// Get element
 				var $element = self[$ELEMENT];
 
@@ -315,13 +321,8 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 					$contents.remove();
 
 					// Resolve deferred
-					dfd.resolve(contents);
+					dfdEmpty.resolve(contents);
 				}, 0);
-
-				// If a deferred was passed, add resolve/reject/notify
-				if (deferred) {
-					dfd.then(deferred.resolve, deferred.reject, deferred.notify);
-				}
 			});
 
 			return self;
