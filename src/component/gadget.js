@@ -249,10 +249,10 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 
 				Deferred(function deferredStop(dfdStop) {
 					dfdStop.then(function doneStop() {
-						self.signal("finalize", dfdStop);
+						self.signal("finalize", dfdFinalize);
 					}, dfdFinalize.reject, dfdFinalize.notify);
 
-					self.signal("stop", dfdFinalize);
+					self.signal("stop", dfdStop);
 				});
 			});
 
