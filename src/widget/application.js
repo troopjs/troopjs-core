@@ -1,6 +1,6 @@
 /*!
  * TroopJS widget/application component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
 define([ "../component/widget", "../util/deferred" ], function ApplicationModule(Widget, Deferred) {
@@ -8,19 +8,11 @@ define([ "../component/widget", "../util/deferred" ], function ApplicationModule
 		displayName : "core/widget/application",
 
 		"sig/start" : function start(signal, deferred) {
-			var self = this;
-
-			self.weave(deferred);
-
-			return self;
+			this.weave(deferred);
 		},
 
 		"sig/stop" : function stop(signal, deferred) {
-			var self = this;
-
-			self.unweave(deferred);
-
-			return self;
+			this.unweave(deferred);
 		}
 	});
 });

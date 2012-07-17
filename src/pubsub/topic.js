@@ -1,10 +1,15 @@
 /*!
  * TroopJS pubsub/topic module
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "../component/base" ], function TopicModule(Component) {
-	var ARRAY = Array;
+define([ "../component/base", "../util/unique" ], function TopicModule(Component, unique) {
+	var TOSTRING = Object.prototype.toString;
+	var TOSTRING_ARRAY = TOSTRING.call(Array.prototype);
+
+	function comparator (a, b) {
+		return a.publisherInstanceCount === b.publisherInstanceCount;
+	}
 
 	return Component.extend(function Topic(topic, publisher, parent) {
 		var self = this;
@@ -12,6 +17,7 @@ define([ "../component/base" ], function TopicModule(Component) {
 		self.topic = topic;
 		self.publisher = publisher;
 		self.parent = parent;
+		self.publisherInstanceCount = publisher.instanceCount;
 	}, {
 		displayName : "core/pubsub/topic",
 
@@ -34,19 +40,22 @@ define([ "../component/base" ], function TopicModule(Component) {
 			var item;
 			var stack = "";
 			var i;
+			var u;
 			var iMax;
 
 			while (current) {
-				if (current.constructor === ARRAY) {
-					for (i = 0, iMax = current.length; i < iMax; i++) {
-						item = current[i];
+				if (TOSTRING.call(current) === TOSTRING_ARRAY) {
+					u = unique.call(current, comparator);
 
-						current[i] = item.constructor === constructor
+					for (i = 0, iMax = u.length; i < iMax; i++) {
+						item = u[i];
+
+						u[i] = item.constructor === constructor
 							? item.trace()
-							: item;
+							: item.topic;
 					}
 
-					stack += current.join(",");
+					stack += u.join(",");
 					break;
 				}
 
