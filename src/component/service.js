@@ -5,6 +5,6 @@
  */
 define([ "./gadget" ], function ServiceModule(Gadget) {
 	return Gadget.extend({
-		displayName : "core/component/service",
+		displayName : "core/component/service"
 	});
 });
