@@ -8,11 +8,13 @@
  */
 define([ "compose" ], function URIModule(Compose) {
 	var NULL = null;
-	var FUNCTION = Function;
-	var ARRAY = Array;
-	var ARRAY_PROTO = ARRAY.prototype;
-	var TYPEOF_OBJECT = typeof Object.prototype;
-	var TYPEOF_STRING = typeof String.prototype;
+	var ARRAY_PROTO = Array.prototype;
+	var OBJECT_PROTO = Object.prototype;
+	var TOSTRING = OBJECT_PROTO.toString;
+	var TOSTRING_OBJECT = TOSTRING.call(OBJECT_PROTO);
+	var TOSTRING_ARRAY = TOSTRING.call(ARRAY_PROTO);
+	var TOSTRING_STRING = TOSTRING.call(String.prototype);
+	var TOSTRING_FUNCTION = TOSTRING.call(Function.prototype);
 	var RE_URI = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?(?:([^?#]*)(?:\?([^#]*))?(?:#(.*))?)/;
 
 	var PROTOCOL = "protocol";
@@ -46,21 +48,21 @@ define([ "compose" ], function URIModule(Compose) {
 		var value;
 		var re = /(?:&|^)([^&=]*)=?([^&]*)/g;
 
-		switch (typeof arg) {
-		case TYPEOF_OBJECT:
+		switch (TOSTRING.call(arg)) {
+		case TOSTRING_OBJECT:
 			for (key in arg) {
 				self[key] = arg[key];
 			}
 			break;
 
-		case TYPEOF_STRING:
-			while (matches = re.exec(str)) {
+		case TOSTRING_STRING:
+			while (matches = re.exec(arg)) {
 				key = matches[1];
 
 				if (key in self) {
 					value = self[key];
 
-					if (value instanceof ARRAY) {
+					if (TOSTRING.call(value) === TOSTRING_ARRAY) {
 						value[value.length] = matches[2];
 					}
 					else {
@@ -84,7 +86,7 @@ define([ "compose" ], function URIModule(Compose) {
 			var j;
 
 			for (key in self) {
-				if (self[key] instanceof FUNCTION) {
+				if (TOSTRING.call(self[key]) === TOSTRING_FUNCTION) {
 					continue;
 				}
 
@@ -97,7 +99,7 @@ define([ "compose" ], function URIModule(Compose) {
 				key = query[i];
 				value = self[key];
 
-				if (value instanceof ARRAY) {
+				if (TOSTRING.call(value) === TOSTRING_ARRAY) {
 					value = value.slice(0);
 
 					value.sort();
@@ -166,19 +168,19 @@ define([ "compose" ], function URIModule(Compose) {
 			var key;
 
 			if (!(PROTOCOL in self)) {
-				uri.splice(0, 3);
+				uri[0] = uri[1] = "";
 			}
 
 			if (!(PATH in self)) {
-				uri.splice(0, 2);
-			}
-
-			if (!(ANCHOR in self)) {
-				uri.splice(-2, 2);
+				uri[3] = uri[4] = "";
 			}
 
 			if (!(QUERY in self)) {
-				uri.splice(-2, 2);
+				uri[5] = uri[6] = "";
+			}
+
+			if (!(ANCHOR in self)) {
+				uri[7] = uri[8] = "";
 			}
 
 			i = uri.length;
