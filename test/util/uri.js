@@ -17,7 +17,7 @@ buster.testCase("URI", function (run) {
 					protocol : "http"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"https://" : function() {
@@ -29,7 +29,7 @@ buster.testCase("URI", function (run) {
 					protocol : "https"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://host" : function () {
@@ -43,7 +43,7 @@ buster.testCase("URI", function (run) {
 					authority : "host"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://host/" : function () {
@@ -58,7 +58,7 @@ buster.testCase("URI", function (run) {
 					path : [ "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://host.com" : function () {
@@ -72,7 +72,7 @@ buster.testCase("URI", function (run) {
 					authority : "host.com"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://subdomain.host.com" : function () {
@@ -86,7 +86,7 @@ buster.testCase("URI", function (run) {
 					authority : "subdomain.host.com"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://host.com:81" : function () {
@@ -101,7 +101,7 @@ buster.testCase("URI", function (run) {
 					authority : "host.com:81"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user@host.com" : function () {
@@ -116,7 +116,7 @@ buster.testCase("URI", function (run) {
 					user : "user"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user@host.com:81" : function () {
@@ -132,7 +132,7 @@ buster.testCase("URI", function (run) {
 					user : "user"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com" : function () {
@@ -148,7 +148,7 @@ buster.testCase("URI", function (run) {
 					password : "pass"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81" : function () {
@@ -165,7 +165,7 @@ buster.testCase("URI", function (run) {
 					password : "pass"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81?query" : function () {
@@ -185,7 +185,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81#anchor" : function () {
@@ -203,7 +203,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/" : function () {
@@ -221,7 +221,7 @@ buster.testCase("URI", function (run) {
 					path : [ "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/?query" : function () {
@@ -242,7 +242,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/#anchor" : function () {
@@ -261,7 +261,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/file.ext" : function () {
@@ -279,7 +279,7 @@ buster.testCase("URI", function (run) {
 					path : [ "file.ext" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory" : function () {
@@ -297,7 +297,7 @@ buster.testCase("URI", function (run) {
 					path : [ "directory" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory?query" : function () {
@@ -318,7 +318,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory#anchor" : function () {
@@ -337,7 +337,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory/#anchor" : function () {
@@ -356,7 +356,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory/sub.directory/" : function () {
@@ -374,7 +374,7 @@ buster.testCase("URI", function (run) {
 					path : [ "directory", "sub.directory", "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory/sub.directory/file.ext" : function () {
@@ -413,7 +413,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory/file.ext?query=1&test=2" : function () {
@@ -435,7 +435,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"http://user:pass@host.com:81/directory/file.ext?query=1#anchor" : function () {
@@ -457,7 +457,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//&#47;&#47;host.com" : function () {
@@ -470,7 +470,7 @@ buster.testCase("URI", function (run) {
 					authority : "host.com"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//&#47;&#47;user:pass@host.com:81/direc.tory/file.ext?query=1&test=2#anchor" : function () {
@@ -492,10 +492,10 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
-			"/directory/sub.directory/file.ext?query=1&test=2#anchor" : function () {
+			"///directory/sub.directory/file.ext?query=1&test=2#anchor" : function () {
 				var source = "/directory/sub.directory/file.ext?query=1&test=2#anchor";
 				var uri = URI(source);
 
@@ -509,10 +509,10 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
-			"/directory/" : function () {
+			"///directory/" : function () {
 				var source = "/directory/";
 				var uri = URI(source);
 
@@ -521,10 +521,10 @@ buster.testCase("URI", function (run) {
 					path : [ "directory", "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
-			"/file.ext" : function () {
+			"///file.ext" : function () {
 				var source = "/file.ext";
 				var uri = URI(source);
 
@@ -533,10 +533,10 @@ buster.testCase("URI", function (run) {
 					path : [ "file.ext" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
-			"/?query" : function () {
+			"///?query" : function () {
 				var source = "/?query";
 				var uri = URI(source);
 
@@ -547,10 +547,10 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
-			"/?query=1&test=2#anchor" : function () {
+			"///?query=1&test=2#anchor" : function () {
 				var source = "/?query=1&test=2#anchor";
 				var uri = URI(source);
 
@@ -563,7 +563,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"#anchor" : function () {
@@ -575,7 +575,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"path/to/file" : function () {
@@ -587,7 +587,7 @@ buster.testCase("URI", function (run) {
 					path : [ "path", "to", "file" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"localhost" : function () {
@@ -599,7 +599,7 @@ buster.testCase("URI", function (run) {
 					path : [ "localhost" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"192.168.1.1" : function () {
@@ -611,7 +611,7 @@ buster.testCase("URI", function (run) {
 					path : [ "192.168.1.1" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com" : function () {
@@ -623,7 +623,7 @@ buster.testCase("URI", function (run) {
 					path : [ "host.com" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//host.com:81" : function () {
@@ -636,7 +636,7 @@ buster.testCase("URI", function (run) {
 					path : [ "81" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//host.com:81/" : function () {
@@ -649,7 +649,7 @@ buster.testCase("URI", function (run) {
 					path : [ "81", "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com?query" : function () {
@@ -664,7 +664,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com#anchor" : function () {
@@ -677,7 +677,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com/" : function () {
@@ -689,7 +689,7 @@ buster.testCase("URI", function (run) {
 					path : [ "host.com", "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com/file.ext" : function () {
@@ -701,7 +701,7 @@ buster.testCase("URI", function (run) {
 					path : [ "host.com", "file.ext" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com/directory/?query" : function () {
@@ -716,7 +716,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com/directory/#anchor" : function () {
@@ -729,7 +729,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"host.com/directory/file.ext" : function () {
@@ -741,7 +741,7 @@ buster.testCase("URI", function (run) {
 					path : [ "host.com", "directory", "file.ext" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//host.com:81/direc.tory/file.ext?query=1&test=2#anchor" : function () {
@@ -759,7 +759,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"user@host.com" : function () {
@@ -771,7 +771,7 @@ buster.testCase("URI", function (run) {
 					path : [ "user@host.com" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//user@host.com:81" : function () {
@@ -784,7 +784,7 @@ buster.testCase("URI", function (run) {
 					path : [ "81" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"user@host.com/" : function () {
@@ -796,7 +796,7 @@ buster.testCase("URI", function (run) {
 					path : [ "user@host.com", "" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"user@host.com/file.ext" : function () {
@@ -808,7 +808,7 @@ buster.testCase("URI", function (run) {
 					path : [ "user@host.com", "file.ext" ]
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"user@host.com?query" : function () {
@@ -823,7 +823,7 @@ buster.testCase("URI", function (run) {
 					}
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"user@host.com#anchor" : function () {
@@ -836,7 +836,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			},
 
 			"//user:pass@host.com:81/direc.tory/file.ext?query=1&test=2#anchor" : function () {
@@ -850,7 +850,7 @@ buster.testCase("URI", function (run) {
 					anchor : "anchor"
 				});
 
-				assert.match(uri.toString(), source);
+				assert.same(uri.toString(), source);
 			}
 		});
 	});
