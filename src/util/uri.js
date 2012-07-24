@@ -101,20 +101,26 @@ define([ "compose" ], function URIModule(Compose) {
 				value = self[key];
 
 				if (TOSTRING.call(value) === TOSTRING_ARRAY) {
-					value = value.slice(0);
+					values = value.slice(0);
 
-					value.sort();
+					values.sort();
 
-					j = value.length;
+					j = values.length;
 
 					while (j--) {
-						value[j] = key + "=" + value[j];
+						value = values[j];
+
+						values[j] = value === ""
+							? key
+							: key + "=" + value;
 					}
 
-					query[i] = value.join("&");
+					query[i] = values.join("&");
 				}
 				else {
-					query[i] = key + "=" + value;
+					query[i] = value === ""
+						? key
+						: key + "=" + value;
 				}
 			}
 
