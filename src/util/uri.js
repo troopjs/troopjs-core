@@ -81,6 +81,7 @@ define([ "compose" ], function URIModule(Compose) {
 			var self = this;
 			var key = NULL;
 			var value = NULL;
+			var values;
 			var query = [];
 			var i = 0;
 			var j;
@@ -169,6 +170,10 @@ define([ "compose" ], function URIModule(Compose) {
 
 			if (!(PROTOCOL in self)) {
 				uri[0] = uri[1] = "";
+			}
+
+			if (!(AUTHORITY in self)) {
+				uri[2] = uri[3] = "";
 			}
 
 			if (!(PATH in self)) {
