@@ -1,6 +1,13 @@
 buster.testCase("URI", function (run) {
 	require( [ "troopjs-core/util/uri" ] , function (URI) {
 		run({
+			"(empty)" : function () {
+				var source = "";
+				var uri = URI(source);
+
+				assert.match(uri.toString(), source);
+			},
+
 			"http://" : function () {
 				var source = "http://";
 				var uri = URI(source);
