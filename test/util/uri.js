@@ -276,7 +276,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "file.ext" ]
+					path : [ "", "file.ext" ]
 				});
 
 				assert.same(uri.toString(), source);
@@ -294,7 +294,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory" ]
+					path : [ "", "directory" ]
 				});
 
 				assert.same(uri.toString(), source);
@@ -312,7 +312,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory" ],
+					path : [ "", "directory" ],
 					query : {
 						query : ""
 					}
@@ -333,7 +333,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory" ],
+					path : [ "", "directory" ],
 					anchor : "anchor"
 				});
 
@@ -352,7 +352,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory", "" ],
+					path : [ "", "directory", "" ],
 					anchor : "anchor"
 				});
 
@@ -371,7 +371,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory", "sub.directory", "" ]
+					path : [ "", "directory", "sub.directory", "" ]
 				});
 
 				assert.same(uri.toString(), source);
@@ -389,7 +389,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory", "sub.directory", "file.ext" ]
+					path : [ "", "directory", "sub.directory", "file.ext" ]
 				});
 
 				assert.match(uri.toString(), source);
@@ -407,7 +407,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory", "file.ext" ],
+					path : [ "", "directory", "file.ext" ],
 					query : {
 						query : ""
 					}
@@ -428,7 +428,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory", "file.ext" ],
+					path : [ "", "directory", "file.ext" ],
 					query : {
 						query : "1",
 						test : "2"
@@ -450,7 +450,7 @@ buster.testCase("URI", function (run) {
 					authority : "user:pass@host.com:81",
 					user : "user",
 					password : "pass",
-					path : [ "directory", "file.ext" ],
+					path : [ "", "directory", "file.ext" ],
 					query : {
 						query : "1"
 					},
@@ -495,13 +495,13 @@ buster.testCase("URI", function (run) {
 				assert.same(uri.toString(), source);
 			},
 
-			"///directory/sub.directory/file.ext?query=1&test=2#anchor" : function () {
+			"/directory/sub.directory/file.ext?query=1&test=2#anchor" : function () {
 				var source = "/directory/sub.directory/file.ext?query=1&test=2#anchor";
 				var uri = URI(source);
 
 				assert.match(uri, {
 					source : source,
-					path : [ "directory", "sub.directory", "file.ext" ],
+					path : [ "", "directory", "sub.directory", "file.ext" ],
 					query : {
 						query : "1",
 						test : "2"
@@ -512,36 +512,37 @@ buster.testCase("URI", function (run) {
 				assert.same(uri.toString(), source);
 			},
 
-			"///directory/" : function () {
+			"/directory/" : function () {
 				var source = "/directory/";
 				var uri = URI(source);
 
 				assert.match(uri, {
 					source : source,
-					path : [ "directory", "" ]
+					path : [ "", "directory", "" ]
 				});
 
 				assert.same(uri.toString(), source);
 			},
 
-			"///file.ext" : function () {
+			"/file.ext" : function () {
 				var source = "/file.ext";
 				var uri = URI(source);
 
 				assert.match(uri, {
 					source : source,
-					path : [ "file.ext" ]
+					path : [ "", "file.ext" ]
 				});
 
 				assert.same(uri.toString(), source);
 			},
 
-			"///?query" : function () {
+			"/?query" : function () {
 				var source = "/?query";
 				var uri = URI(source);
 
 				assert.match(uri, {
 					source : source,
+					path : [ "" ],
 					query : {
 						query : ""
 					}
@@ -550,12 +551,13 @@ buster.testCase("URI", function (run) {
 				assert.same(uri.toString(), source);
 			},
 
-			"///?query=1&test=2#anchor" : function () {
+			"/?query=1&test=2#anchor" : function () {
 				var source = "/?query=1&test=2#anchor";
 				var uri = URI(source);
 
 				assert.match(uri, {
 					source : source,
+					path : [ "" ],
 					query : {
 						query : "1",
 						test : "2"
