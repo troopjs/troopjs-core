@@ -3,10 +3,10 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/**
- * The gadget trait provides life cycle management
- */
+/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true */
+/*global define:true */
 define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
+	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
@@ -80,7 +80,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 
 		// Extend self
 		Compose.call(self, {
-			signal : function signal(signal, deferred) {
+			signal : function onSignal(signal, deferred) {
 				var _self = this;
 				var _callbacks;
 				var _j;
@@ -172,7 +172,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 			var subscription;
 
 			// Loop over subscriptions
-			while (subscription = subscriptions.shift()) {
+			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
 				hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
 			}
 
@@ -184,7 +184,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		},
 
 		/**
-		 * Calls hub.publish in self context
+			 * Calls hub.publish in self context
 		 * @returns self
 		 */
 		publish : function publish() {
