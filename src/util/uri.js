@@ -9,7 +9,6 @@
 /*jshint strict:false, smarttabs:true, laxbreak:true, newcap:false, forin:false, loopfunc:true */
 /*global define:true */
 define([ "compose" ], function URIModule(Compose) {
-	var UNDEFINED;
 	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
 	var OBJECT_PROTO = Object.prototype;
@@ -58,7 +57,7 @@ define([ "compose" ], function URIModule(Compose) {
 				self[key] = arg[key];
 			}
 		} else {
-			while ((matches = re.exec(arg)) !== UNDEFINED) {
+			while ((matches = re.exec(arg)) !== NULL) {
 				key = matches[1];
 
 				if (key in self) {
@@ -141,15 +140,19 @@ define([ "compose" ], function URIModule(Compose) {
 
 	var URI = Compose(function URI(str) {
 		var self = this;
-		var matches = RE_URI.exec(str);
-		var i = matches.length;
 		var value;
+		var matches;
+		var i;
 
-		while (i--) {
-			value = matches[i];
+		if ((matches = RE_URI.exec(str)) !== NULL) {
+			i = matches.length;
 
-			if (value) {
-				self[KEYS[i]] = value;
+			while (i--) {
+				value = matches[i];
+
+				if (value) {
+					self[KEYS[i]] = value;
+				}
 			}
 		}
 
