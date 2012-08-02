@@ -3,6 +3,8 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
+/*jshint strict:false, smarttabs:true, laxbreak:true */
+/*global define:true */
 define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholderModule(Widget, Deferred) {
 	var FUNCTION = Function;
 	var POP = Array.prototype.pop;

@@ -3,13 +3,12 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/**
- * The widget trait provides common UI related logic
- */
+/*jshint strict:false, smarttabs:true, newcap:false */
+/*global define:true */
 define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadget, $, Deferred) {
+	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
-	var UNDEFINED = undefined;
 	var ARRAY_PROTO = Array.prototype;
 	var SHIFT = ARRAY_PROTO.shift;
 	var UNSHIFT = ARRAY_PROTO.unshift;
@@ -121,7 +120,7 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 		"sig/initialize" : function initialize(signal, deferred) {
 			var self = this;
 			var $element = self[$ELEMENT];
-			var $proxies = self[$PROXIES] = [];;
+			var $proxies = self[$PROXIES] = [];
 			var key = NULL;
 			var value;
 			var matches;
@@ -172,7 +171,7 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 			var $proxy;
 
 			// Loop over subscriptions
-			while ($proxy = $proxies.shift()) {
+			while (($proxy = $proxies.shift()) !== UNDEFINED) {
 				$element.unbind($proxy[0], $proxy[1]);
 			}
 

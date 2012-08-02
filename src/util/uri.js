@@ -6,7 +6,10 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
+/*jshint strict:false, smarttabs:true, laxbreak:true, newcap:false, forin:false, loopfunc:true */
+/*global define:true */
 define([ "compose" ], function URIModule(Compose) {
+	var UNDEFINED;
 	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
 	var OBJECT_PROTO = Object.prototype;
@@ -50,15 +53,12 @@ define([ "compose" ], function URIModule(Compose) {
 		var value;
 		var re = /(?:&|^)([^&=]*)=?([^&]*)/g;
 
-		switch (TOSTRING.call(arg)) {
-		case TOSTRING_OBJECT:
+		if (TOSTRING.call(arg) === TOSTRING_OBJECT) {
 			for (key in arg) {
 				self[key] = arg[key];
 			}
-			break;
-
-		default:
-			while (matches = re.exec(arg)) {
+		} else {
+			while ((matches = re.exec(arg)) !== UNDEFINED) {
 				key = matches[1];
 
 				if (key in self) {
@@ -75,7 +75,6 @@ define([ "compose" ], function URIModule(Compose) {
 					self[key] = matches[2];
 				}
 			}
-			break;
 		}
 
 	}, {
@@ -131,17 +130,9 @@ define([ "compose" ], function URIModule(Compose) {
 	});
 
 	var Path = Compose(ARRAY_PROTO, function Path(arg) {
-		var self = this;
-
-		switch (TOSTRING.call(arg)) {
-			case TOSTRING_ARRAY:
-				PUSH.apply(self, arg);
-				break;
-
-			default:
-				PUSH.apply(self, SPLIT.call(arg, "/"));
-				break;
-		}
+		PUSH.apply(this, TOSTRING.call(arg) === TOSTRING_ARRAY
+			? arg
+			: SPLIT.call(arg, "/"));
 	}, {
 		toString : function toString() {
 			return this.join("/");
