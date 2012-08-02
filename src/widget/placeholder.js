@@ -1,14 +1,13 @@
 /*!
  * TroopJS widget/placeholder component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
+/*jshint strict:false, smarttabs:true, laxbreak:true */
+/*global define:true */
 define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholderModule(Widget, Deferred) {
-	var UNDEFINED = undefined;
 	var FUNCTION = Function;
-	var ARRAY = Array;
-	var ARRAY_PROTO = ARRAY.prototype;
-	var POP = ARRAY_PROTO.pop;
+	var POP = Array.prototype.pop;
 	var HOLDING = "holding";
 	var DATA_HOLDING = "data-" + HOLDING;
 	var $ELEMENT = "$element";
@@ -20,12 +19,12 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 		var arg = arguments;
 		var argc = arg.length;
 
-		// Check if the last argument looks like a deferred, and in that case set it
+		// If deferred not a true Deferred, make it so
 		var deferred = argc > 0 && arg[argc - 1][THEN] instanceof FUNCTION
 			? POP.call(arg)
-			: UNDEFINED;
+			: Deferred();
 
-		Deferred(function deferredRelease(dfd) {
+		Deferred(function deferredRelease(dfdRelease) {
 			var i;
 			var iMax;
 			var name;
@@ -33,17 +32,19 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 
 			// We're already holding something, resolve with cache
 			if (HOLDING in self) {
-				dfd.resolve(self[HOLDING]);
+				dfdRelease
+					.done(deferred.resolve)
+					.resolve(self[HOLDING]);
 			}
 			else {
 				// Add done handler to release
-				dfd.done(function doneRelease(widget) {
+				dfdRelease.then([ function doneRelease(widget) {
 					// Set DATA_HOLDING attribute
 					self[$ELEMENT].attr(DATA_HOLDING, widget);
 
 					// Store widget
 					self[HOLDING] = widget;
-				});
+				}, deferred.resolve ], deferred.reject, deferred.notify);
 
 				// Get widget name
 				name = self[TARGET];
@@ -58,23 +59,21 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 
 				// Require widget by name
 				require([ name ], function required(Widget) {
-					// Resolve with constructed, bound and initialized instance
-					var widget = Widget
-						.apply(Widget, argv);
+					// Defer require
+					Deferred(function deferredStart(dfdRequire) {
+						// Constructed and initialized instance
+						var widget = Widget
+							.apply(Widget, argv);
 
-					Deferred(function deferredStart(dfdStart) {
-						widget.start(dfdStart);
-					})
-					.done(function doneStarted() {
-						dfd.resolve(widget);
-					})
-					.fail(dfd.reject);
+						// Link deferred
+						dfdRequire.then(function doneStart() {
+							dfdRelease.resolve(widget);
+						}, dfdRelease.reject, dfdRelease.notify);
+
+						// Start
+						widget.start(dfdRequire);
+					});
 				});
-			}
-
-			// Link deferred
-			if (deferred) {
-				dfd.then(deferred.resolve, deferred.reject);
 			}
 		});
 
@@ -84,8 +83,13 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 	function hold(deferred) {
 		var self = this;
 
+		deferred = deferred || Deferred();
+
 		Deferred(function deferredHold(dfdHold) {
 			var widget;
+
+			// Link deferred
+			dfdHold.then(deferred.resolve, deferred.reject, deferred.notify);
 
 			// Check that we are holding
 			if (HOLDING in self) {
@@ -98,19 +102,11 @@ define([ "../component/widget", "../util/deferred" ], function WidgetPlaceholder
 				// Remove DATA_HOLDING attribute
 				self[$ELEMENT].removeAttr(DATA_HOLDING);
 
-				// Deferred stop
-				Deferred(function deferredStop(dfdStop) {
-					widget.stop(dfdStop);
-				})
-				.then(dfdHold.resolve, dfdHold.reject);
+				// Stop
+				widget.stop(dfdHold);
 			}
 			else {
 				dfdHold.resolve();
-			}
-
-			// Link deferred
-			if (deferred) {
-				dfdHold.then(deferred.resolve, deferred.reject);
 			}
 		});
 

@@ -1,12 +1,12 @@
 /*!
  * TroopJS gadget component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/**
- * The gadget trait provides life cycle management
- */
+/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true */
+/*global define:true */
 define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
+	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
@@ -33,7 +33,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		var key = null;
 
 		// Iterate base chain (while there's a prototype)
-		for (i = bases.length; i >= 0; i--) {
+		for (i = bases.length - 1; i >= 0; i--) {
 			base = bases[i];
 
 			add: for (key in base) {
@@ -80,7 +80,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 
 		// Extend self
 		Compose.call(self, {
-			signal : function signal(signal, deferred) {
+			signal : function onSignal(signal, deferred) {
 				var _self = this;
 				var _callbacks;
 				var _j;
@@ -172,7 +172,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 			var subscription;
 
 			// Loop over subscriptions
-			while (subscription = subscriptions.shift()) {
+			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
 				hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
 			}
 
@@ -184,7 +184,7 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		},
 
 		/**
-		 * Calls hub.publish in self context
+			 * Calls hub.publish in self context
 		 * @returns self
 		 */
 		publish : function publish() {
@@ -222,18 +222,18 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		start : function start(deferred) {
 			var self = this;
 
-			Deferred(function deferredStart(dfdStart) {
-				Deferred(function deferredInitialize(dfdInitialize) {
-					self.signal("initialize", dfdInitialize);
-				})
-				.done(function doneInitialize() {
-					self.signal("start", dfdStart);
-				})
-				.fail(dfdStart.reject);
+			deferred = deferred || Deferred();
 
-				if (deferred) {
-					dfdStart.then(deferred.resolve, deferred.reject);
-				}
+			Deferred(function deferredStart(dfdStart) {
+				dfdStart.then(deferred.resolve, deferred.reject, deferred.notify);
+
+				Deferred(function deferredInitialize(dfdInitialize) {
+					dfdInitialize.then(function doneInitialize() {
+						self.signal("start", dfdStart);
+					}, dfdStart.reject, dfdStart.notify);
+
+					self.signal("initialize", dfdInitialize);
+				});
 			});
 
 			return self;
@@ -242,18 +242,18 @@ define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function Ga
 		stop : function stop(deferred) {
 			var self = this;
 
-			Deferred(function deferredFinalize(dfdFinalize) {
-				Deferred(function deferredStop(dfdStop) {
-					self.signal("stop", dfdStop);
-				})
-				.done(function doneStop() {
-					self.signal("finalize", dfdFinalize);
-				})
-				.fail(dfdFinalize.reject);
+			deferred = deferred || Deferred();
 
-				if (deferred) {
-					dfdFinalize.then(deferred.resolve, deferred.reject);
-				}
+			Deferred(function deferredFinalize(dfdFinalize) {
+				dfdFinalize.then(deferred.resolve, deferred.reject, deferred.notify);
+
+				Deferred(function deferredStop(dfdStop) {
+					dfdStop.then(function doneStop() {
+						self.signal("finalize", dfdFinalize);
+					}, dfdFinalize.reject, dfdFinalize.notify);
+
+					self.signal("stop", dfdStop);
+				});
 			});
 
 			return self;

@@ -1,12 +1,10 @@
 /*!
  * TroopJS base component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/**
- * The base trait provides functionality for instance counting,
- * configuration and a default 'toString' method.
- */
+/*jshint strict:false, smarttabs:true */
+/*global define:true */
 define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	var COUNT = 0;
 

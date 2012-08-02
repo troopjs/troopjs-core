@@ -1,19 +1,17 @@
 /*!
  * TroopJS widget component
- * @license TroopJS 0.0.1 Copyright 2012, Mikael Karon <mikael@karon.se>
+ * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/**
- * The widget trait provides common UI related logic
- */
+/*jshint strict:false, smarttabs:true, newcap:false */
+/*global define:true */
 define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadget, $, Deferred) {
+	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
-	var UNDEFINED = undefined;
 	var ARRAY_PROTO = Array.prototype;
 	var SHIFT = ARRAY_PROTO.shift;
 	var UNSHIFT = ARRAY_PROTO.unshift;
-	var POP = ARRAY_PROTO.pop;
 	var $TRIGGER = $.fn.trigger;
 	var $ONE = $.fn.one;
 	var $BIND = $.fn.bind;
@@ -66,40 +64,37 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 			var $element = self[$ELEMENT];
 			var arg = arguments;
 
-			// Get contents from first argument
+			// Shift contents from first argument
 			var contents = SHIFT.call(arg);
 
-			// Get arg length
-			var argc = arg.length;
+			// Assume deferred is the last argument
+			var deferred = arg[arg.length - 1];
 
-			// Check if the last argument looks like a deferred, and in that case set it
-			var deferred = argc > 0 && arg[argc - 1][THEN] instanceof FUNCTION
-				? POP.call(arg)
-				: UNDEFINED;
-
-			if (deferred){
-				deferred.notifyWith(this, ['beforeRender']);
-			}
-
-			// Call render with contents (or result of contents if it's a function)
-			$fn.call($element, contents instanceof FUNCTION ? contents.apply(self, arg) : contents);
-
-			if (deferred){
-				deferred.notifyWith(this, ['afterRender']);
+			// If deferred not a true Deferred, make it so
+			if (deferred === UNDEFINED || !(deferred[THEN] instanceof FUNCTION)) {
+				deferred = Deferred();
 			}
 
 			// Defer render (as weaving it may need to load async)
 			Deferred(function deferredRender(dfdRender) {
 
-				// After render is complete, trigger REFRESH with woven components
-				dfdRender.done(function renderDone() {
-					$element.trigger(REFRESH, arguments);
-				});
-
 				// Link deferred
-				if (deferred) {
-					dfdRender.then(deferred.resolve, deferred.reject, deferred.notify);
-				}
+				dfdRender.then(function renderDone() {
+					// Trigger refresh
+					$element.trigger(REFRESH, arguments);
+
+					// Resolve outer deferred
+					deferred.resolve();
+				}, deferred.reject, deferred.notify);
+
+				// Notify that we're about to render
+				dfdRender.notify("beforeRender", self);
+
+				// Call render with contents (or result of contents if it's a function)
+				$fn.call($element, contents instanceof FUNCTION ? contents.apply(self, arg) : contents);
+
+				// Notify that we're rendered
+				dfdRender.notify("afterRender", self);
 
 				// Weave element
 				$element.find(ATTR_WEAVE).weave(dfdRender);
@@ -125,7 +120,7 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 		"sig/initialize" : function initialize(signal, deferred) {
 			var self = this;
 			var $element = self[$ELEMENT];
-			var $proxies = self[$PROXIES] = [];;
+			var $proxies = self[$PROXIES] = [];
 			var key = NULL;
 			var value;
 			var matches;
@@ -176,7 +171,7 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 			var $proxy;
 
 			// Loop over subscriptions
-			while ($proxy = $proxies.shift()) {
+			while (($proxy = $proxies.shift()) !== UNDEFINED) {
 				$element.unbind($proxy[0], $proxy[1]);
 			}
 
@@ -202,12 +197,13 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 
 		/**
 		 * Unweaves all children of $element _and_ self
+		 * @param deferred (Deferred) Deferred (optional)
 		 * @returns self
 		 */
-		unweave : function unweave() {
+		unweave : function unweave(deferred) {
 			var self = this;
 
-			self[$ELEMENT].find(ATTR_WOVEN).andSelf().unweave();
+			self[$ELEMENT].find(ATTR_WOVEN).andSelf().unweave(deferred);
 
 			return this;
 		},
@@ -298,8 +294,14 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 		empty : function empty(deferred) {
 			var self = this;
 
+			// Ensure we have deferred
+			deferred = deferred || Deferred();
+
 			// Create deferred for emptying
-			Deferred(function emptyDeferred(dfd) {
+			Deferred(function emptyDeferred(dfdEmpty) {
+				// Link deferred
+				dfdEmpty.then(deferred.resolve, deferred.reject, deferred.notify);
+
 				// Get element
 				var $element = self[$ELEMENT];
 
@@ -318,13 +320,8 @@ define([ "./gadget", "jquery", "../util/deferred" ], function WidgetModule(Gadge
 					$contents.remove();
 
 					// Resolve deferred
-					dfd.resolve(contents);
+					dfdEmpty.resolve(contents);
 				}, 0);
-
-				// If a deferred was passed, add resolve/reject
-				if (deferred) {
-					dfd.then(deferred.resolve, deferred.reject);
-				}
 			});
 
 			return self;
