@@ -5,7 +5,7 @@
  */
 /*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true */
 /*global define:true */
-define([ "compose", "./base", "../util/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
+define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
 	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;

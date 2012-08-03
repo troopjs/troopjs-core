@@ -5,7 +5,7 @@
  */
 /*jshint strict:false, smarttabs:true, laxbreak:true */
 /*global define:true */
-define([ "../component/base", "../util/unique" ], function TopicModule(Component, unique) {
+define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Component, unique) {
 	var TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARRAY = TOSTRING.call(Array.prototype);
 
