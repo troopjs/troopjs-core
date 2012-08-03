@@ -3,7 +3,7 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "../component/service", "../util/uri" ], function RouterModule(Service, URI) {
+define([ "../component/service", "troopjs-utils/uri" ], function RouterModule(Service, URI) {
 	var HASHCHANGE = "hashchange";
 	var $ELEMENT = "$element";
 	var ROUTE = "route";

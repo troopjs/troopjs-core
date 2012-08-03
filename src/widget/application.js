@@ -3,7 +3,7 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "../component/widget", "../util/deferred" ], function ApplicationModule(Widget, Deferred) {
+define([ "../component/widget", "troopjs-utils/deferred" ], function ApplicationModule(Widget, Deferred) {
 	return Widget.extend({
 		displayName : "core/widget/application",
 
