@@ -118,10 +118,11 @@ define([ "../component/widget", "troopjs-utils/deferred" ], function WidgetPlace
 	}, {
 		displayName : "core/widget/placeholder",
 
+		"sig/finalize" : function onFinalize(signal, deferred) {
+			this.hold(deferred);
+		},
+
 		release : release,
-		hold : hold,
-		finalize : function onFinalize(signal, deferred) {
-			hold(deferred);
-		}
+		hold : hold
 	});
 });
