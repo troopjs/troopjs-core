@@ -120,6 +120,8 @@ define([ "../component/widget", "troopjs-utils/deferred" ], function WidgetPlace
 
 		release : release,
 		hold : hold,
-		finalize : hold
+		finalize : function onFinalize(signal, deferred) {
+			hold(deferred);
+		}
 	});
 });
