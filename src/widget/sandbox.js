@@ -31,6 +31,15 @@ define( [ "../component/widget", "jquery" ], function SandboxModule(Widget, $) {
 
 		"sig/stop" : function onStop(signal, deferred) {
 			this.unweave(deferred);
+		},
+
+		"sig/finalize": function onFinalize(signal, deferred){
+
+			delete this[_$ELEMENT];
+			
+			if (deferred){
+				deferred.resolve();
+			}
 		}
 	});
 });
