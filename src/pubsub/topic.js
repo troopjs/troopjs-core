@@ -13,23 +13,24 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 		return a.publisherInstanceCount === b.publisherInstanceCount;
 	}
 
+	/**
+	 * Generates string representation of this object
+	 * @returns Instance topic
+	 */
+	function topicToString() {
+		return this.topic;
+	}
+
 	return Component.extend(function Topic(topic, publisher, parent) {
 		var self = this;
 
+		self.toString = topicToString;
 		self.topic = topic;
 		self.publisher = publisher;
 		self.parent = parent;
 		self.publisherInstanceCount = publisher.instanceCount;
 	}, {
 		displayName : "core/pubsub/topic",
-
-		/**
-		 * Generates string representation of this object
-		 * @returns Instance topic
-		 */
-		toString : function toString() {
-			return this.topic;
-		},
 
 		/**
 		 * Traces topic origin to root
