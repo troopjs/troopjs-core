@@ -70,7 +70,7 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 	 */
 	Topic.prototype.toString = function () {
 		return this.topic;
-	}
+	};
 
 	return Topic;
 });
