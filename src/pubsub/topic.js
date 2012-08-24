@@ -13,18 +13,9 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 		return a.publisherInstanceCount === b.publisherInstanceCount;
 	}
 
-	/**
-	 * Generates string representation of this object
-	 * @returns Instance topic
-	 */
-	function topicToString() {
-		return this.topic;
-	}
-
-	return Component.extend(function Topic(topic, publisher, parent) {
+	var Topic = Component.extend(function Topic(topic, publisher, parent) {
 		var self = this;
 
-		self.toString = topicToString;
 		self.topic = topic;
 		self.publisher = publisher;
 		self.parent = parent;
@@ -72,4 +63,14 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 			return stack;
 		}
 	});
+
+	/**
+	 * Generates string representation of this object
+	 * @returns Instance topic
+	 */
+	Topic.prototype.toString = function () {
+		return this.topic;
+	}
+
+	return Topic;
 });

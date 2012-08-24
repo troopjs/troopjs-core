@@ -8,18 +8,7 @@
 define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	var COUNT = 0;
 
-	/**
-	 * Generates string representation of this object
-	 * @returns Combination displayName and instanceCount
-	 */
-	function baseToString(){
-		var self = this;
-
-		return self.displayName + "@" + self.instanceCount;
-	}
-
-	return Compose(function Component() {
-		this.toString = baseToString;
+	var Component = Compose(function Component() {
 		this.instanceCount = COUNT++;
 	}, {
 		displayName : "core/component",
@@ -29,4 +18,16 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 		 */
 		config : config
 	});
+
+	/**
+	 * Generates string representation of this object
+	 * @returns Combination displayName and instanceCount
+	 */
+	Component.prototype.toString = function () {
+		var self = this;
+
+		return self.displayName + "@" + self.instanceCount;
+	};
+
+	return Component;
 });
