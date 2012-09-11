@@ -5,7 +5,7 @@
  */
 /*jshint strict:false, smarttabs:true, laxbreak:true */
 /*global define:true */
-define([ "../component/widget", "troopjs-utils/deferred" ], function WidgetPlaceholderModule(Widget, Deferred) {
+define([ "../component/widget", "troopjs-utils/deferred", "require" ], function WidgetPlaceholderModule(Widget, Deferred, parentRequire) {
 	var FUNCTION = Function;
 	var POP = Array.prototype.pop;
 	var HOLDING = "holding";
@@ -58,7 +58,7 @@ define([ "../component/widget", "troopjs-utils/deferred" ], function WidgetPlace
 				}
 
 				// Require widget by name
-				require([ name ], function required(Widget) {
+				parentRequire([ name ], function required(Widget) {
 					// Defer require
 					Deferred(function deferredStart(dfdRequire) {
 						// Constructed and initialized instance
@@ -118,8 +118,11 @@ define([ "../component/widget", "troopjs-utils/deferred" ], function WidgetPlace
 	}, {
 		displayName : "core/widget/placeholder",
 
+		"sig/finalize" : function finalize(signal, deferred) {
+			this.hold(deferred);
+		},
+
 		release : release,
-		hold : hold,
-		finalize : hold
+		hold : hold
 	});
 });
