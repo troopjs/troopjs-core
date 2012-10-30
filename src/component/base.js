@@ -5,11 +5,12 @@
  */
 /*jshint strict:false, smarttabs:true */
 /*global define:true */
-define([ "compose", "config" ], function ComponentModule(Compose, config) {
+define([ "../event/emitter", "config" ], function ComponentModule(Emitter, config) {
 	var COUNT = 0;
+	var INSTANCE_COUNT = "instanceCount";
 
-	var Component = Compose(function Component() {
-		this.instanceCount = COUNT++;
+	var Component = Emitter.extend(function Component() {
+		this[INSTANCE_COUNT] = COUNT++;
 	}, {
 		displayName : "core/component",
 
@@ -26,7 +27,7 @@ define([ "compose", "config" ], function ComponentModule(Compose, config) {
 	Component.prototype.toString = function () {
 		var self = this;
 
-		return self.displayName + "@" + self.instanceCount;
+		return self.displayName + "@" + self[INSTANCE_COUNT];
 	};
 
 	return Component;
