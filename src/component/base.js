@@ -5,19 +5,14 @@
  */
 /*jshint strict:false, smarttabs:true */
 /*global define:true */
-define([ "../event/emitter", "config" ], function ComponentModule(Emitter, config) {
+define([ "../event/emitter" ], function ComponentModule(Emitter) {
 	var COUNT = 0;
 	var INSTANCE_COUNT = "instanceCount";
 
 	var Component = Emitter.extend(function Component() {
 		this[INSTANCE_COUNT] = COUNT++;
 	}, {
-		displayName : "core/component",
-
-		/**
-		 * Application configuration
-		 */
-		config : config
+		displayName : "core/component"
 	});
 
 	/**
