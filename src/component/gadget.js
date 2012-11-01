@@ -3,9 +3,10 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*global define:true */
+/*global define:false */
 define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
 	/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true */
+
 	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
