@@ -30,7 +30,7 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 		var signals = {};
 		var signal;
 		var matches;
-		var key = null;
+		var key;
 
 		// Iterate base chain (while there's a prototype)
 		for (i = bases.length - 1; i >= 0; i--) {
@@ -126,7 +126,7 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 			var self = this;
 
 			var subscriptions = self[SUBSCRIPTIONS] = [];
-			var key = NULL;
+			var key;
 			var value;
 			var matches;
 			var topic;
