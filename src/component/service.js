@@ -3,9 +3,9 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*jshint strict:false */
 /*global define:true */
 define([ "./gadget" ], function ServiceModule(Gadget) {
+	/*jshint strict:false */
 	return Gadget.extend({
 		displayName : "core/component/service"
 	});

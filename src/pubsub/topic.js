@@ -3,9 +3,9 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*jshint strict:false, smarttabs:true, laxbreak:true */
 /*global define:true */
 define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Component, unique) {
+	/*jshint strict:false, smarttabs:true, laxbreak:true */
 	var TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARRAY = TOSTRING.call(Array.prototype);
 

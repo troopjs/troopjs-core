@@ -3,9 +3,9 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*jshint strict:false */
 /*global define:true */
 define([ "../component/service", "../pubsub/topic", "jquery", "troopjs-utils/merge" ], function AjaxModule(Service, Topic, $, merge) {
+	/*jshint strict:false */
 	return Service.extend({
 		displayName : "core/remote/ajax",
 

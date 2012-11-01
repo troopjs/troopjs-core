@@ -3,9 +3,9 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*jshint strict:false, smarttabs:true, laxbreak:true */
 /*global define:true */
 define([ "compose" ], function EventEmitterModule(Compose) {
+	/*jshint strict:false, smarttabs:true, laxbreak:true */
 	var UNDEFINED;
 	var TRUE = true;
 	var FALSE = false;

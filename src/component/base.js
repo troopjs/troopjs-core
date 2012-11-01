@@ -3,9 +3,9 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*jshint strict:false, smarttabs:true */
 /*global define:true */
 define([ "../event/emitter" ], function ComponentModule(Emitter) {
+	/*jshint strict:false, smarttabs:true */
 	var COUNT = 0;
 	var INSTANCE_COUNT = "instanceCount";
 
