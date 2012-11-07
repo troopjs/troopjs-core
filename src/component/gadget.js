@@ -4,7 +4,7 @@
  * Released under the MIT license.
  */
 /*global define:false */
-define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
+define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(Compose, Component, when, hub) {
 	/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true */
 
 	var UNDEFINED;
@@ -81,49 +81,21 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 
 		// Extend self
 		Compose.call(self, {
-			signal : function onSignal(signal, deferred) {
+			signal : function onSignal(signal) {
 				var _self = this;
-				var _callbacks;
-				var _j;
-				var head = deferred;
 
-				// Only trigger if we have callbacks for this signal
-				if (signal in signals) {
-					// Get callbacks
-					_callbacks = signals[signal];
-
-					// Reset counter
-					_j = _callbacks.length;
-
-					// Build deferred chain from end to 1
-					while (--_j) {
-						// Create new deferred
-						head = Deferred(function (dfd) {
-							// Store callback and deferred as they will have changed by the time we exec
-							var _callback = _callbacks[_j];
-							var _deferred = head;
-
-							// Add done handler
-							dfd.done(function done() {
-								_callback.call(_self, signal, _deferred);
-							});
-						});
-					}
-
-					// Execute first sCallback, use head deferred
-					_callbacks[0].call(_self, signal, head);
-				}
-				else if (deferred) {
-					deferred.resolve();
-				}
-
-				return _self;
+				// If we have callbacks for this signal, exec, otherwise just resolve
+				return signal in signals
+					? when.map(signals[signal], function (callback) {
+						return callback.call(_self, signal);
+					})
+					: when.resolve();
 			}
 		});
 	}, {
 		displayName : "core/component/gadget",
 
-		"sig/initialize" : function initialize(signal, deferred) {
+		"sig/initialize" : function initialize() {
 			var self = this;
 
 			var subscriptions = self[SUBSCRIPTIONS] = [];
@@ -150,7 +122,7 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 					topic = matches[2];
 
 					// Subscribe
-					hub.subscribe(topic, self, matches[1] === MEMORY, value);
+					SUBSCRIBE.call(hub, topic, self, matches[1] === MEMORY, value);
 
 					// Store in subscriptions
 					subscriptions[subscriptions.length] = [topic, self, value];
@@ -160,32 +132,24 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 				}
 			}
 
-			if (deferred) {
-				deferred.resolve();
-			}
-
 			return self;
 		},
 
-		"sig/finalize" : function finalize(signal, deferred) {
+		"sig/finalize" : function finalize() {
 			var self = this;
 			var subscriptions = self[SUBSCRIPTIONS];
 			var subscription;
 
 			// Loop over subscriptions
 			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
-				hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
-			}
-
-			if (deferred) {
-				deferred.resolve();
+				UNSUBSCRIBE.call(hub, subscription[0], subscription[1], subscription[2]);
 			}
 
 			return self;
 		},
 
 		/**
-			 * Calls hub.publish in self context
+		 * Calls hub.publish in self context
 		 * @returns self
 		 */
 		publish : function publish() {
@@ -220,44 +184,20 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 			return self;
 		},
 
-		start : function start(deferred) {
+		start : function start() {
 			var self = this;
 
-			deferred = deferred || Deferred();
-
-			Deferred(function deferredStart(dfdStart) {
-				dfdStart.then(deferred.resolve, deferred.reject, deferred.notify);
-
-				Deferred(function deferredInitialize(dfdInitialize) {
-					dfdInitialize.then(function doneInitialize() {
-						self.signal("start", dfdStart);
-					}, dfdStart.reject, dfdStart.notify);
-
-					self.signal("initialize", dfdInitialize);
-				});
+			return when.map(["initialize", "start"], function (signal) {
+				return self.signal(signal);
 			});
-
-			return self;
 		},
 
-		stop : function stop(deferred) {
+		stop : function stop() {
 			var self = this;
 
-			deferred = deferred || Deferred();
-
-			Deferred(function deferredFinalize(dfdFinalize) {
-				dfdFinalize.then(deferred.resolve, deferred.reject, deferred.notify);
-
-				Deferred(function deferredStop(dfdStop) {
-					dfdStop.then(function doneStop() {
-						self.signal("finalize", dfdFinalize);
-					}, dfdFinalize.reject, dfdFinalize.notify);
-
-					self.signal("stop", dfdStop);
-				});
+			return when.map(["stop", "finalize"], function (signal) {
+				return self.signal(signal);
 			});
-
-			return self;
 		}
 	});
 });
