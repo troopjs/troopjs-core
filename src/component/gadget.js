@@ -10,6 +10,7 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
+	var SLICE = Array.prototype.slice;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig\/(.+)/;
 	var PUBLISH = hub.publish;
@@ -83,13 +84,15 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 		Compose.call(self, {
 			signal : function onSignal(signal) {
 				var _self = this;
+				var args = SLICE.call(arguments);
 
-				// If we have callbacks for this signal, exec, otherwise just resolve
-				return signal in signals
-					? when.map(signals[signal], function (callback) {
+				return when.map(signals[signal], args.length > 1
+					? function (callback) {
+						return callback.apply(_self, args);
+					}
+					: function (callback) {
 						return callback.call(_self, signal);
-					})
-					: when.resolve();
+					});
 			}
 		});
 	}, {
