@@ -18,7 +18,6 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
-	var MEMORY = "memory";
 	var SUBSCRIPTIONS = "subscriptions";
 
 	return Component.extend(function Gadget() {
@@ -127,7 +126,7 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 					topic = matches[2];
 
 					// Subscribe
-					SUBSCRIBE.call(hub, topic, self, matches[1] === MEMORY, value);
+					SUBSCRIBE.call(hub, topic, self, matches[1] === "memory", value);
 
 					// Store in subscriptions
 					subscriptions[subscriptions.length] = [topic, self, value];
