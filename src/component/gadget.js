@@ -101,7 +101,6 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 
 		"sig/initialize" : function initialize() {
 			var self = this;
-
 			var subscriptions = self[SUBSCRIPTIONS] = [];
 			var key;
 			var value;
