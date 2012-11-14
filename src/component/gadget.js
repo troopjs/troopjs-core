@@ -135,8 +135,6 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 					self[key] = NULL;
 				}
 			}
-
-			return self;
 		},
 
 		"sig/finalize" : function finalize() {
@@ -148,8 +146,6 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
 				UNSUBSCRIBE.call(hub, subscription[0], subscription[1], subscription[2]);
 			}
-
-			return self;
 		},
 
 		/**
