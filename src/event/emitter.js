@@ -114,45 +114,22 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 					// Get handled
 					handled = memory[HANDLED];
 
-					// Optimize for arguments
-					if (memory[LENGTH] > 0 ) {
-						// Loop through handlers
-						while(handler) {
-							// Skip to next handler if this handler has already been handled
-							if (handler[HANDLED] === handled) {
-								handler = handler[NEXT];
-								continue;
-							}
-
-							// Store handled
-							handler[HANDLED] = handled;
-
-							// Apply handler callback
-							handler[CALLBACK].apply(handler[CONTEXT], memory);
-
-							// Update handler
+					// Loop through handlers
+					while(handler) {
+						// Skip to next handler if this handler has already been handled
+						if (handler[HANDLED] === handled) {
 							handler = handler[NEXT];
+							continue;
 						}
-					}
-					// Optimize for no arguments
-					else {
-						// Loop through handlers
-						while(handler) {
-							// Skip to next handler if this handler has already been handled
-							if (handler[HANDLED] === handled) {
-								handler = handler[NEXT];
-								continue;
-							}
 
-							// Store handled
-							handler[HANDLED] = handled;
+						// Store handled
+						handler[HANDLED] = handled;
 
-							// Call handler callback
-							handler[CALLBACK].call(handler[CONTEXT]);
+						// Apply handler callback
+						handler[CALLBACK].apply(handler[CONTEXT], memory);
 
-							// Update handler
-							handler = handler[NEXT];
-						}
+						// Update handler
+						handler = handler[NEXT];
 					}
 				}
 			}
@@ -300,45 +277,22 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 				// Get first handler
 				handler = handlers[HEAD];
 
-				// Optimize for arguments
-				if (arg[LENGTH] > 0) {
-					// Loop through handlers
-					while(handler) {
-						// Skip to next handler if this handler has already been handled
-						if (handler[HANDLED] === handled) {
-							handler = handler[NEXT];
-							continue;
-						}
-
-						// Update handled
-						handler[HANDLED] = handled;
-
-						// Apply handler callback
-						handler[CALLBACK].apply(handler[CONTEXT], arg);
-
-						// Update handler
+				// Loop through handlers
+				while(handler) {
+					// Skip to next handler if this handler has already been handled
+					if (handler[HANDLED] === handled) {
 						handler = handler[NEXT];
+						continue;
 					}
-				}
-				// Optimize for no arguments
-				else {
-					// Loop through handlers
-					while(handler) {
-						// Skip to next handler if this handler has already been handled
-						if (handler[HANDLED] === handled) {
-							handler = handler[NEXT];
-							continue;
-						}
 
-						// Update handled
-						handler[HANDLED] = handled;
+					// Update handled
+					handler[HANDLED] = handled;
 
-						// Call handler callback
-						handler[CALLBACK].call(handler[CONTEXT]);
+					// Apply handler callback
+					handler[CALLBACK].apply(handler[CONTEXT], arg);
 
-						// Update handler
-						handler = handler[NEXT];
-					}
+					// Update handler
+					handler = handler[NEXT];
 				}
 			}
 			// No handlers
