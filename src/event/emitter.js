@@ -4,7 +4,7 @@
  * Released under the MIT license.
  */
 /*global define:false */
-define([ "compose" ], function EventEmitterModule(Compose) {
+define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	/*jshint strict:false, smarttabs:true, laxbreak:true */
 
 	var UNDEFINED;
@@ -48,6 +48,29 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 			var head;
 			var tail;
 			var offset;
+
+			function next(_memory) {
+				// Update memory
+				memory = _memory || memory;
+
+				// Step forward until we find a unhandled handler
+				while(handler[HANDLED] === handled) {
+					// No more handlers, escape!
+					if (!(handler = handler[NEXT])) {
+						// Remember memory
+						handlers[MEMORY] = memory;
+
+						// Return promise resolved with memory
+						return when.resolve(memory);
+					}
+				}
+
+				// Update handled
+				handler[HANDLED] = handled;
+
+				// Return promise of callback execution, chain next
+				return when(handler[CALLBACK].apply(handler[CONTEXT], memory), next);
+			}
 
 			// No context or memory was supplied
 			if (context instanceof FUNCTION) {
@@ -112,24 +135,13 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 					memory = handlers[MEMORY];
 
 					// Get handled
-					handled = memory[HANDLED];
+					handled = handlers[HANDLED];
 
-					// Loop through handlers
-					while(handler) {
-						// Skip to next handler if this handler has already been handled
-						if (handler[HANDLED] === handled) {
-							handler = handler[NEXT];
-							continue;
-						}
-
-						// Store handled
-						handler[HANDLED] = handled;
-
-						// Apply handler callback
-						handler[CALLBACK].apply(handler[CONTEXT], memory);
-
-						// Update handler
-						handler = handler[NEXT];
+					try {
+						next();
+					}
+					catch (e) {
+//						when.reject(e);
 					}
 				}
 			}
@@ -259,52 +271,76 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 		 */
 		emit : function emit(event /*, arg, arg, ..*/) {
 			var self = this;
-			var arg = arguments;
+			var memory = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
+			var handled;
 
-			// Store handled
-			var handled = arg[HANDLED] = COUNT++;
+			function next(_memory) {
+				// Update memory
+				memory = _memory || memory;
 
-			// Have handlers
+				// Step forward until we find a unhandled handler
+				while(handler[HANDLED] === handled) {
+					// No more handlers, escape!
+					if (!(handler = handler[NEXT])) {
+						// Remember memory
+						handlers[MEMORY] = memory;
+
+						// Return promise resolved with memory
+						return when.resolve(memory);
+					}
+				}
+
+				// Update handled
+				handler[HANDLED] = handled;
+
+				// Return promise of callback execution, chain next
+				return when(handler[CALLBACK].apply(handler[CONTEXT], memory), next);
+			}
+
+			// Have event in handlers
 			if (event in handlers) {
 				// Get handlers
 				handlers = handlers[event];
 
-				// Remember arguments
-				handlers[MEMORY] = arg;
+				// Update handled
+				handled = handlers[HANDLED] = COUNT++;
 
-				// Get first handler
-				handler = handlers[HEAD];
+				// Have head in handlers
+				if (HEAD in handlers) {
+					// Get first handler
+					handler = handlers[HEAD];
 
-				// Loop through handlers
-				while(handler) {
-					// Skip to next handler if this handler has already been handled
-					if (handler[HANDLED] === handled) {
-						handler = handler[NEXT];
-						continue;
+					try {
+						// Return promise
+						return next();
 					}
+					catch (e) {
+						// Return promise rejected with exception
+						return when.reject(e);
+					}
+				}
+				// No head in handlers
+				else {
+					// Remember memory
+					handlers[MEMORY] = memory;
 
-					// Update handled
-					handler[HANDLED] = handled;
-
-					// Apply handler callback
-					handler[CALLBACK].apply(handler[CONTEXT], arg);
-
-					// Update handler
-					handler = handler[NEXT];
+					// Return promise resolved  with memory
+					return when.resolve(memory);
 				}
 			}
-			// No handlers
-			else if (arg[LENGTH] > 0){
+			// No event in handlers
+			else {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
 
 				// Remember arguments
-				handlers[MEMORY] = arg;
-			}
+				handlers[MEMORY] = memory;
 
-			return this;
+				// Return promise resolved  with memory
+				return when.resolve(memory);
+			}
 		}
 	});
 });

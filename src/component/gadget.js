@@ -165,11 +165,7 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 		 * @returns self
 		 */
 		publish : function publish() {
-			var self = this;
-
-			PUBLISH.apply(hub, arguments);
-
-			return self;
+			return PUBLISH.apply(hub, arguments);
 		},
 
 		/**
