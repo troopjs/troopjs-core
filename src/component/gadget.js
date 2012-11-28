@@ -12,7 +12,6 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
-	var ARRAY_CONCAT = ARRAY_PROTO.concat;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig\/(.+)/;
 	var PUBLISH = hub.publish;
@@ -86,14 +85,28 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 			signal : function onSignal(signal) {
 				var _self = this;
 				var args = ARRAY_SLICE.call(arguments);
+				var callbacks = signals[signal] || [];
+				var length = callbacks.length;
+				var index = 0;
 
-				return when.reduce(signals[signal], args.length > 1
-					? function (results, callback) {
-						return callback.apply(_self, args);
-					}
-					: function (results, callback) {
-						return callback.call(_self, signal);
-					}, NULL);
+				function next(_args) {
+					// Update args
+					args = _args || args;
+
+					// Return a chained promise of next callback, or a promise resolved with args
+					return length > index
+						? when(callbacks[index++].apply(_self, args), next)
+						: when.resolve(args);
+				}
+
+				try {
+					// Return promise
+					return next();
+				}
+				catch (e) {
+					// Return rejected promise
+					return when.reject(e);
+				}
 			}
 		});
 	}, {
@@ -185,30 +198,18 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 
 		start : function start() {
 			var self = this;
-			var self_signal = self.signal;
-			var args = ARRAY_SLICE.call(arguments);
 
-			return when.reduce(["initialize", "start"], args.length > 1
-				? function (results, signal) {
-					return self_signal.apply(self, ARRAY_CONCAT.call(ARRAY_PROTO, signal, args));
-				}
-				: function (results, signal) {
-					return self_signal.call(self, signal);
-				}, NULL);
+			return self.signal("initialize").then(function () {
+				return self.signal("start");
+			});
 		},
 
 		stop : function stop() {
 			var self = this;
-			var self_signal = self.signal;
-			var args = ARRAY_SLICE.call(arguments);
 
-			return when.reduce(["stop", "finalize"], args.length > 1
-				? function (results, signal) {
-					return self_signal.apply(self, ARRAY_CONCAT.call(ARRAY_PROTO, signal, args));
-				}
-				: function (results, signal) {
-					return self_signal.call(self, signal);
-				}, NULL);
+			return self.signal("stop").then(function () {
+				return self.signal("finalize");
+			});
 		}
 	});
 });
