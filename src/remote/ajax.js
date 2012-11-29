@@ -10,14 +10,14 @@ define([ "../component/service", "../pubsub/topic", "jquery", "troopjs-utils/mer
 	return Service.extend({
 		displayName : "core/remote/ajax",
 
-		"hub/ajax" : function request(topic, settings, deferred) {
+		"hub/ajax" : function ajax(topic, settings) {
 			// Request
-			$.ajax(merge.call({
+			return $.ajax(merge.call({
 				"headers": {
 					"x-request-id": new Date().getTime(),
 					"x-components": topic instanceof Topic ? topic.trace() : topic
 				}
-			}, settings)).then(deferred.resolve, deferred.reject, deferred.notify);
+			}, settings));
 		}
 	});
 });
