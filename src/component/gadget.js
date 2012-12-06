@@ -13,10 +13,11 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
-	var RE_SIG = /^sig\/(.+)/;
+	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
+	var SIGNALS = "signals";
 	var SUBSCRIPTIONS = "subscriptions";
 
 	return Component.extend(function Gadget() {
@@ -25,18 +26,17 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 		var base;
 		var callbacks;
 		var callback;
-		var i;
+		var i = bases.length;
 		var j;
 		var jMax;
 
-		var signals = {};
+		var signals = self[SIGNALS] = {};
 		var signal;
 		var matches;
 		var key;
 
-		// Iterate base chain (while there's a prototype)
-		for (i = bases.length - 1; i >= 0; i--) {
-			base = bases[i];
+		// Iterate base chain (backwards)
+		while(base = bases[--i]) {
 
 			add: for (key in base) {
 				// Get value
@@ -47,68 +47,38 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 					continue;
 				}
 
-				// Match signature in key
-				matches = RE_SIG.exec(key);
+				// Continue if we can't match
+				if ((matches = RE_SIG.exec(key)) === NULL) {
+					continue;
+				}
 
-				if (matches !== NULL) {
-					// Get signal
-					signal = matches[1];
+				// Get signal
+				signal = matches[2];
 
-					// Have we stored any callbacks for this signal?
-					if (signal in signals) {
-						// Get callbacks (for this signal)
-						callbacks = signals[signal];
+				// Have we stored any callbacks for this signal?
+				if (signal in signals) {
+					// Get callbacks (for this signal)
+					callbacks = signals[signal];
 
-						// Reset counters
-						j = jMax = callbacks.length;
+					// Reset counters
+					j = jMax = callbacks.length;
 
-						// Loop callbacks, continue add if we've already added this callback
-						while (j--) {
-							if (callback === callbacks[j]) {
-								continue add;
-							}
+					// Loop callbacks, continue add if we've already added this callback
+					while (j--) {
+						if (callback === callbacks[j]) {
+							continue add;
 						}
+					}
 
-						// Add callback to callbacks chain
-						callbacks[jMax] = callback;
-					}
-					else {
-						// First callback
-						signals[signal] = [ callback ];
-					}
+					// Add callback to callbacks chain
+					callbacks[jMax] = callback;
+				}
+				else {
+					// First callback
+					signals[signal] = [ callback ];
 				}
 			}
 		}
-
-		// Extend self
-		Compose.call(self, {
-			signal : function onSignal(signal) {
-				var _self = this;
-				var args = ARRAY_SLICE.call(arguments);
-				var callbacks = signals[signal] || [];
-				var length = callbacks.length;
-				var index = 0;
-
-				function next(_args) {
-					// Update args
-					args = _args || args;
-
-					// Return a chained promise of next callback, or a promise resolved with args
-					return length > index
-						? when(callbacks[index++].apply(_self, args), next)
-						: when.resolve(args);
-				}
-
-				try {
-					// Return promise
-					return next();
-				}
-				catch (e) {
-					// Return rejected promise
-					return when.reject(e);
-				}
-			}
-		});
 	}, {
 		displayName : "core/component/gadget",
 
@@ -130,22 +100,22 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 					continue;
 				}
 
-				// Match signature in key
-				matches = RE_HUB.exec(key);
-
-				if (matches !== NULL) {
-					// Get topic
-					topic = matches[2];
-
-					// Subscribe
-					SUBSCRIBE.call(hub, topic, self, matches[1] === "memory", value);
-
-					// Store in subscriptions
-					subscriptions[subscriptions.length] = [topic, self, value];
-
-					// NULL value
-					self[key] = NULL;
+				// Continue if we can't match
+				if ((matches = RE_HUB.exec(key)) === NULL) {
+					continue;
 				}
+
+				// Get topic
+				topic = matches[2];
+
+				// Subscribe
+				SUBSCRIBE.call(hub, topic, self, matches[1] === "memory", value);
+
+				// Store in subscriptions
+				subscriptions[subscriptions.length] = [topic, self, value];
+
+				// NULL value
+				self[key] = NULL;
 			}
 		},
 
@@ -157,6 +127,35 @@ define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(C
 			// Loop over subscriptions
 			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
 				UNSUBSCRIBE.call(hub, subscription[0], subscription[1], subscription[2]);
+			}
+		},
+
+		"signal" : function onSignal(signal) {
+			var self = this;
+			var args = ARRAY_SLICE.call(arguments);
+			var callbacks = self[SIGNALS][signal];
+			var length = callbacks
+				? callbacks.length
+				: 0;
+			var index = 0;
+
+			function next(_args) {
+				// Update args
+				args = _args || args;
+
+				// Return a chained promise of next callback, or a promise resolved with args
+				return length > index
+					? when(callbacks[index++].apply(self, args), next)
+					: when.resolve(args);
+			}
+
+			try {
+				// Return promise
+				return next();
+			}
+			catch (e) {
+				// Return rejected promise
+				return when.reject(e);
 			}
 		},
 
