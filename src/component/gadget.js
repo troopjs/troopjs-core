@@ -4,14 +4,13 @@
  * Released under the MIT license.
  */
 /*global define:false */
-define([ "compose", "./base", "when", "../pubsub/hub" ], function GadgetModule(Compose, Component, when, hub) {
+define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
 	/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true laxbreak:true */
 
 	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
-	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
