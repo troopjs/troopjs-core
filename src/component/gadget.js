@@ -172,14 +172,14 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		/**
 		 * Calls hub.publish in self context
 		 */
-		publish : function publish() {
+		"publish" : function publish() {
 			return PUBLISH.apply(hub, arguments);
 		},
 
 		/**
 		 * Calls hub.subscribe in self context
 		 */
-		subscribe : function subscribe() {
+		"subscribe" : function subscribe() {
 			var self = this;
 
 			SUBSCRIBE.apply(hub, arguments);
@@ -190,7 +190,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		/**
 		 * Calls hub.unsubscribe in self context
 		 */
-		unsubscribe : function unsubscribe() {
+		"unsubscribe" : function unsubscribe() {
 			var self = this;
 
 			UNSUBSCRIBE.apply(hub, arguments);
@@ -202,7 +202,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 * Start the component
 		 * @return {*}
 		 */
-		start : function start() {
+		"start" : function start() {
 			var self = this;
 
 			return self.signal("initialize").then(function () {
@@ -214,7 +214,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 * Stops the component
 		 * @return {*}
 		 */
-		stop : function stop() {
+		"stop" : function stop() {
 			var self = this;
 
 			return self.signal("stop").then(function () {
