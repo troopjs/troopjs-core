@@ -81,6 +81,9 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	}, {
 		displayName : "core/component/gadget",
 
+		/**
+		 * Signal handler for 'initialize'
+		 */
 		"sig/initialize" : function initialize() {
 			var self = this;
 			var subscriptions = self[SUBSCRIPTIONS] = [];
@@ -118,6 +121,9 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			}
 		},
 
+		/**
+		 * Signal handler for 'finalize'
+		 */
 		"sig/finalize" : function finalize() {
 			var self = this;
 			var subscriptions = self[SUBSCRIPTIONS];
@@ -129,6 +135,11 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			}
 		},
 
+		/**
+		 * Signals the component
+		 * @param signal {String} Signal
+		 * @return {*}
+		 */
 		"signal" : function onSignal(signal) {
 			var self = this;
 			var args = ARRAY_SLICE.call(arguments);
@@ -160,7 +171,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 
 		/**
 		 * Calls hub.publish in self context
-		 * @returns self
 		 */
 		publish : function publish() {
 			return PUBLISH.apply(hub, arguments);
@@ -168,7 +178,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 
 		/**
 		 * Calls hub.subscribe in self context
-		 * @returns self
 		 */
 		subscribe : function subscribe() {
 			var self = this;
@@ -180,7 +189,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 
 		/**
 		 * Calls hub.unsubscribe in self context
-		 * @returns self
 		 */
 		unsubscribe : function unsubscribe() {
 			var self = this;
@@ -190,6 +198,10 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			return self;
 		},
 
+		/**
+		 * Start the component
+		 * @return {*}
+		 */
 		start : function start() {
 			var self = this;
 
@@ -198,6 +210,10 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			});
 		},
 
+		/**
+		 * Stops the component
+		 * @return {*}
+		 */
 		stop : function stop() {
 			var self = this;
 
