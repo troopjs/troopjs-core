@@ -10,7 +10,9 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var UNDEFINED;
 	var NULL = null;
 	var FUNCTION = Function;
-	var ARRAY_SLICE = Array.prototype.slice;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
@@ -204,9 +206,17 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"start" : function start() {
 			var self = this;
+			var _signal = self.signal;
+			var args = arguments;
 
-			return self.signal("initialize").then(function () {
-				return self.signal("start");
+			// Add signal to arguments
+			ARRAY_UNSHIFT.call(args, "initialize");
+
+			return _signal.apply(self, args).then(function () {
+				// Modify args to change signal
+				args[0] = "start";
+
+				return _signal.apply(self, args);
 			});
 		},
 
@@ -216,9 +226,17 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"stop" : function stop() {
 			var self = this;
+			var _signal = self.signal;
+			var args = arguments;
 
-			return self.signal("stop").then(function () {
-				return self.signal("finalize");
+			// Add signal to arguments
+			ARRAY_UNSHIFT.call(args, "stop");
+
+			return _signal.apply(self, args).then(function () {
+				// Modify args to change signal
+				args[0] = "finalize";
+
+				return _signal.apply(self, args);
 			});
 		}
 	});
