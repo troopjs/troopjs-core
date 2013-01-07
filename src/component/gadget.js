@@ -37,7 +37,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		var key;
 
 		// Iterate base chain (backwards)
-		while(base = bases[--i]) {
+		while((base = bases[--i])) {
 
 			add: for (key in base) {
 				// Get value
