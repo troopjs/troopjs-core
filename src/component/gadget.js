@@ -18,6 +18,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var PUBLISH = hub.publish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
+	var FEATURES = "features";
 	var SIGNALS = "signals";
 	var SUBSCRIPTIONS = "subscriptions";
 
@@ -76,7 +77,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				}
 				else {
 					// First callback
-					signals[signal] = [ callback ];
+					signals[signal] = [callback];
 				}
 			}
 		}
@@ -88,6 +89,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/initialize" : function initialize() {
 			var self = this;
+			var subscription;
 			var subscriptions = self[SUBSCRIPTIONS] = [];
 			var key;
 			var value;
@@ -115,8 +117,11 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				// Subscribe
 				SUBSCRIBE.call(hub, topic, self, value);
 
-				// Store in subscriptions
-				subscriptions[subscriptions.length] = [topic, self, value];
+				// Create and store subscription
+				subscriptions[subscriptions.length] = subscription = [topic, self, value];
+
+				// Store features
+				subscription[FEATURES] = matches[1];
 
 				// NULL value
 				self[key] = NULL;
