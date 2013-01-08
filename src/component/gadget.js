@@ -113,7 +113,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				topic = matches[2];
 
 				// Subscribe
-				SUBSCRIBE.call(hub, topic, self, matches[1] === "memory", value);
+				SUBSCRIBE.call(hub, topic, self, value);
 
 				// Store in subscriptions
 				subscriptions[subscriptions.length] = [topic, self, value];

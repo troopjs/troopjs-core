@@ -8,8 +8,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	/*jshint strict:false, smarttabs:true, laxbreak:true */
 
 	var UNDEFINED;
-	var TRUE = true;
-	var FALSE = false;
 	var FUNCTION = Function;
 	var MEMORY = "memory";
 	var CONTEXT = "context";
@@ -31,67 +29,29 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 *
 		 * @param event Event to subscribe to
 		 * @param context (optional) context to scope callbacks to
-		 * @param memory (optional) do we want the last value applied to callbacks
 		 * @param callback Callback for this event
 		 * @returns self
 		 */
-		on : function on(event /*, context, memory, callback, callback, ..*/) {
+		on : function on(event /*, context, callback, callback, ..*/) {
 			var self = this;
 			var arg = arguments;
 			var length = arg[LENGTH];
 			var context = arg[1];
-			var memory = arg[2];
-			var callback = arg[3];
+			var callback = arg[2];
 			var handlers = self[HANDLERS];
 			var handler;
-			var handled;
 			var head;
 			var tail;
 			var offset;
 
-			function next(_memory) {
-				// Update memory
-				memory = _memory || memory;
-
-				// Step forward until we find a unhandled handler
-				while(handler[HANDLED] === handled) {
-					// No more handlers, escape!
-					if (!(handler = handler[NEXT])) {
-						// Remember memory
-						handlers[MEMORY] = memory;
-
-						// Return promise resolved with memory
-						return when.resolve(memory);
-					}
-				}
-
-				// Update handled
-				handler[HANDLED] = handled;
-
-				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], memory), next);
-			}
-
 			// No context or memory was supplied
 			if (context instanceof FUNCTION) {
-				memory = FALSE;
 				context = ROOT;
 				offset = 1;
 			}
-			// Only memory was supplied
-			else if (context === TRUE || context === FALSE) {
-				memory = context;
-				context = ROOT;
-				offset = 2;
-			}
-			// Context was supplied, but not memory
-			else if (memory instanceof FUNCTION) {
-				memory = FALSE;
-				offset = 2;
-			}
 			// All arguments were supplied
 			else if (callback instanceof FUNCTION){
-				offset = 3;
+				offset = 2;
 			}
 			// Something is wrong, return fast
 			else {
@@ -128,22 +88,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 				// Set tail handler
 				handlers[TAIL] = tail;
-
-				// Want memory and have memory
-				if (memory && MEMORY in handlers) {
-					// Get memory
-					memory = handlers[MEMORY];
-
-					// Get handled
-					handled = handlers[HANDLED];
-
-					try {
-						next();
-					}
-					catch (e) {
-//						when.reject(e);
-					}
-				}
 			}
 			// No handlers
 			else {
@@ -233,8 +177,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 					if (handler[CALLBACK] === callback && handler[CONTEXT] === context) {
 						// Is this the first handler
 						if (handler === head) {
-							// Re-link head and previous, then
-							// continue
+							// Re-link head and previous, then continue
 							head = previous = handler[NEXT];
 							continue;
 						}
@@ -266,29 +209,32 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 * Emit an event
 		 *
 		 * @param event Event to emit
-		 * @param arg (optional) Argument
+		 * @param arg (optional) Arguments
 		 * @returns self
 		 */
 		emit : function emit(event /*, arg, arg, ..*/) {
 			var self = this;
-			var memory = arguments;
+			var arg = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
 
-			function next(_memory) {
-				// Update memory
-				memory = _memory || memory;
+			/**
+			 * Internal function for async execution handlers
+			 */
+			function next(_arg) {
+				// Update arg
+				arg = _arg || arg;
 
 				// Step forward until we find a unhandled handler
 				while(handler[HANDLED] === handled) {
 					// No more handlers, escape!
 					if (!(handler = handler[NEXT])) {
-						// Remember memory
-						handlers[MEMORY] = memory;
+						// Remember arg
+						handlers[MEMORY] = arg;
 
-						// Return promise resolved with memory
-						return when.resolve(memory);
+						// Return promise resolved with arg
+						return when.resolve(arg);
 					}
 				}
 
@@ -296,7 +242,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handler[HANDLED] = handled;
 
 				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], memory), next);
+				return when(handler[CALLBACK].apply(handler[CONTEXT], arg), next);
 			}
 
 			// Have event in handlers
@@ -314,7 +260,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 					try {
 						// Return promise
-						return next();
+						return next(arg);
 					}
 					catch (e) {
 						// Return promise rejected with exception
@@ -323,11 +269,11 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				}
 				// No head in handlers
 				else {
-					// Remember memory
-					handlers[MEMORY] = memory;
+					// Remember arg
+					handlers[MEMORY] = arg;
 
-					// Return promise resolved  with memory
-					return when.resolve(memory);
+					// Return promise resolved with arg
+					return when.resolve(arg);
 				}
 			}
 			// No event in handlers
@@ -335,11 +281,11 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
 
-				// Remember arguments
-				handlers[MEMORY] = memory;
+				// Remember arg
+				handlers[MEMORY] = arg;
 
-				// Return promise resolved  with memory
-				return when.resolve(memory);
+				// Return promise resolved with arg
+				return when.resolve(arg);
 			}
 		}
 	});
