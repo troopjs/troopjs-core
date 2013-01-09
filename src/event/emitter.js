@@ -18,8 +18,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var FILTER = "filter";
-	var NAME = "name";
 
 	return Compose(function EventEmitter() {
 		this[HANDLERS] = {};
@@ -218,7 +216,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
-			var filter = event[FILTER];
 
 			/**
 			 * Internal function for async execution handlers
@@ -228,7 +225,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				arg = _arg || arg;
 
 				// Step forward until we find a unhandled handler
-				while(handler[HANDLED] === handled || filter && !filter(handler)) {
+				while(handler[HANDLED] === handled) {
 					// No more handlers, escape!
 					if (!(handler = handler[NEXT])) {
 						// Remember arg
@@ -245,9 +242,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Return promise of callback execution, chain next
 				return when(handler[CALLBACK].apply(handler[CONTEXT], arg), next);
 			}
-
-			// (re)set arg and event
-			arg[0] = event = event[NAME] || event;
 
 			// Have event in handlers
 			if (event in handlers) {
