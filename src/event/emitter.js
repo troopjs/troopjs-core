@@ -135,18 +135,14 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var previous;
 			var offset;
 
-			// If context is a function it's actually a callback and context should be ROOT
+			// If context is a function it's actually a callback and context should be UNDEFINED
 			if (context instanceof FUNCTION) {
 				context = UNDEFINED;
 				offset = 1;
 			}
-			// Context was not a function, is callback (sanity check)
-			else if (callback instanceof FUNCTION){
-				offset = 2;
-			}
-			// Something is wrong
+			// context was not a callback
 			else {
-				throw new Error("no callbacks supplied");
+				offset = 2;
 			}
 
 			// Return fast if we don't have subscribers
@@ -157,10 +153,15 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			// Get handlers
 			handlers = handlers[event];
 
+			// Return fast if there's no HEAD
+			if (!(HEAD in handlers)) {
+				return self;
+			}
+
 			// Get head
 			head = handlers[HEAD];
 
-			// Loop over remaining arguments
+			// Loop callbacks
 			while (offset < length) {
 				// Store callback
 				callback = arg[offset++];
@@ -168,10 +169,10 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Get first handler
 				handler = previous = head;
 
-				// Loop through handlers
+				// Step through handlers
 				do {
 					// Check if this handler should be unlinked
-					if (handler[CALLBACK] === callback && handler[CONTEXT] === context) {
+					if (handler[CALLBACK] === callback && (context === UNDEFINED || handler[CONTEXT] === context)) {
 						// Is this the first handler
 						if (handler === head) {
 							// Re-link head and previous, then continue
@@ -200,6 +201,83 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			}
 
 			return self;
+		},
+
+		/**
+		 * Reemit event from memory
+		 *
+		 * @param event Event to reemit
+		 * @param context (optional) context to filter callbacks by
+		 * @param callback (optional) Callback to reemit, if none are provided all callbacks will be reemited
+		 * @returns self
+		 */
+		reemit : function reemit(event /*, context, callback, callback, ..*/) {
+			var self = this;
+			var arg = arguments;
+			var length = arg[LENGTH];
+			var context = arg[1];
+			var callback = arg[2];
+			var handlers = self[HANDLERS];
+			var handler;
+			var handled;
+			var head;
+			var offset;
+
+			// If context is a function it's actually a callback and context should be UNDEFINED
+			if (context instanceof FUNCTION) {
+				context = UNDEFINED;
+				offset = 1;
+			}
+			// context was not a callback
+			else {
+				offset = 2;
+			}
+
+			// Have event in handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
+
+				// Have memory in handlers
+				if (MEMORY in handlers) {
+					// If we have no HEAD we can return a promise resolved with memory
+					if (!(HEAD in handlers)) {
+						return when.resolve(handlers[MEMORY]);
+					}
+
+					// Get first handler
+					head = handlers[HEAD];
+
+					// Compute next handled
+					handled = handlers[HANDLED] + 1;
+
+					// Loop callbacks
+					while (offset < length) {
+						// Store callback
+						callback = arg[offset++];
+
+						// Get first handler
+						handler = head;
+
+						// Step through handlers
+						do {
+							// Check if this handler should be reemited
+							if (handler[CALLBACK] === callback && (context === UNDEFINED || handler[CONTEXT] === context)) {
+								continue;
+							}
+
+							// Mark this handler as already handled (to prevent reemit)
+							handler[HANDLED] = handled;
+						} while ((handler = handler[NEXT]) !== UNDEFINED);
+					}
+
+					// Return self.emit with memory
+					return self.emit.apply(self, handlers[MEMORY]);
+				}
+			}
+
+			// Return resolved promise
+			return when.resolve();
 		},
 
 		/**
