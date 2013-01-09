@@ -44,18 +44,18 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var tail;
 			var offset;
 
-			// No context or memory was supplied
+			// If context is a function it's actually a callback and context should be ROOT
 			if (context instanceof FUNCTION) {
 				context = ROOT;
 				offset = 1;
 			}
-			// All arguments were supplied
+			// Context was not a function, is callback (sanity check)
 			else if (callback instanceof FUNCTION){
 				offset = 2;
 			}
-			// Something is wrong, return fast
+			// Something is wrong
 			else {
-				return self;
+				throw new Error("no callbacks supplied");
 			}
 
 			// Have handlers
@@ -137,22 +137,21 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var previous;
 			var offset;
 
-			// No context or memory was supplied
+			// If context is a function it's actually a callback and context should be ROOT
 			if (context instanceof FUNCTION) {
-				callback = context;
 				context = ROOT;
 				offset = 1;
 			}
-			// All arguments were supplied
+			// Context was not a function, is callback (sanity check)
 			else if (callback instanceof FUNCTION){
 				offset = 2;
 			}
-			// Something is wrong, return fast
+			// Something is wrong
 			else {
-				return self;
+				throw new Error("no callbacks supplied");
 			}
 
-			// Fast fail if we don't have subscribers
+			// Return fast if we don't have subscribers
 			if (!(event in handlers)) {
 				return self;
 			}
