@@ -267,26 +267,18 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 						return when.reject(e);
 					}
 				}
-				// No head in handlers
-				else {
-					// Remember arg
-					handlers[MEMORY] = arg;
-
-					// Return promise resolved with arg
-					return when.resolve(arg);
-				}
 			}
 			// No event in handlers
 			else {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
-
-				// Remember arg
-				handlers[MEMORY] = arg;
-
-				// Return promise resolved with arg
-				return when.resolve(arg);
 			}
+
+			// Remember arg
+			handlers[MEMORY] = arg;
+
+			// Return promise resolved with arg
+			return when.resolve(arg);
 		}
 	});
 });
