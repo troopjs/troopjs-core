@@ -48,12 +48,12 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				offset = 1;
 			}
 			// Context was not a function, is callback (sanity check)
-			else if (callback instanceof FUNCTION){
+			else if (callback instanceof FUNCTION) {
 				offset = 2;
 			}
 			// Something is wrong
 			else {
-				throw new Error("no callbacks supplied");
+				throw new Error("no callback(s) supplied");
 			}
 
 			// Have handlers
@@ -120,8 +120,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 *
 		 * @param event Event to unsubscribe from
 		 * @param context (optional) context to scope callbacks to
-		 * @param callback (optional) Callback to unsubscribe, if none
-		 *        are provided all callbacks are unsubscribed
+		 * @param callback (optional) Callback to unsubscribe, if none are provided all callbacks are unsubscribed
 		 * @returns self
 		 */
 		off : function off(event /*, context, callback, callback, ..*/) {
