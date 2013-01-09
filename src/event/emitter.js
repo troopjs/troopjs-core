@@ -18,7 +18,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var ROOT = {};
 	var COUNT = 0;
 
 	return Compose(function EventEmitter() {
@@ -46,7 +45,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 			// If context is a function it's actually a callback and context should be ROOT
 			if (context instanceof FUNCTION) {
-				context = ROOT;
+				context = UNDEFINED;
 				offset = 1;
 			}
 			// Context was not a function, is callback (sanity check)
@@ -139,7 +138,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 			// If context is a function it's actually a callback and context should be ROOT
 			if (context instanceof FUNCTION) {
-				context = ROOT;
+				context = UNDEFINED;
 				offset = 1;
 			}
 			// Context was not a function, is callback (sanity check)
