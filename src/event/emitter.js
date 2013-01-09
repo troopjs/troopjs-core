@@ -224,15 +224,18 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			 * Internal function for async execution handlers
 			 */
 			function next(_arg) {
+				// Update arg
+				arg = _arg || arg;
+
 				// Step forward until we find a unhandled handler
 				while(handler[HANDLED] === handled || filter && !filter(handler)) {
 					// No more handlers, escape!
 					if (!(handler = handler[NEXT])) {
 						// Remember arg
-						handlers[MEMORY] = _arg;
+						handlers[MEMORY] = arg;
 
 						// Return promise resolved with arg
-						return when.resolve(_arg);
+						return when.resolve(arg);
 					}
 				}
 
@@ -240,7 +243,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handler[HANDLED] = handled;
 
 				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], _arg), next);
+				return when(handler[CALLBACK].apply(handler[CONTEXT], arg), next);
 			}
 
 			// (re)set arg and event
