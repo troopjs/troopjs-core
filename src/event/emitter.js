@@ -18,7 +18,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var COUNT = 0;
 
 	return Compose(function EventEmitter() {
 		this[HANDLERS] = {};
@@ -108,7 +107,8 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Create event list
 				handlers[event] = {
 					"head" : head,
-					"tail" : tail
+					"tail" : tail,
+					"handled" : 0
 				};
 			}
 
@@ -221,18 +221,15 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			 * Internal function for async execution handlers
 			 */
 			function next(_arg) {
-				// Update arg
-				arg = _arg || arg;
-
 				// Step forward until we find a unhandled handler
 				while(handler[HANDLED] === handled) {
 					// No more handlers, escape!
 					if (!(handler = handler[NEXT])) {
 						// Remember arg
-						handlers[MEMORY] = arg;
+						handlers[MEMORY] = _arg;
 
 						// Return promise resolved with arg
-						return when.resolve(arg);
+						return when.resolve(_arg);
 					}
 				}
 
@@ -240,7 +237,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handler[HANDLED] = handled;
 
 				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], arg), next);
+				return when(handler[CALLBACK].apply(handler[CONTEXT], _arg), next);
 			}
 
 			// Have event in handlers
@@ -249,7 +246,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handlers = handlers[event];
 
 				// Update handled
-				handled = handlers[HANDLED] = COUNT++;
+				handled = ++handlers[HANDLED];
 
 				// Have head in handlers
 				if (HEAD in handlers) {
@@ -270,6 +267,9 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			else {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
+
+				// Set handled
+				handlers[HANDLED] = 0;
 			}
 
 			// Remember arg
