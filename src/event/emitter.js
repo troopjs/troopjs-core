@@ -19,39 +19,42 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
 
-	return Compose(function EventEmitter() {
+	return Compose(
+	/**
+	 * Creates a new EventEmitter
+	 * @constructor
+	 */
+	function EventEmitter() {
 		this[HANDLERS] = {};
 	}, {
 		/**
-		 * Subscribe to a event
-		 *
-		 * @param event Event to subscribe to
-		 * @param context (optional) context to scope callbacks to
-		 * @param callback Callback for this event
-		 * @returns self
+		 * Adds a listener for the specified event.
+		 * @param {String} event to subscribe to
+		 * @param {Object} [context] to scope callbacks to
+		 * @param {...Function} callback for this event
+		 * @throws {Error} if no callbacks are provided
+		 * @return {Object} instance of this
 		 */
-		on : function on(event /*, context, callback, callback, ..*/) {
+		on : function on(event, context, callback) {
 			var self = this;
 			var arg = arguments;
 			var length = arg[LENGTH];
-			var context = arg[1];
-			var callback = arg[2];
 			var handlers = self[HANDLERS];
 			var handler;
 			var head;
 			var tail;
 			var offset;
 
-			// If context is a function it's actually a callback and context should be ROOT
+			// If context is a function it's actually a callback and context should be UNDEFINED
 			if (context instanceof FUNCTION) {
 				context = UNDEFINED;
 				offset = 1;
 			}
-			// Context was not a function, is callback (sanity check)
+			// Context was not a function, but do we have callback(s)?
 			else if (callback instanceof FUNCTION) {
 				offset = 2;
 			}
-			// Something is wrong
+			// No callback(s) provided - throw!
 			else {
 				throw new Error("no callback(s) supplied");
 			}
@@ -63,25 +66,31 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handlers = handlers[event];
 
 				// Create new handler
-				handler = {
-					"callback" : arg[offset++],
-					"context" : context
-				};
+				handler = {};
+
+				// Set handler callback to next arg from offset
+				handler[CALLBACK] = arg[offset++];
+
+				// Set handler context
+				handler[CONTEXT] = context;
 
 				// Get tail handler
 				tail = TAIL in handlers
-					// Have tail, update handlers.tail.next to point to handler
+					// Have tail, update handlers[TAIL][NEXT] to point to handler
 					? handlers[TAIL][NEXT] = handler
-					// Have no tail, update handlers.head to point to handler
+					// Have no tail, update handlers[HEAD] to point to handler
 					: handlers[HEAD] = handler;
 
 				// Iterate handlers from offset
 				while (offset < length) {
-					// Set tail -> tail.next -> handler
-					tail = tail[NEXT] = {
-						"callback" : arg[offset++],
-						"context" : context
-					};
+					// Set tail -> tail[NEXT] -> handler
+					tail = tail[NEXT] = handler = {};
+
+					// Set handler callback to next arg from offset
+					handler[CALLBACK] = arg[offset++];
+
+					// Set handler context
+					handler[CONTEXT] = context;
 				}
 
 				// Set tail handler
@@ -90,45 +99,49 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			// No handlers
 			else {
 				// Create head and tail
-				head = tail = {
-					"callback" : arg[offset++],
-					"context" : context
-				};
+				head = tail = handler = {};
+
+				// Set handler callback to next arg from offset
+				handler[CALLBACK] = arg[offset++];
+
+				// Set handler context
+				handler[CONTEXT] = context;
 
 				// Iterate handlers from offset
 				while (offset < length) {
-					// Set tail -> tail.next -> handler
-					tail = tail[NEXT] = {
-						"callback" : arg[offset++],
-						"context" : context
-					};
+					// Set tail -> tail[NEXT] -> handler
+					tail = tail[NEXT] = handler = {};
+
+					// Set handler callback to next arg from offset
+					handler[CALLBACK] = arg[offset++];
+
+					// Set handler context
+					handler[CONTEXT] = context;
 				}
 
-				// Create event list
-				handlers[event] = {
-					"head" : head,
-					"tail" : tail,
-					"handled" : 0
-				};
+				// Create event handlers
+				handlers = handlers[event] = {};
+
+				// Initialize event handlers
+				handlers[HEAD] = head;
+				handlers[TAIL] = tail;
+				handlers[HANDLED] = 0;
 			}
 
 			return self;
 		},
 
 		/**
-		 * Unsubscribes from event
-		 *
-		 * @param event Event to unsubscribe from
-		 * @param context (optional) context to scope callbacks to
-		 * @param callback (optional) Callback to unsubscribe, if none are provided all callbacks are unsubscribed
-		 * @returns self
+		 * Remove a listener for the specified event.
+		 * @param {String} event to unsubscribe from
+		 * @param {Object} [context]to scope callbacks to
+		 * @param {...Function} [callback] to unsubscribe, if none are provided all callbacks are unsubscribed
+		 * @return {Object} instance of this
 		 */
-		off : function off(event /*, context, callback, callback, ..*/) {
+		off : function off(event, context, callback) {
 			var self = this;
 			var arg = arguments;
 			var length = arg[LENGTH];
-			var context = arg[1];
-			var callback = arg[2];
 			var handlers = self[HANDLERS];
 			var handler;
 			var head;
@@ -205,18 +218,15 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 		/**
 		 * Reemit event from memory
-		 *
-		 * @param event Event to reemit
-		 * @param context (optional) context to filter callbacks by
-		 * @param callback (optional) Callback to reemit, if none are provided all callbacks will be reemited
-		 * @returns self
+		 * @param {String} event to reemit
+		 * @param {Object} [context] to filter callbacks by
+		 * @param {...Function} [callback] to reemit, if none are provided all callbacks will be reemited
+		 * @return {Object} instance of this
 		 */
-		reemit : function reemit(event /*, context, callback, callback, ..*/) {
+		reemit : function reemit(event, context, callback) {
 			var self = this;
 			var arg = arguments;
 			var length = arg[LENGTH];
-			var context = arg[1];
-			var callback = arg[2];
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
@@ -281,13 +291,11 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		},
 
 		/**
-		 * Emit an event
-		 *
-		 * @param event Event to emit
-		 * @param arg (optional) Arguments
-		 * @returns self
+		 * Execute each of the listeners in order with the supplied arguments
+		 * @param {String} event to emit
+		 * @return {Promise} promise that resolves with results from all listeners
 		 */
-		emit : function emit(event /*, arg, arg, ..*/) {
+		emit : function emit(event) {
 			var self = this;
 			var arg = arguments;
 			var handlers = self[HANDLERS];
@@ -295,7 +303,10 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var handled;
 
 			/**
-			 * Internal function for async execution handlers
+			 * Internal function for async execution of callbacks
+			 * @private
+			 * @param {Array} [_arg] result from previous callback
+			 * @return {Promise} promise of next execution
 			 */
 			function next(_arg) {
 				// Update arg
