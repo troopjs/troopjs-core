@@ -16,6 +16,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
+	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var FEATURES = "features";
@@ -126,6 +127,24 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				// NULL value
 				self[key] = NULL;
 			}
+		},
+
+		"sig/start" : function start() {
+			var self = this;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var subscription;
+			var i = subscriptions.length;
+			var results = [];
+
+			while ((subscription = subscriptions[--i]) !== UNDEFINED) {
+				if (subscription[FEATURES] !== "memory") {
+					continue;
+				}
+
+				results.push(REPUBLISH.call(hub, subscription[0], subscription[1], subscription[2]));
+			}
+
+			return when.map(results, function (o) { return o; });
 		},
 
 		/**
