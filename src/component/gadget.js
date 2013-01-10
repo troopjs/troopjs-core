@@ -12,6 +12,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var FUNCTION = Function;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var ARRAY_SPLICE = ARRAY_PROTO.splice;
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
@@ -207,8 +208,13 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"subscribe" : function subscribe() {
 			var self = this;
+			var args = arguments;
 
-			SUBSCRIBE.apply(hub, arguments);
+			// Add self as context
+			ARRAY_SPLICE.call(args, 1, 0, self);
+
+			// Subscribe
+			SUBSCRIBE.apply(hub, args);
 
 			return self;
 		},
@@ -218,8 +224,13 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"unsubscribe" : function unsubscribe() {
 			var self = this;
+			var args = arguments;
 
-			UNSUBSCRIBE.apply(hub, arguments);
+			// Add self as context
+			ARRAY_SPLICE.call(args, 1, 0, self);
+
+			// Unsubscribe
+			UNSUBSCRIBE.apply(hub, args);
 
 			return self;
 		},
