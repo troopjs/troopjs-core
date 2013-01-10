@@ -13,6 +13,7 @@ define([ "compose", "../component/base" ], function HubModule(Compose, Component
 		displayName: "core/pubsub/hub",
 		subscribe : from(Component, "on"),
 		unsubscribe : from(Component, "off"),
-		publish : from(Component, "emit")
+		publish : from(Component, "emit"),
+		republish : from(Component, "reemit")
 	});
 });

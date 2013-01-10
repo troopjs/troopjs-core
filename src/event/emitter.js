@@ -8,8 +8,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	/*jshint strict:false, smarttabs:true, laxbreak:true */
 
 	var UNDEFINED;
-	var TRUE = true;
-	var FALSE = false;
 	var FUNCTION = Function;
 	var MEMORY = "memory";
 	var CONTEXT = "context";
@@ -20,8 +18,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var ROOT = {};
-	var COUNT = 0;
 
 	return Compose(function EventEmitter() {
 		this[HANDLERS] = {};
@@ -31,71 +27,33 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 *
 		 * @param event Event to subscribe to
 		 * @param context (optional) context to scope callbacks to
-		 * @param memory (optional) do we want the last value applied to callbacks
 		 * @param callback Callback for this event
 		 * @returns self
 		 */
-		on : function on(event /*, context, memory, callback, callback, ..*/) {
+		on : function on(event /*, context, callback, callback, ..*/) {
 			var self = this;
 			var arg = arguments;
 			var length = arg[LENGTH];
 			var context = arg[1];
-			var memory = arg[2];
-			var callback = arg[3];
+			var callback = arg[2];
 			var handlers = self[HANDLERS];
 			var handler;
-			var handled;
 			var head;
 			var tail;
 			var offset;
 
-			function next(_memory) {
-				// Update memory
-				memory = _memory || memory;
-
-				// Step forward until we find a unhandled handler
-				while(handler[HANDLED] === handled) {
-					// No more handlers, escape!
-					if (!(handler = handler[NEXT])) {
-						// Remember memory
-						handlers[MEMORY] = memory;
-
-						// Return promise resolved with memory
-						return when.resolve(memory);
-					}
-				}
-
-				// Update handled
-				handler[HANDLED] = handled;
-
-				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], memory), next);
-			}
-
-			// No context or memory was supplied
+			// If context is a function it's actually a callback and context should be ROOT
 			if (context instanceof FUNCTION) {
-				memory = FALSE;
-				context = ROOT;
+				context = UNDEFINED;
 				offset = 1;
 			}
-			// Only memory was supplied
-			else if (context === TRUE || context === FALSE) {
-				memory = context;
-				context = ROOT;
+			// Context was not a function, is callback (sanity check)
+			else if (callback instanceof FUNCTION) {
 				offset = 2;
 			}
-			// Context was supplied, but not memory
-			else if (memory instanceof FUNCTION) {
-				memory = FALSE;
-				offset = 2;
-			}
-			// All arguments were supplied
-			else if (callback instanceof FUNCTION){
-				offset = 3;
-			}
-			// Something is wrong, return fast
+			// Something is wrong
 			else {
-				return self;
+				throw new Error("no callback(s) supplied");
 			}
 
 			// Have handlers
@@ -128,22 +86,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 				// Set tail handler
 				handlers[TAIL] = tail;
-
-				// Want memory and have memory
-				if (memory && MEMORY in handlers) {
-					// Get memory
-					memory = handlers[MEMORY];
-
-					// Get handled
-					handled = handlers[HANDLED];
-
-					try {
-						next();
-					}
-					catch (e) {
-//						when.reject(e);
-					}
-				}
 			}
 			// No handlers
 			else {
@@ -165,7 +107,8 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Create event list
 				handlers[event] = {
 					"head" : head,
-					"tail" : tail
+					"tail" : tail,
+					"handled" : 0
 				};
 			}
 
@@ -177,8 +120,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 *
 		 * @param event Event to unsubscribe from
 		 * @param context (optional) context to scope callbacks to
-		 * @param callback (optional) Callback to unsubscribe, if none
-		 *        are provided all callbacks are unsubscribed
+		 * @param callback (optional) Callback to unsubscribe, if none are provided all callbacks are unsubscribed
 		 * @returns self
 		 */
 		off : function off(event /*, context, callback, callback, ..*/) {
@@ -193,22 +135,17 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var previous;
 			var offset;
 
-			// No context or memory was supplied
+			// If context is a function it's actually a callback and context should be UNDEFINED
 			if (context instanceof FUNCTION) {
-				callback = context;
-				context = ROOT;
+				context = UNDEFINED;
 				offset = 1;
 			}
-			// All arguments were supplied
-			else if (callback instanceof FUNCTION){
+			// context was not a callback
+			else {
 				offset = 2;
 			}
-			// Something is wrong, return fast
-			else {
-				return self;
-			}
 
-			// Fast fail if we don't have subscribers
+			// Return fast if we don't have subscribers
 			if (!(event in handlers)) {
 				return self;
 			}
@@ -216,10 +153,15 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			// Get handlers
 			handlers = handlers[event];
 
+			// Return fast if there's no HEAD
+			if (!(HEAD in handlers)) {
+				return self;
+			}
+
 			// Get head
 			head = handlers[HEAD];
 
-			// Loop over remaining arguments
+			// Loop callbacks
 			while (offset < length) {
 				// Store callback
 				callback = arg[offset++];
@@ -227,14 +169,13 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Get first handler
 				handler = previous = head;
 
-				// Loop through handlers
+				// Step through handlers
 				do {
 					// Check if this handler should be unlinked
-					if (handler[CALLBACK] === callback && handler[CONTEXT] === context) {
+					if (handler[CALLBACK] === callback && (context === UNDEFINED || handler[CONTEXT] === context)) {
 						// Is this the first handler
 						if (handler === head) {
-							// Re-link head and previous, then
-							// continue
+							// Re-link head and previous, then continue
 							head = previous = handler[NEXT];
 							continue;
 						}
@@ -263,32 +204,112 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		},
 
 		/**
+		 * Reemit event from memory
+		 *
+		 * @param event Event to reemit
+		 * @param context (optional) context to filter callbacks by
+		 * @param callback (optional) Callback to reemit, if none are provided all callbacks will be reemited
+		 * @returns self
+		 */
+		reemit : function reemit(event /*, context, callback, callback, ..*/) {
+			var self = this;
+			var arg = arguments;
+			var length = arg[LENGTH];
+			var context = arg[1];
+			var callback = arg[2];
+			var handlers = self[HANDLERS];
+			var handler;
+			var handled;
+			var head;
+			var offset;
+
+			// If context is a function it's actually a callback and context should be UNDEFINED
+			if (context instanceof FUNCTION) {
+				context = UNDEFINED;
+				offset = 1;
+			}
+			// context was not a callback
+			else {
+				offset = 2;
+			}
+
+			// Have event in handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
+
+				// Have memory in handlers
+				if (MEMORY in handlers) {
+					// If we have no HEAD we can return a promise resolved with memory
+					if (!(HEAD in handlers)) {
+						return when.resolve(handlers[MEMORY]);
+					}
+
+					// Get first handler
+					head = handlers[HEAD];
+
+					// Compute next handled
+					handled = handlers[HANDLED] + 1;
+
+					// Loop callbacks
+					while (offset < length) {
+						// Store callback
+						callback = arg[offset++];
+
+						// Get first handler
+						handler = head;
+
+						// Step through handlers
+						do {
+							// Check if this handler should be reemited
+							if (handler[CALLBACK] === callback && (context === UNDEFINED || handler[CONTEXT] === context)) {
+								continue;
+							}
+
+							// Mark this handler as already handled (to prevent reemit)
+							handler[HANDLED] = handled;
+						} while ((handler = handler[NEXT]) !== UNDEFINED);
+					}
+
+					// Return self.emit with memory
+					return self.emit.apply(self, handlers[MEMORY]);
+				}
+			}
+
+			// Return resolved promise
+			return when.resolve();
+		},
+
+		/**
 		 * Emit an event
 		 *
 		 * @param event Event to emit
-		 * @param arg (optional) Argument
+		 * @param arg (optional) Arguments
 		 * @returns self
 		 */
 		emit : function emit(event /*, arg, arg, ..*/) {
 			var self = this;
-			var memory = arguments;
+			var arg = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
 
-			function next(_memory) {
-				// Update memory
-				memory = _memory || memory;
+			/**
+			 * Internal function for async execution handlers
+			 */
+			function next(_arg) {
+				// Update arg
+				arg = _arg || arg;
 
 				// Step forward until we find a unhandled handler
 				while(handler[HANDLED] === handled) {
 					// No more handlers, escape!
 					if (!(handler = handler[NEXT])) {
-						// Remember memory
-						handlers[MEMORY] = memory;
+						// Remember arg
+						handlers[MEMORY] = arg;
 
-						// Return promise resolved with memory
-						return when.resolve(memory);
+						// Return promise resolved with arg
+						return when.resolve(arg);
 					}
 				}
 
@@ -296,7 +317,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handler[HANDLED] = handled;
 
 				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], memory), next);
+				return when(handler[CALLBACK].apply(handler[CONTEXT], arg), next);
 			}
 
 			// Have event in handlers
@@ -305,7 +326,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				handlers = handlers[event];
 
 				// Update handled
-				handled = handlers[HANDLED] = COUNT++;
+				handled = ++handlers[HANDLED];
 
 				// Have head in handlers
 				if (HEAD in handlers) {
@@ -314,20 +335,12 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 					try {
 						// Return promise
-						return next();
+						return next(arg);
 					}
 					catch (e) {
 						// Return promise rejected with exception
 						return when.reject(e);
 					}
-				}
-				// No head in handlers
-				else {
-					// Remember memory
-					handlers[MEMORY] = memory;
-
-					// Return promise resolved  with memory
-					return when.resolve(memory);
 				}
 			}
 			// No event in handlers
@@ -335,12 +348,15 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
 
-				// Remember arguments
-				handlers[MEMORY] = memory;
-
-				// Return promise resolved  with memory
-				return when.resolve(memory);
+				// Set handled
+				handlers[HANDLED] = 0;
 			}
+
+			// Remember arg
+			handlers[MEMORY] = arg;
+
+			// Return promise resolved with arg
+			return when.resolve(arg);
 		}
 	});
 });
