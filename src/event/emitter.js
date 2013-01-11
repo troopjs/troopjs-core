@@ -1,11 +1,11 @@
-/*!
+/**
  * TroopJS event/emitter module
- * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
- * Released under the MIT license.
+ * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @preserve
  */
 /*global define:false */
 define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
-	/*jshint strict:false, smarttabs:true, laxbreak:true */
+	/*jshint laxbreak:true */
 
 	var UNDEFINED;
 	var FUNCTION = Function;
@@ -33,7 +33,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 * @param {Object} context to scope callbacks to
 		 * @param {...Function} callback for this event
 		 * @throws {Error} if no callbacks are provided
-		 * @return {Object} instance of this
+		 * @returns {Object} instance of this
 		 */
 		on : function on(event, context, callback) {
 			var self = this;
@@ -127,7 +127,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 * @param {String} event to unsubscribe from
 		 * @param {Object} context to scope callbacks to
 		 * @param {...Function} [callback] to unsubscribe, if none are provided all callbacks are unsubscribed
-		 * @return {Object} instance of this
+		 * @returns {Object} instance of this
 		 */
 		off : function off(event, context, callback) {
 			var self = this;
@@ -202,7 +202,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 * @param {String} event to reemit
 		 * @param {Object} context to filter callbacks by
 		 * @param {...Function} [callback] to reemit, if none are provided all callbacks will be reemited
-		 * @return {Object} instance of this
+		 * @returns {Object} instance of this
 		 */
 		reemit : function reemit(event, context, callback) {
 			var self = this;
@@ -264,7 +264,7 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		/**
 		 * Execute each of the listeners in order with the supplied arguments
 		 * @param {String} event to emit
-		 * @return {Promise} promise that resolves with results from all listeners
+		 * @returns {Promise} promise that resolves with results from all listeners
 		 */
 		emit : function emit(event) {
 			var self = this;
