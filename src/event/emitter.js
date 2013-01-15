@@ -7,8 +7,6 @@
 define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 	/*jshint laxbreak:true */
 
-	var UNDEFINED;
-	var FUNCTION = Function;
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
@@ -32,7 +30,6 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		 * @param {String} event to subscribe to
 		 * @param {Object} context to scope callbacks to
 		 * @param {...Function} callback for this event
-		 * @throws {Error} if no callbacks are provided
 		 * @returns {Object} instance of this
 		 */
 		on : function on(event, context, callback) {
@@ -45,14 +42,8 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var length = args[LENGTH];
 			var offset = 2;
 
-			// Make sure we have at least one callback
-			if (!(callback instanceof FUNCTION)) {
-				throw new Error("no callback(s) supplied");
-			}
-
 			// Have handlers
 			if (event in handlers) {
-
 				// Get handlers
 				handlers = handlers[event];
 
@@ -124,9 +115,9 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 
 		/**
 		 * Remove a listener for the specified event.
-		 * @param {String} event to unsubscribe from
-		 * @param {Object} context to scope callbacks to
-		 * @param {...Function} [callback] to unsubscribe, if none are provided all callbacks are unsubscribed
+		 * @param {String} event to remove callback from
+		 * @param {Object} context to scope callback to
+		 * @param {...Function} [callback] to remove
 		 * @returns {Object} instance of this
 		 */
 		off : function off(event, context, callback) {
@@ -135,9 +126,9 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var handlers = self[HANDLERS];
 			var handler;
 			var head;
-			var previous;
+			var tail;
 			var length = args[LENGTH];
-			var offset = 2;
+			var offset;
 
 			// Return fast if we don't have subscribers
 			if (!(event in handlers)) {
@@ -152,43 +143,47 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 				return self;
 			}
 
-			// Get head
-			head = handlers[HEAD];
+			// Get first handler
+			handler = handlers[HEAD];
 
-			// Loop callbacks
-			while (offset < length) {
-				// Store callback
-				callback = args[offset++];
-
-				// Get first handler
-				handler = previous = head;
-
-				// Step through handlers
-				do {
-					// Check if this handler should be unlinked
-					if (handler[CALLBACK] === callback && (context === UNDEFINED || handler[CONTEXT] === context)) {
-						// Is this the first handler
-						if (handler === head) {
-							// Re-link head and previous, then continue
-							head = previous = handler[NEXT];
-							continue;
-						}
-
-						// Unlink current handler, then continue
-						previous[NEXT] = handler[NEXT];
+			// Step through handlers
+			keep: do {
+				// Check if context matches
+				if (handler[CONTEXT] === context) {
+					// Continue if no callback was provided
+					if (length === 2) {
 						continue;
 					}
 
-					// Update previous pointer
-					previous = handler;
-				} while ((handler = handler[NEXT]) !== UNDEFINED);
-			}
+					// Reset offset, then loop callbacks
+					for (offset = 2; offset < length; offset++) {
+						// Continue if handler CALLBACK matches
+						if (handler[CALLBACK] === args[offset]) {
+							continue keep;
+						}
+					}
+				}
 
-			// Update head and tail
-			if (head && previous) {
+				// It there's no head - link head -> tail -> handler
+				if (!head) {
+					head = tail = handler;
+				}
+				// Otherwise just link tail -> tail[NEXT] -> handler
+				else {
+					tail = tail[NEXT] = handler;
+				}
+			} while ((handler = handler[NEXT]));
+
+			// If we have both head and tail we should update handlers
+			if (head && tail) {
+				// Set handlers HEAD and TAIL
 				handlers[HEAD] = head;
-				handlers[TAIL] = previous;
+				handlers[TAIL] = tail;
+
+				// Make sure to remove NEXT from tail
+				delete tail[NEXT];
 			}
+			// Otherwise we remove the handlers list
 			else {
 				delete handlers[HEAD];
 				delete handlers[TAIL];
@@ -200,8 +195,8 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 		/**
 		 * Reemit event from memory
 		 * @param {String} event to reemit
-		 * @param {Object} context to filter callbacks by
-		 * @param {...Function} [callback] to reemit, if none are provided all callbacks will be reemited
+		 * @param {Object} context to scope callback to
+		 * @param {...Function} callback to reemit
 		 * @returns {Object} instance of this
 		 */
 		reemit : function reemit(event, context, callback) {
@@ -210,9 +205,8 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
-			var head;
 			var length = args[LENGTH];
-			var offset = 2;
+			var offset;
 
 			// Have event in handlers
 			if (event in handlers) {
@@ -227,30 +221,32 @@ define([ "compose", "when" ], function EventEmitterModule(Compose, when) {
 					}
 
 					// Get first handler
-					head = handlers[HEAD];
+					handler = handlers[HEAD];
 
 					// Compute next handled
 					handled = handlers[HANDLED] + 1;
 
-					// Loop callbacks
-					while (offset < length) {
-						// Store callback
-						callback = args[offset++];
-
-						// Get first handler
-						handler = head;
-
-						// Step through handlers
-						do {
-							// Check if this handler should be reemited
-							if (handler[CALLBACK] === callback && (context === UNDEFINED || handler[CONTEXT] === context)) {
+					// Step through handlers
+					mark: do {
+						// Check if context matches
+						if (handler[CONTEXT] === context) {
+							// Continue if no callback was provided
+							if (length === 2) {
 								continue;
 							}
 
-							// Mark this handler as already handled (to prevent reemit)
-							handler[HANDLED] = handled;
-						} while ((handler = handler[NEXT]) !== UNDEFINED);
-					}
+							// Reset offset, then loop callbacks
+							for (offset = 2; offset < length; offset++) {
+								// Break if handler CALLBACK matches
+								if (handler[CALLBACK] === args[offset]) {
+									continue mark;
+								}
+							}
+						}
+
+						// Mark this handler as handled (to prevent reemit)
+						handler[HANDLED] = handled;
+					} while ((handler = handler[NEXT]));
 
 					// Return self.emit with memory
 					return self.emit.apply(self, handlers[MEMORY]);
