@@ -84,7 +84,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			}
 		}
 	}, {
-		displayName : "core/component/gadget",
+		"displayName" : "core/component/gadget",
 
 		/**
 		 * Signal handler for 'initialize'

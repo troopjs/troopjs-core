@@ -11,8 +11,8 @@ define([ "../event/emitter" ], function ComponentModule(Emitter) {
 	var Component = Emitter.extend(function Component() {
 		this[INSTANCE_COUNT] = COUNT++;
 	}, {
-		instanceCount : COUNT,
-		displayName : "core/component"
+		"instanceCount" : COUNT,
+		"displayName" : "core/component"
 	});
 
 	/**
