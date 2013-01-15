@@ -5,8 +5,6 @@
  */
 /*global define:false */
 define([ "./gadget" ], function ServiceModule(Gadget) {
-	/*jshint strict:false */
-
 	return Gadget.extend({
 		"displayName" : "core/component/service"
 	});

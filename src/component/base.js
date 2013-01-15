@@ -5,8 +5,6 @@
  */
 /*global define:false */
 define([ "../event/emitter" ], function ComponentModule(Emitter) {
-	/*jshint strict:false, smarttabs:true */
-
 	var COUNT = 0;
 	var INSTANCE_COUNT = "instanceCount";
 

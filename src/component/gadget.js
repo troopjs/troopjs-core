@@ -5,7 +5,7 @@
  */
 /*global define:false */
 define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
-	/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true laxbreak:true */
+	/*jshint laxbreak:true */
 
 	var UNDEFINED;
 	var NULL = null;
