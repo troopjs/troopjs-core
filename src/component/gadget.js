@@ -20,6 +20,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
+	var LENGTH = "length";
 	var FEATURES = "features";
 	var SIGNALS = "signals";
 	var SUBSCRIPTIONS = "subscriptions";
@@ -30,7 +31,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		var base;
 		var callbacks;
 		var callback;
-		var i = bases.length;
+		var i = bases[LENGTH];
 		var j;
 		var jMax;
 
@@ -65,7 +66,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 					callbacks = signals[signal];
 
 					// Reset counters
-					j = jMax = callbacks.length;
+					j = jMax = callbacks[LENGTH];
 
 					// Loop callbacks, continue add if we've already added this callback
 					while (j--) {
@@ -120,7 +121,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				SUBSCRIBE.call(hub, topic, self, value);
 
 				// Create and store subscription
-				subscriptions[subscriptions.length] = subscription = [topic, self, value];
+				subscriptions[subscriptions[LENGTH]] = subscription = [topic, self, value];
 
 				// Store features
 				subscription[FEATURES] = matches[1];
@@ -134,7 +135,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			var self = this;
 			var subscriptions = self[SUBSCRIPTIONS];
 			var subscription;
-			var i = subscriptions.length;
+			var i = subscriptions[LENGTH];
 			var results = [];
 
 			while ((subscription = subscriptions[--i]) !== UNDEFINED) {
@@ -172,7 +173,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			var args = ARRAY_SLICE.call(arguments);
 			var callbacks = self[SIGNALS][signal];
 			var length = callbacks
-				? callbacks.length
+				? callbacks[LENGTH]
 				: 0;
 			var index = 0;
 
