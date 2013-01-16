@@ -155,9 +155,10 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			var self = this;
 			var subscriptions = self[SUBSCRIPTIONS];
 			var subscription;
+			var i = subscriptions[LENGTH];
 
 			// Loop over subscriptions
-			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
+			while ((subscription = subscriptions[--i]) !== UNDEFINED) {
 				UNSUBSCRIBE.call(hub, subscription[0], subscription[1], subscription[2]);
 			}
 		},
