@@ -15,7 +15,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
 	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
-	var RE_EXT = /^(\w+)(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
 	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
