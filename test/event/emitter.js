@@ -3,20 +3,6 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 	require( [ "troopjs-core/event/emitter", "when" ] , function (Emitter, when) {
 
-		// a little helper to deal with async calls
-		var async = function(callbacks, done) {
-			var next = function(result) {
-				var cb = callbacks.shift();
-				if (cb) {
-					cb(next);
-				} else {
-					done && done();
-				}
-			}
-
-			next();
-		};
-
 		run({
 			"on/emit" : function () {
 				var arg = "TEST";
@@ -41,15 +27,15 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					count++;
 				});
 
-				async([
-					function(next) {
-						emitter.emit("test", arg);
-						emitter.emit("test", arg);
-						next();
-					},
-				], function() {
+				var dfd = when.defer();
+
+				dfd.promise.then(function(){
 					assert.equals(count, 2);
-				})
+				});
+
+				emitter.emit("test", arg);
+				emitter.emit("test", arg);
+				dfd.resolve();
 			},
 
 			"on/emit again with different arg": function() {
@@ -57,20 +43,19 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 				var count = 0;
 				var last;
+				var dfd = when.defer();
 
 				emitter.on("test", context, function(topic, test) {
 					last = test;
 				});
 
-				async([
-					function(next) {
-						emitter.emit("test", "test");
-						emitter.emit("test", "test2");
-						next();
-					},
-				], function() {
+				dfd.promise.then(function(){
 					assert.same(last, "test2")
-				});				
+				});
+
+				emitter.emit("test", "test");
+				emitter.emit("test", "test2");
+				dfd.resolve();
 			},
 
 			"on/emit 2 emitters": function() {
@@ -94,45 +79,38 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var emitter = Emitter();
 				var context = this;
 				var last;
+				var dfd = when.defer();
 				var callback = function(topic, arg) {
 					last = arg;
 				};
 
 				emitter.on("test", context, callback);
 			
-				async([
-					function(next) {
-						emitter.emit("test", "test");
-						emitter.off("test", context, callback);
-						emitter.emit("test", "test2");
-						next();
-					}
-				], function() {
+				dfd.promise.then(function(){
 					assert.equals(last, "test");
 				});
+
+				emitter.emit("test", "test");
+				emitter.off("test", context, callback);
+				emitter.emit("test", "test2");
+				dfd.resolve();
 			},
 
 			"on/reemit": function() {
 				var emitter = Emitter();
 				var context = this;
 				var count = 0;
-
+				
 				emitter.on("test", context, function(topic, message){
 					assert.equals(message, "test");
 					last = message;
 					count++;
 				});
 
-				async([
-					function(next) {
-						emitter.emit("test", "test");
-						emitter.reemit("test", context, function(topic, message) {
-							assert.equals(message, "test");
-							count++;
-						});
-					}
-				], function() {
-					assert.equals(count, 2);
+				emitter.emit("test", "test");
+
+				emitter.reemit("test", context, function(topic, message) {
+					assert.equals(message, "test");
 				});
 			}
 		});
