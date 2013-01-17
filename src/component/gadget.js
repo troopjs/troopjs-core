@@ -31,8 +31,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		var callbacks;
 		var callback;
 		var i = bases[LENGTH];
-		var j;
-		var jMax;
 
 		var signals = self[SIGNALS] = {};
 		var signal;
@@ -41,12 +39,17 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 
 		// Iterate base chain (backwards)
 		while((base = bases[--i])) {
+			// Iterate keys
+			for (key in base) {
+				// Continue if this is not a property on base
+				if (!base.hasOwnProperty(key)) {
+					continue;
+				}
 
-			add: for (key in base) {
-				// Get value
+				// Get callback
 				callback = base[key];
 
-				// Continue if value is not a function
+				// Continue if callback is not a function
 				if (!(callback instanceof FUNCTION)) {
 					continue;
 				}
@@ -64,18 +67,8 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 					// Get callbacks (for this signal)
 					callbacks = signals[signal];
 
-					// Reset counters
-					j = jMax = callbacks[LENGTH];
-
-					// Loop callbacks, continue add if we've already added this callback
-					while (j--) {
-						if (callback === callbacks[j]) {
-							continue add;
-						}
-					}
-
 					// Add callback to callbacks chain
-					callbacks[jMax] = callback;
+					callbacks[callbacks[LENGTH]] = callback;
 				}
 				else {
 					// First callback
