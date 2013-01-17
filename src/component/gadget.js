@@ -14,28 +14,30 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var ARRAY_SPLICE = ARRAY_PROTO.splice;
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
 	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
-	var RE_SIG = /^sig(?::(\w+))?\/(.+)/;
+	var RE_PRO = /^(\w+)(?::(\w+))?\/(.+)/;
 	var PUBLISH = hub.publish;
 	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var LENGTH = "length";
 	var FEATURES = "features";
-	var SIGNALS = "signals";
+	var CONTEXT = "context";
+	var VALUE = "value";
 	var SUBSCRIPTIONS = "subscriptions";
+	var PROPERTIES = "properties";
 
 	return Component.extend(function Gadget() {
 		var self = this;
 		var bases = self.constructor._getBases(true);
 		var base;
-		var callbacks;
-		var callback;
 		var i = bases[LENGTH];
 
-		var signals = self[SIGNALS] = {};
-		var signal;
+		var properties = self[PROPERTIES] = {};
+		var property;
 		var matches;
 		var key;
+		var type;
+		var name;
 
 		// Iterate base chain (backwards)
 		while((base = bases[--i])) {
@@ -46,34 +48,34 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 					continue;
 				}
 
-				// Get callback
-				callback = base[key];
-
-				// Continue if callback is not a function
-				if (!(callback instanceof FUNCTION)) {
-					continue;
-				}
-
 				// Continue if we can't match
-				if ((matches = RE_SIG.exec(key)) === NULL) {
+				if ((matches = RE_PRO.exec(key)) === NULL) {
 					continue;
 				}
 
-				// Get signal
-				signal = matches[2];
+				// Get type
+				type = matches[1];
 
-				// Have we stored any callbacks for this signal?
-				if (signal in signals) {
-					// Get callbacks (for this signal)
-					callbacks = signals[signal];
+				// Get or create type from properties
+				type = type in properties
+					? properties[type]
+					: properties[type] = {};
 
-					// Add callback to callbacks chain
-					callbacks[callbacks[LENGTH]] = callback;
-				}
-				else {
-					// First callback
-					signals[signal] = [callback];
-				}
+				// Get name
+				name = matches[3];
+
+				// Get or create name from type
+				name = name in type
+					? type[name]
+					: type[name] = [];
+
+				// Create and set property by type/name
+				property = name[name[LENGTH]] = {};
+
+				// Init property
+				property[FEATURES] = matches[2];
+				property[CONTEXT] = base;
+				property[VALUE] = base[key];
 			}
 		}
 	}, {
@@ -164,9 +166,9 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		"signal" : function onSignal(signal) {
 			var self = this;
 			var args = ARRAY_SLICE.call(arguments);
-			var callbacks = self[SIGNALS][signal];
-			var length = callbacks
-				? callbacks[LENGTH]
+			var signals = self[PROPERTIES]["sig"][signal];
+			var length = signals
+				? signals[LENGTH]
 				: 0;
 			var index = 0;
 
@@ -176,7 +178,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 
 				// Return a chained promise of next callback, or a promise resolved with args
 				return length > index
-					? when(callbacks[index++].apply(self, args), next)
+					? when(signals[index++][VALUE].apply(self, args), next)
 					: when.resolve(args);
 			}
 
