@@ -1,7 +1,6 @@
-/*!
- * TroopJS pubsub/hub module
- * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
- * Released under the MIT license.
+/**
+ * TroopJS core/pubsub/hub
+ * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
 define([ "compose", "../component/base" ], function HubModule(Compose, Component) {

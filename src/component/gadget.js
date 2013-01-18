@@ -1,5 +1,5 @@
 /**
- * TroopJS gadget component
+ * TroopJS core/component/gadget
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
