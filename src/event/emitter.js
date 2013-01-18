@@ -1,7 +1,6 @@
 /**
  * TroopJS event/emitter module
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
- * @preserve
  */
 /*global define:false */
 define([ "compose", "when" ], function EventEmitterModule(Compose, when) {

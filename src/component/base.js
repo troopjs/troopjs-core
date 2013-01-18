@@ -162,7 +162,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 
 	/**
 	 * Generates string representation of this object
-	 * @returns Combination displayName and instanceCount
+	 * @returns {string} displayName and instanceCount
 	 */
 	Component.prototype.toString = function () {
 		var self = this;
