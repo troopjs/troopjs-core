@@ -17,7 +17,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	var VALUE = "value";
 	var PROPERTIES = "properties";
 	var SIG = "sig";
-	var RE_PRO = /^(\w+)(?::(\w+))?\/(.+)/;
+	var RE_PRO = /^(\w+)(?::([^\/]+))?\/(.+)/;
 	var COUNT = 0;
 
 	var Component = Emitter.extend(
