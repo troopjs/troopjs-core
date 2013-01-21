@@ -21,10 +21,10 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	var COUNT = 0;
 
 	var Component = Emitter.extend(
-		/**
-		 * Creates a new component
-		 * @constructor
-		 */
+	/**
+	 * Creates a new component
+	 * @constructor
+	 */
 	function Component() {
 		var self = this;
 		var bases = self.constructor._getBases(true);
