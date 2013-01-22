@@ -6,7 +6,6 @@
 define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	/*jshint laxbreak:true */
 
-	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
@@ -80,7 +79,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 				}
 
 				// Continue if we can't match
-				if ((matches = RE_PRO.exec(key)) === NULL) {
+				if ((matches = RE_PRO.exec(key)) === null) {
 					continue;
 				}
 
