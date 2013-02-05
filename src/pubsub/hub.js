@@ -3,16 +3,16 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "compose", "../component/base" ], function HubModule(Compose, Component) {
+define([ "../component/base" ], function HubModule(Component) {
 	/*jshint strict:false, smarttabs:true */
 
-	var from = Compose.from;
+	var COMPONENT_PROTOTYPE = Component.prototype;
 
-	return Compose.create(Component, {
+	return Component.extend({
 		displayName: "core/pubsub/hub",
-		subscribe : from(Component, "on"),
-		unsubscribe : from(Component, "off"),
-		publish : from(Component, "emit"),
-		republish : from(Component, "reemit")
-	});
+		subscribe : COMPONENT_PROTOTYPE.on,
+		unsubscribe : COMPONENT_PROTOTYPE.off,
+		publish : COMPONENT_PROTOTYPE.emit,
+		republish : COMPONENT_PROTOTYPE.reemit
+	})();
 });

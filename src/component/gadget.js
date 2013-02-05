@@ -15,7 +15,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var LENGTH = "length";
 	var FEATURES = "features";
 	var VALUE = "value";
-	var PROPERTIES = "properties";
+	var SPECIALS = "specials";
 
 	return Component.extend({
 		"displayName" : "core/component/gadget",
@@ -25,7 +25,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/initialize" : function initialize() {
 			var self = this;
-			var properties = self[PROPERTIES][HUB];
+			var properties = self[SPECIALS][HUB];
 			var subscriptions;
 			var args;
 			var key;
@@ -58,7 +58,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/start" : function start() {
 			var self = this;
-			var properties = self[PROPERTIES][HUB];
+			var properties = self[SPECIALS][HUB];
 			var results = [];
 			var subscriptions;
 			var subscription;
@@ -100,7 +100,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/finalize" : function finalize() {
 			var self = this;
-			var properties = self[PROPERTIES][HUB];
+			var properties = self[SPECIALS][HUB];
 			var subscriptions;
 			var args;
 			var key;
