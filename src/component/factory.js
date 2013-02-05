@@ -4,6 +4,8 @@
  */
 /*global define:true*/
 define([ "poly/object" ], function ComponentFactoryModule() {
+	/*jshint laxbreak:true */
+
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
@@ -91,7 +93,7 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 			if(typeof arg === TYPEOF_FUNCTION) {
 				// If this is a synthetic constructor then add (child) constructors
 				if (CONSTRUCTORS in arg) {
-					ARRAY_PUSH.apply(constructors, arg[CONSTRUCTORS])
+					ARRAY_PUSH.apply(constructors, arg[CONSTRUCTORS]);
 				}
 				// Otherwise add as usual
 				else {
@@ -120,7 +122,7 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 					ARRAY_UNSHIFT.apply(specials, arg[SPECIALS]);
 				}
 				// Check if this matches a SPECIAL signature
-				else if (matches = RE_SPECIAL.exec(name)) {
+				else if ((matches = RE_SPECIAL.exec(name))) {
 					// Create special
 					special = {};
 
