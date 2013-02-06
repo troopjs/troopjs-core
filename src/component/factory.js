@@ -13,6 +13,7 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 	var PROTOTYPE = "prototype";
 	var LENGTH = "length";
 	var EXTEND = "extend";
+	var CONSTRUCTOR = "constructor";
 	var CONSTRUCTORS = "constructors";
 	var SPECIALS = "specials";
 	var GROUP = "group";
@@ -100,8 +101,13 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 					ARRAY_PUSH.call(constructors, arg);
 				}
 
+				// If we have SPECIALS then unshift arg[SPECIALS] onto specials
+				if (SPECIALS in arg) {
+					ARRAY_UNSHIFT.apply(specials, arg[SPECIALS]);
+				}
+
 				// Continue if this is a dead cause
-				if (arg === arg[PROTOTYPE].constructor) {
+				if (arg === arg[PROTOTYPE][CONSTRUCTOR]) {
 					continue;
 				}
 
@@ -117,12 +123,8 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 				// Get name
 				name = names[j];
 
-				// If this is SPECIALS then unshift arg[SPECIALS] onto specials
-				if (name === SPECIALS) {
-					ARRAY_UNSHIFT.apply(specials, arg[SPECIALS]);
-				}
 				// Check if this matches a SPECIAL signature
-				else if ((matches = RE_SPECIAL.exec(name))) {
+				if ((matches = RE_SPECIAL.exec(name))) {
 					// Create special
 					special = {};
 
@@ -142,12 +144,6 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 				}
 			}
 		}
-
-		// Add SPECIALS to descriptor
-		descriptor[SPECIALS] = {
-			"value" : specials,
-			"writable" : false
-		};
 
 		// Define properties on prototype
 		Object.defineProperties(prototype, descriptor);
@@ -197,6 +193,12 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 			"writable" : false
 		};
 
+		// Add SPECIALS to descriptor
+		descriptor[SPECIALS] = {
+			"value" : specials,
+			"writable" : false
+		};
+
 		// Add EXTEND to descriptor
 		descriptor[EXTEND] = {
 			"value" : extend,
@@ -204,22 +206,35 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 		};
 
 		// Create and return Constructor
-		return Object.defineProperties(function Constructor () {
-			// Allow to be created either via 'new' or direct invocation
-			var instance = this instanceof Constructor
-				? this
-				: Object.create(prototype);
-			var _args = arguments;
-			var _i;
+		return Object.defineProperties(
+			/**
+			 * Component constructor
+			 * @returns {Constructor} Constructor
+			 * @constructor
+			 */
+			function Constructor () {
+				// Allow to be created either via 'new' or direct invocation
+				var instance = this instanceof Constructor
+					? this
+					: Object.create(prototype);
 
-			// Iterate constructors
-			for (_i = 0; _i < constructorsLength; _i++) {
-				// Capture result as _args to pass to next constructor
-				_args = constructors[_i].apply(instance, _args) || _args;
-			}
+				var _args = arguments;
+				var _i;
 
-			return instance;
-		}, descriptor);
+				// Set the constructor on instance
+				Object.defineProperty(instance, CONSTRUCTOR, {
+					"value" : Constructor,
+					"writable" : false
+				});
+
+				// Iterate constructors
+				for (_i = 0; _i < constructorsLength; _i++) {
+					// Capture result as _args to pass to next constructor
+					_args = constructors[_i].apply(instance, _args) || _args;
+				}
+
+				return instance;
+			}, descriptor);
 	}
 
 	return Factory;

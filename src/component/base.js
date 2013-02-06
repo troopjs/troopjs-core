@@ -12,8 +12,6 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	var INSTANCE_COUNT = "instanceCount";
 	var LENGTH = "length";
 	var VALUE = "value";
-	var SPECIALS = "specials";
-	var SIG = "sig";
 	var COUNT = 0;
 
 	var Component = Emitter.extend(
@@ -37,7 +35,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 		"signal" : function onSignal(signal) {
 			var self = this;
 			var args = ARRAY_SLICE.call(arguments);
-			var signals = self[SPECIALS][SIG][signal];
+			var signals = self.constructor.specials.sig[signal];
 			var length = signals
 				? signals[LENGTH]
 				: 0;
