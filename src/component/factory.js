@@ -178,6 +178,35 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 			group[group[LENGTH]] = type[type[LENGTH]] = special;
 		}
 
+		/**
+		 * Component constructor
+		 * @returns {Constructor} Constructor
+		 * @constructor
+		 */
+		function Constructor () {
+			// Allow to be created either via 'new' or direct invocation
+			var instance = this instanceof Constructor
+				? this
+				: Object.create(prototype);
+
+			var _args = arguments;
+			var _i;
+
+			// Set the constructor on instance
+			Object.defineProperty(instance, CONSTRUCTOR, {
+				"value" : Constructor,
+				"writable" : false
+			});
+
+			// Iterate constructors
+			for (_i = 0; _i < constructorsLength; _i++) {
+				// Capture result as _args to pass to next constructor
+				_args = constructors[_i].apply(instance, _args) || _args;
+			}
+
+			return instance;
+		}
+
 		// Reset descriptor
 		descriptor = {};
 
@@ -205,36 +234,11 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 			"writable" : false
 		};
 
-		// Create and return Constructor
-		return Object.defineProperties(
-			/**
-			 * Component constructor
-			 * @returns {Constructor} Constructor
-			 * @constructor
-			 */
-			function Constructor () {
-				// Allow to be created either via 'new' or direct invocation
-				var instance = this instanceof Constructor
-					? this
-					: Object.create(prototype);
+		// Add descriptor to Constructor
+		Object.defineProperties(Constructor, descriptor);
 
-				var _args = arguments;
-				var _i;
-
-				// Set the constructor on instance
-				Object.defineProperty(instance, CONSTRUCTOR, {
-					"value" : Constructor,
-					"writable" : false
-				});
-
-				// Iterate constructors
-				for (_i = 0; _i < constructorsLength; _i++) {
-					// Capture result as _args to pass to next constructor
-					_args = constructors[_i].apply(instance, _args) || _args;
-				}
-
-				return instance;
-			}, descriptor);
+		// Return Constructor
+		return Constructor;
 	}
 
 	return Factory;
