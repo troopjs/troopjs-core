@@ -11,14 +11,15 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
-	var HUB = "hub";
 	var LENGTH = "length";
 	var FEATURES = "features";
+	var TYPE = "type";
 	var VALUE = "value";
-	var SPECIALS = "specials";
-	var CONSTRUCTOR = "constructor";
+	var SUBSCRIPTIONS = "subscriptions";
 
-	return Component.extend({
+	return Component.extend(function Gadget() {
+		this[SUBSCRIPTIONS] = [];
+	}, {
 		"displayName" : "core/component/gadget",
 
 		/**
@@ -26,31 +27,30 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/initialize" : function initialize() {
 			var self = this;
-			var properties = self[CONSTRUCTOR][SPECIALS][HUB];
-			var subscriptions;
-			var args;
-			var key;
+			var subscription;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var special;
+			var specials = self.constructor.specials.hub;
 			var i;
-			var j;
 			var iMax;
+			var type;
+			var value;
 
-			// Iterate properties
-			for (key in properties) {
-				// Get subscriptions
-				subscriptions = properties[key];
+			// Iterate specials
+			for (i = 0, iMax = specials ? specials[LENGTH] : 0; i < iMax; i++) {
+				// Get special
+				special = specials[i];
 
-				// Create args
-				args = [key, self];
+				// Create subscription
+				subscription = subscriptions[i] = {};
 
-				// Extract VALUE into args
-				for (i = 0, iMax = subscriptions[LENGTH], j = args[LENGTH]; i < iMax; i++) {
-					args[j++] = subscriptions[i][VALUE];
-				}
+				// Set subscription properties
+				subscription[TYPE] = type = special[TYPE];
+				subscription[FEATURES] = special[FEATURES];
+				subscription[VALUE] = value = special[VALUE];
 
-				// Did we capture any args?
-				if (j > 2) {
-					SUBSCRIBE.apply(hub, args);
-				}
+				// Subscribe
+				SUBSCRIBE.call(hub, type, self, value);
 			}
 		},
 
@@ -59,40 +59,28 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/start" : function start() {
 			var self = this;
-			var properties = self[CONSTRUCTOR][SPECIALS][HUB];
-			var results = [];
-			var subscriptions;
 			var subscription;
-			var args;
-			var key;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var results = [];
+			var resultsLength = 0;
 			var i;
-			var j;
 			var iMax;
 
-			for (key in properties) {
-				// Get subscriptions
-				subscriptions = properties[key];
+			// Iterate subscriptions
+			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
+				// Get subscription
+				subscription = subscriptions[i];
 
-				// Create args
-				args = [key, self];
-
-				// Extract callbacks into args
-				for (i = 0, iMax = subscriptions[LENGTH], j = args[LENGTH]; i < iMax; i++) {
-					subscription = subscriptions[i];
-
-					// Only add onto args if we have "memory"
-					if (subscription[FEATURES] === "memory") {
-						args[j++] = subscription[VALUE];
-					}
+				// If this is not a "memory" subscription - continue
+				if (subscription[FEATURES] !== "memory") {
+					continue;
 				}
 
-				// Did we capture any args?
-				if (j > 2) {
-					results[results[LENGTH]] = REPUBLISH.apply(hub, args);
-				}
+				// Republish, store result
+				results[resultsLength++] = REPUBLISH.call(subscription[TYPE], self, subscription[VALUE]);
 			}
 
-			// Return promise that will resolve when all republish is done
+			// Return promise that will resolve when all results are resolved
 			return when.all(results);
 		},
 
@@ -101,30 +89,18 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"sig/finalize" : function finalize() {
 			var self = this;
-			var properties = self[CONSTRUCTOR][SPECIALS][HUB];
-			var subscriptions;
-			var args;
-			var key;
+			var subscription;
+			var subscriptions = self[SUBSCRIPTIONS];
 			var i;
-			var j;
 			var iMax;
 
-			for (key in properties) {
-				// Get subscriptions
-				subscriptions = properties[key];
+			// Iterate subscriptions
+			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
+				// Get subscription
+				subscription = subscriptions[i];
 
-				// Create args
-				args = [key, self];
-
-				// Extract callbacks into args
-				for (i = 0, iMax = subscriptions[LENGTH], j = args[LENGTH]; i < iMax; i++) {
-					args[j++] = subscriptions[i][VALUE];
-				}
-
-				// Did we capture any args?
-				if (j > 2) {
-					UNSUBSCRIBE.apply(hub, args);
-				}
+				// Unsubscribe
+				UNSUBSCRIBE.call(hub, subscription[TYPE], self, subscription[VALUE]);
 			}
 		},
 
