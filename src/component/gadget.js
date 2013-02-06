@@ -6,7 +6,7 @@
 define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
 	/*jshint laxbreak:true */
 
-	var ARRAY_SPLICE = Array.prototype.splice;
+	var ARRAY_PUSH = Array.prototype.push;
 	var PUBLISH = hub.publish;
 	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
@@ -116,10 +116,10 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"subscribe" : function subscribe() {
 			var self = this;
-			var args = arguments;
+			var args = [ self ];
 
 			// Add self as context
-			ARRAY_SPLICE.call(args, 1, 0, self);
+			ARRAY_PUSH.call(args, arguments);
 
 			// Subscribe
 			SUBSCRIBE.apply(hub, args);
@@ -132,10 +132,10 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"unsubscribe" : function unsubscribe() {
 			var self = this;
-			var args = arguments;
+			var args = [ self ];
 
 			// Add self as context
-			ARRAY_SPLICE.call(args, 1, 0, self);
+			ARRAY_PUSH.call(args, arguments);
 
 			// Unsubscribe
 			UNSUBSCRIBE.apply(hub, args);

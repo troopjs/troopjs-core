@@ -7,7 +7,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	/*jshint laxbreak:true */
 
 	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var INSTANCE_COUNT = "instanceCount";
 	var LENGTH = "length";
@@ -68,10 +68,10 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 		"start" : function start() {
 			var self = this;
 			var _signal = self.signal;
-			var args = arguments;
+			var args = [ "initialize" ];
 
 			// Add signal to arguments
-			ARRAY_UNSHIFT.call(args, "initialize");
+			ARRAY_PUSH.apply(args, arguments);
 
 			return _signal.apply(self, args).then(function _start() {
 				// Modify args to change signal
@@ -88,10 +88,10 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 		"stop" : function stop() {
 			var self = this;
 			var _signal = self.signal;
-			var args = arguments;
+			var args = [ "stop" ];
 
 			// Add signal to arguments
-			ARRAY_UNSHIFT.call(args, "stop");
+			ARRAY_PUSH.apply(args, arguments);
 
 			return _signal.apply(self, args).then(function _stop() {
 				// Modify args to change signal
