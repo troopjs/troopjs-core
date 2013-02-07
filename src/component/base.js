@@ -105,7 +105,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 		 * Generates string representation of this object
 		 * @returns {string} displayName and instanceCount
 		 */
-		"toString" : function toString() {
+		"toString" : function _toString() {
 			var self = this;
 
 			return self.displayName + "@" + self[INSTANCE_COUNT];

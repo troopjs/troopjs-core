@@ -71,7 +71,7 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 		 * Generates string representation of this object
 		 * @returns {String} Instance topic
 		 */
-		"toString" : function toString() {
+		"toString" : function _toString() {
 			return this[TOPIC];
 		}
 	});
