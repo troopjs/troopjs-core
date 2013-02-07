@@ -8,18 +8,23 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 
 	var TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARRAY = TOSTRING.call(Array.prototype);
+	var TOPIC = "topic";
+	var PUBLISHER = "publisher";
+	var PARENT = "parent";
+	var CONSTRUCTOR = "constructor";
+	var PUBLISHER_INSTANCE_COUNT = "publisherInstanceCount";
 
 	function comparator (a, b) {
-		return a.publisherInstanceCount === b.publisherInstanceCount;
+		return a[PUBLISHER_INSTANCE_COUNT] === b[PUBLISHER_INSTANCE_COUNT];
 	}
 
 	return Component.extend(function Topic(topic, publisher, parent) {
 		var self = this;
 
-		self.topic = topic;
-		self.publisher = publisher;
-		self.parent = parent;
-		self.publisherInstanceCount = publisher.instanceCount;
+		self[TOPIC] = topic;
+		self[PUBLISHER] = publisher;
+		self[PARENT] = parent;
+		self[PUBLISHER_INSTANCE_COUNT] = publisher.instanceCount;
 	}, {
 		"displayName" : "core/pubsub/topic",
 
@@ -29,8 +34,7 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 		 */
 		"trace" : function trace() {
 			var current = this;
-			var constructor = current.constructor;
-			var parent;
+			var constructor = current[CONSTRUCTOR];
 			var item;
 			var stack = "";
 			var i;
@@ -44,20 +48,20 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 					for (i = 0, iMax = u.length; i < iMax; i++) {
 						item = u[i];
 
-						u[i] = item.constructor === constructor
+						u[i] = item[CONSTRUCTOR] === constructor
 							? item.trace()
-							: item.topic;
+							: item[TOPIC];
 					}
 
 					stack += u.join(",");
 					break;
 				}
 
-				parent = current.parent;
-				stack += parent
-					? current.publisher + ":"
-					: current.publisher;
-				current = parent;
+				stack += PARENT in current
+					? current[PUBLISHER] + ":"
+					: current[PUBLISHER];
+
+				current = current[PARENT];
 			}
 
 			return stack;
@@ -68,7 +72,7 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 		 * @returns {String} Instance topic
 		 */
 		"toString" : function toString() {
-			return this.topic;
+			return this[TOPIC];
 		}
 	});
 });
