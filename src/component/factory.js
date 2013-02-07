@@ -194,8 +194,7 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 
 			// Set the constructor on instance
 			Object.defineProperty(instance, CONSTRUCTOR, {
-				"value" : Constructor,
-				"writable" : false
+				"value" : Constructor
 			});
 
 			// Iterate constructors
@@ -212,26 +211,22 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 
 		// Add PROTOTYPE to descriptor
 		descriptor[PROTOTYPE] = {
-			"value" : prototype,
-			"writable" : false
+			"value" : prototype
 		};
 
 		// Add CONSTRUCTORS to descriptor
 		descriptor[CONSTRUCTORS] = {
-			"value" : constructors,
-			"writable" : false
+			"value" : constructors
 		};
 
 		// Add SPECIALS to descriptor
 		descriptor[SPECIALS] = {
-			"value" : specials,
-			"writable" : false
+			"value" : specials
 		};
 
 		// Add EXTEND to descriptor
 		descriptor[EXTEND] = {
-			"value" : extend,
-			"writable" : false
+			"value" : extend
 		};
 
 		// Add descriptor to Constructor
