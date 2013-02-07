@@ -21,7 +21,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	 */
 	function Component() {
 		// Update instance count
-		this[INSTANCE_COUNT] = COUNT++;
+		this[INSTANCE_COUNT] = ++COUNT;
 	}, {
 		"instanceCount" : COUNT,
 
