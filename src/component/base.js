@@ -73,7 +73,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return _signal.apply(self, args).then(function _start() {
+			return _signal.apply(self, args).then(function started() {
 				// Modify args to change signal
 				args[0] = "start";
 
@@ -93,7 +93,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return _signal.apply(self, args).then(function _stop() {
+			return _signal.apply(self, args).then(function stopped() {
 				// Modify args to change signal
 				args[0] = "finalize";
 
