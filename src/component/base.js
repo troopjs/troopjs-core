@@ -25,7 +25,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	}, {
 		"instanceCount" : COUNT,
 
-		"displayName" : "core/component",
+		"displayName" : "core/component/base",
 
 		/**
 		 * Signals the component

@@ -4,15 +4,15 @@
  */
 /*global define:false */
 define([ "../component/base" ], function HubModule(Component) {
-	/*jshint strict:false, smarttabs:true */
+	/*jshint strict:false */
 
 	var COMPONENT_PROTOTYPE = Component.prototype;
 
 	return Component.extend({
-		displayName: "core/pubsub/hub",
-		subscribe : COMPONENT_PROTOTYPE.on,
-		unsubscribe : COMPONENT_PROTOTYPE.off,
-		publish : COMPONENT_PROTOTYPE.emit,
-		republish : COMPONENT_PROTOTYPE.reemit
+		"displayName": "core/pubsub/hub",
+		"subscribe" : COMPONENT_PROTOTYPE.on,
+		"unsubscribe" : COMPONENT_PROTOTYPE.off,
+		"publish" : COMPONENT_PROTOTYPE.emit,
+		"republish" : COMPONENT_PROTOTYPE.reemit
 	})();
 });
