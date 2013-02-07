@@ -14,7 +14,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	var VALUE = "value";
 	var COUNT = 0;
 
-	var Component = Emitter.extend(
+	return Emitter.extend(
 	/**
 	 * Creates a new component
 	 * @constructor
@@ -99,18 +99,16 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 
 				return _signal.apply(self, args);
 			});
+		},
+
+		/**
+		 * Generates string representation of this object
+		 * @returns {string} displayName and instanceCount
+		 */
+		"toString" : function toString() {
+			var self = this;
+
+			return self.displayName + "@" + self[INSTANCE_COUNT];
 		}
 	});
-
-	/**
-	 * Generates string representation of this object
-	 * @returns {string} displayName and instanceCount
-	 */
-	Component.prototype.toString = function () {
-		var self = this;
-
-		return self.displayName + "@" + self[INSTANCE_COUNT];
-	};
-
-	return Component;
 });
