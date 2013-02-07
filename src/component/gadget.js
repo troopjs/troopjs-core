@@ -77,7 +77,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				}
 
 				// Republish, store result
-				results[resultsLength++] = REPUBLISH.call(subscription[TYPE], self, subscription[VALUE]);
+				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], self, subscription[VALUE]);
 			}
 
 			// Return promise that will resolve when all results are resolved
