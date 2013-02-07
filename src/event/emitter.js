@@ -24,6 +24,7 @@ define([ "../component/factory", "when" ], function EventEmitterModule(Factory, 
 	function EventEmitter() {
 		this[HANDLERS] = {};
 	}, {
+		displayName : "core/event/emitter",
 		/**
 		 * Adds a listener for the specified event.
 		 * @param {String} event to subscribe to
