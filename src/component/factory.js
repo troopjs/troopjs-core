@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:true*/
-define([ "poly/object" ], function ComponentFactoryModule() {
+define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModule(unique) {
 	/*jshint laxbreak:true */
 
 	var ARRAY_PROTO = Array.prototype;
@@ -22,33 +22,6 @@ define([ "poly/object" ], function ComponentFactoryModule() {
 	var TYPE = "type";
 	var NAME = "name";
 	var RE_SPECIAL = /^(\w+)(?::([^\/]+))?\/(.+)/;
-
-	/**
-	 * Reduces values to only be unique
-	 * @returns {*}
-	 */
-	function unique() {
-		var arg;
-		var args = this;
-		var i;
-		var j;
-		var k;
-		var iMax = args[LENGTH];
-
-		outer: for (i = k = 0; i < iMax; i++) {
-			arg = args[i];
-
-			for (j = 0; j < i; j++) {
-				if (arg === args[j]) {
-					continue outer;
-				}
-			}
-
-			args[k++] = arg;
-		}
-
-		return args[LENGTH] = k;
-	}
 
 	/**
 	 * Extends a component

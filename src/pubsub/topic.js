@@ -43,17 +43,17 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 
 			while (current) {
 				if (TOSTRING.call(current) === TOSTRING_ARRAY) {
-					u = unique.call(current, comparator);
+					unique.call(current, comparator);
 
-					for (i = 0, iMax = u.length; i < iMax; i++) {
-						item = u[i];
+					for (i = 0, iMax = current.length; i < iMax; i++) {
+						item = current[i];
 
-						u[i] = item[CONSTRUCTOR] === constructor
+						current[i] = item[CONSTRUCTOR] === constructor
 							? item.trace()
 							: item[TOPIC];
 					}
 
-					stack += u.join(",");
+					stack += current.join(",");
 					break;
 				}
 
