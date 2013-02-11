@@ -81,8 +81,11 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], self, subscription[VALUE]);
 			}
 
-			// Return promise that will resolve when all results are resolved
-			return when.all(results);
+			// Chain promise that will resolve when all results are fulfilled
+			when.chain(results, deferred.resolver, arguments);
+
+			// Return promise
+			return deferred.promise;
 		},
 
 		/**
