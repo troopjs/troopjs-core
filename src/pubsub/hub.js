@@ -3,12 +3,12 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/base" ], function HubModule(Component) {
+define([ "../event/emitter" ], function HubModule(Emitter) {
 	/*jshint strict:false */
 
-	var COMPONENT_PROTOTYPE = Component.prototype;
+	var COMPONENT_PROTOTYPE = Emitter.prototype;
 
-	return Component.extend({
+	return Emitter.extend({
 		"displayName": "core/pubsub/hub",
 		"subscribe" : COMPONENT_PROTOTYPE.on,
 		"unsubscribe" : COMPONENT_PROTOTYPE.off,

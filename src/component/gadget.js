@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
+define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Emitter, when, hub) {
 	/*jshint laxbreak:true */
 
 	var ARRAY_PUSH = Array.prototype.push;
@@ -17,7 +17,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var VALUE = "value";
 	var SUBSCRIPTIONS = "subscriptions";
 
-	return Component.extend(function Gadget() {
+	return Emitter.extend(function Gadget() {
 		this[SUBSCRIPTIONS] = [];
 	}, {
 		"displayName" : "core/component/gadget",

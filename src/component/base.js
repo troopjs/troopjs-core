@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
+define([ "../component/factory", "when" ], function ComponentModule(Factory, when) {
 	/*jshint laxbreak:true */
 
 	var ARRAY_PROTO = Array.prototype;
@@ -14,7 +14,7 @@ define([ "../event/emitter", "when" ], function ComponentModule(Emitter, when) {
 	var VALUE = "value";
 	var COUNT = 0;
 
-	return Emitter.extend(
+	return Factory(
 	/**
 	 * Creates a new component
 	 * @constructor

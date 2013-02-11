@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/factory", "when" ], function EventEmitterModule(Factory, when) {
+define([ "../component/base", "when" ], function EventEmitterModule(Component, when) {
 	/*jshint laxbreak:true */
 
 	var MEMORY = "memory";
@@ -16,7 +16,7 @@ define([ "../component/factory", "when" ], function EventEmitterModule(Factory, 
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
 
-	return Factory(
+	return Component.extend(
 	/**
 	 * Creates a new EventEmitter
 	 * @constructor
