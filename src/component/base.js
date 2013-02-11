@@ -34,12 +34,12 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 		 */
 		"signal" : function onSignal(signal) {
 			var self = this;
-			var args = ARRAY_SLICE.call(arguments);
 			var signals = self.constructor.specials.sig[signal];
 			var length = signals
 				? signals[LENGTH]
 				: 0;
 			var index = 0;
+			var args;
 
 			function next(_args) {
 				// Update args
@@ -53,7 +53,7 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 
 			try {
 				// Return promise
-				return next();
+				return next(ARRAY_SLICE.call(arguments));
 			}
 			catch (e) {
 				// Return rejected promise
@@ -73,11 +73,11 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return _signal.apply(self, args).then(function started() {
+			return _signal.apply(self, args).then(function started(_args) {
 				// Modify args to change signal
-				args[0] = "start";
+				_args[0] = "start";
 
-				return _signal.apply(self, args);
+				return _signal.apply(self, _args);
 			});
 		},
 

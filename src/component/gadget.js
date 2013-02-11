@@ -65,6 +65,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			var resultsLength = 0;
 			var i;
 			var iMax;
+			var deferred = when.defer();
 
 			// Iterate subscriptions
 			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
