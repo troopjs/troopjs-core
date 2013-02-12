@@ -1,36 +1,40 @@
-/*!
- * TroopJS pubsub/topic module
- * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
- * Released under the MIT license.
+/**
+ * TroopJS core/pubsub/topic
+ * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*jshint strict:false, smarttabs:true, laxbreak:true */
-/*global define:true */
+/*global define:false */
 define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Component, unique) {
+	/*jshint strict:false, smarttabs:true, laxbreak:true */
+
 	var TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARRAY = TOSTRING.call(Array.prototype);
+	var TOPIC = "topic";
+	var PUBLISHER = "publisher";
+	var PARENT = "parent";
+	var CONSTRUCTOR = "constructor";
+	var PUBLISHER_INSTANCE_COUNT = "publisherInstanceCount";
 
 	function comparator (a, b) {
-		return a.publisherInstanceCount === b.publisherInstanceCount;
+		return a[PUBLISHER_INSTANCE_COUNT] === b[PUBLISHER_INSTANCE_COUNT];
 	}
 
-	var Topic = Component.extend(function Topic(topic, publisher, parent) {
+	return Component.extend(function Topic(topic, publisher, parent) {
 		var self = this;
 
-		self.topic = topic;
-		self.publisher = publisher;
-		self.parent = parent;
-		self.publisherInstanceCount = publisher.instanceCount;
+		self[TOPIC] = topic;
+		self[PUBLISHER] = publisher;
+		self[PARENT] = parent;
+		self[PUBLISHER_INSTANCE_COUNT] = publisher.instanceCount;
 	}, {
-		displayName : "core/pubsub/topic",
+		"displayName" : "core/pubsub/topic",
 
 		/**
 		 * Traces topic origin to root
 		 * @returns String representation of all topics traced down to root
 		 */
-		trace : function trace() {
+		"trace" : function trace() {
 			var current = this;
-			var constructor = current.constructor;
-			var parent;
+			var constructor = current[CONSTRUCTOR];
 			var item;
 			var stack = "";
 			var i;
@@ -39,38 +43,36 @@ define([ "../component/base", "troopjs-utils/unique" ], function TopicModule(Com
 
 			while (current) {
 				if (TOSTRING.call(current) === TOSTRING_ARRAY) {
-					u = unique.call(current, comparator);
+					unique.call(current, comparator);
 
-					for (i = 0, iMax = u.length; i < iMax; i++) {
-						item = u[i];
+					for (i = 0, iMax = current.length; i < iMax; i++) {
+						item = current[i];
 
-						u[i] = item.constructor === constructor
+						current[i] = item[CONSTRUCTOR] === constructor
 							? item.trace()
-							: item.topic;
+							: item[TOPIC];
 					}
 
-					stack += u.join(",");
+					stack += current.join(",");
 					break;
 				}
 
-				parent = current.parent;
-				stack += parent
-					? current.publisher + ":"
-					: current.publisher;
-				current = parent;
+				stack += PARENT in current
+					? current[PUBLISHER] + ":"
+					: current[PUBLISHER];
+
+				current = current[PARENT];
 			}
 
 			return stack;
+		},
+
+		/**
+		 * Generates string representation of this object
+		 * @returns {String} Instance topic
+		 */
+		"toString" : function _toString() {
+			return this[TOPIC];
 		}
 	});
-
-	/**
-	 * Generates string representation of this object
-	 * @returns Instance topic
-	 */
-	Topic.prototype.toString = function () {
-		return this.topic;
-	};
-
-	return Topic;
 });

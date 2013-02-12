@@ -1,260 +1,148 @@
-/*!
- * TroopJS gadget component
- * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
- * Released under the MIT license.
+/**
+ * TroopJS core/component/gadget
+ * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*jshint strict:false, smarttabs:true, newcap:false, forin:false, loopfunc:true */
-/*global define:true */
-define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], function GadgetModule(Compose, Component, Deferred, hub) {
-	var UNDEFINED;
-	var NULL = null;
-	var FUNCTION = Function;
-	var RE_HUB = /^hub(?::(\w+))?\/(.+)/;
-	var RE_SIG = /^sig\/(.+)/;
+/*global define:false */
+define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Emitter, when, hub) {
+	/*jshint laxbreak:true */
+
+	var ARRAY_PUSH = Array.prototype.push;
 	var PUBLISH = hub.publish;
+	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
 	var UNSUBSCRIBE = hub.unsubscribe;
-	var MEMORY = "memory";
+	var LENGTH = "length";
+	var FEATURES = "features";
+	var TYPE = "type";
+	var VALUE = "value";
 	var SUBSCRIPTIONS = "subscriptions";
 
-	return Component.extend(function Gadget() {
-		var self = this;
-		var bases = self.constructor._getBases(true);
-		var base;
-		var callbacks;
-		var callback;
-		var i;
-		var j;
-		var jMax;
-
-		var signals = {};
-		var signal;
-		var matches;
-		var key = null;
-
-		// Iterate base chain (while there's a prototype)
-		for (i = bases.length - 1; i >= 0; i--) {
-			base = bases[i];
-
-			add: for (key in base) {
-				// Get value
-				callback = base[key];
-
-				// Continue if value is not a function
-				if (!(callback instanceof FUNCTION)) {
-					continue;
-				}
-
-				// Match signature in key
-				matches = RE_SIG.exec(key);
-
-				if (matches !== NULL) {
-					// Get signal
-					signal = matches[1];
-
-					// Have we stored any callbacks for this signal?
-					if (signal in signals) {
-						// Get callbacks (for this signal)
-						callbacks = signals[signal];
-
-						// Reset counters
-						j = jMax = callbacks.length;
-
-						// Loop callbacks, continue add if we've already added this callback
-						while (j--) {
-							if (callback === callbacks[j]) {
-								continue add;
-							}
-						}
-
-						// Add callback to callbacks chain
-						callbacks[jMax] = callback;
-					}
-					else {
-						// First callback
-						signals[signal] = [ callback ];
-					}
-				}
-			}
-		}
-
-		// Extend self
-		Compose.call(self, {
-			signal : function onSignal(signal, deferred) {
-				var _self = this;
-				var _callbacks;
-				var _j;
-				var head = deferred;
-
-				// Only trigger if we have callbacks for this signal
-				if (signal in signals) {
-					// Get callbacks
-					_callbacks = signals[signal];
-
-					// Reset counter
-					_j = _callbacks.length;
-
-					// Build deferred chain from end to 1
-					while (--_j) {
-						// Create new deferred
-						head = Deferred(function (dfd) {
-							// Store callback and deferred as they will have changed by the time we exec
-							var _callback = _callbacks[_j];
-							var _deferred = head;
-
-							// Add done handler
-							dfd.done(function done() {
-								_callback.call(_self, signal, _deferred);
-							});
-						});
-					}
-
-					// Execute first sCallback, use head deferred
-					_callbacks[0].call(_self, signal, head);
-				}
-				else if (deferred) {
-					deferred.resolve();
-				}
-
-				return _self;
-			}
-		});
+	return Emitter.extend(function Gadget() {
+		this[SUBSCRIPTIONS] = [];
 	}, {
-		displayName : "core/component/gadget",
+		"displayName" : "core/component/gadget",
 
-		"sig/initialize" : function initialize(signal, deferred) {
+		/**
+		 * Signal handler for 'initialize'
+		 */
+		"sig/initialize" : function initialize() {
 			var self = this;
-
-			var subscriptions = self[SUBSCRIPTIONS] = [];
-			var key = NULL;
-			var value;
-			var matches;
-			var topic;
-
-			// Loop over each property in gadget
-			for (key in self) {
-				// Get value
-				value = self[key];
-
-				// Continue if value is not a function
-				if (!(value instanceof FUNCTION)) {
-					continue;
-				}
-
-				// Match signature in key
-				matches = RE_HUB.exec(key);
-
-				if (matches !== NULL) {
-					// Get topic
-					topic = matches[2];
-
-					// Subscribe
-					hub.subscribe(topic, self, matches[1] === MEMORY, value);
-
-					// Store in subscriptions
-					subscriptions[subscriptions.length] = [topic, self, value];
-
-					// NULL value
-					self[key] = NULL;
-				}
-			}
-
-			if (deferred) {
-				deferred.resolve();
-			}
-
-			return self;
-		},
-
-		"sig/finalize" : function finalize(signal, deferred) {
-			var self = this;
-			var subscriptions = self[SUBSCRIPTIONS];
 			var subscription;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var special;
+			var specials = self.constructor.specials.hub;
+			var i;
+			var iMax;
+			var type;
+			var value;
 
-			// Loop over subscriptions
-			while ((subscription = subscriptions.shift()) !== UNDEFINED) {
-				hub.unsubscribe(subscription[0], subscription[1], subscription[2]);
+			// Iterate specials
+			for (i = 0, iMax = specials ? specials[LENGTH] : 0; i < iMax; i++) {
+				// Get special
+				special = specials[i];
+
+				// Create subscription
+				subscription = subscriptions[i] = {};
+
+				// Set subscription properties
+				subscription[TYPE] = type = special[TYPE];
+				subscription[FEATURES] = special[FEATURES];
+				subscription[VALUE] = value = special[VALUE];
+
+				// Subscribe
+				SUBSCRIBE.call(hub, type, self, value);
 			}
-
-			if (deferred) {
-				deferred.resolve();
-			}
-
-			return self;
 		},
 
 		/**
-			 * Calls hub.publish in self context
-		 * @returns self
+		 * Signal handler for 'start'
 		 */
-		publish : function publish() {
+		"sig/start" : function start() {
 			var self = this;
+			var subscription;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var results = [];
+			var resultsLength = 0;
+			var i;
+			var iMax;
+			var deferred = when.defer();
 
-			PUBLISH.apply(hub, arguments);
+			// Iterate subscriptions
+			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
+				// Get subscription
+				subscription = subscriptions[i];
 
-			return self;
+				// If this is not a "memory" subscription - continue
+				if (subscription[FEATURES] !== "memory") {
+					continue;
+				}
+
+				// Republish, store result
+				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], self, subscription[VALUE]);
+			}
+
+			// Chain promise that will resolve when all results are fulfilled
+			when.chain(results, deferred.resolver, arguments);
+
+			// Return promise
+			return deferred.promise;
+		},
+
+		/**
+		 * Signal handler for 'finalize'
+		 */
+		"sig/finalize" : function finalize() {
+			var self = this;
+			var subscription;
+			var subscriptions = self[SUBSCRIPTIONS];
+			var i;
+			var iMax;
+
+			// Iterate subscriptions
+			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
+				// Get subscription
+				subscription = subscriptions[i];
+
+				// Unsubscribe
+				UNSUBSCRIBE.call(hub, subscription[TYPE], self, subscription[VALUE]);
+			}
+		},
+
+		/**
+		 * Calls hub.publish in self context
+		 */
+		"publish" : function publish() {
+			return PUBLISH.apply(hub, arguments);
 		},
 
 		/**
 		 * Calls hub.subscribe in self context
-		 * @returns self
 		 */
-		subscribe : function subscribe() {
+		"subscribe" : function subscribe() {
 			var self = this;
+			var args = [ self ];
 
-			SUBSCRIBE.apply(hub, arguments);
+			// Add self as context
+			ARRAY_PUSH.call(args, arguments);
+
+			// Subscribe
+			SUBSCRIBE.apply(hub, args);
 
 			return self;
 		},
 
 		/**
 		 * Calls hub.unsubscribe in self context
-		 * @returns self
 		 */
-		unsubscribe : function unsubscribe() {
+		"unsubscribe" : function unsubscribe() {
 			var self = this;
+			var args = [ self ];
 
-			UNSUBSCRIBE.apply(hub, arguments);
+			// Add self as context
+			ARRAY_PUSH.call(args, arguments);
 
-			return self;
-		},
-
-		start : function start(deferred) {
-			var self = this;
-
-			deferred = deferred || Deferred();
-
-			Deferred(function deferredStart(dfdStart) {
-				dfdStart.then(deferred.resolve, deferred.reject, deferred.notify);
-
-				Deferred(function deferredInitialize(dfdInitialize) {
-					dfdInitialize.then(function doneInitialize() {
-						self.signal("start", dfdStart);
-					}, dfdStart.reject, dfdStart.notify);
-
-					self.signal("initialize", dfdInitialize);
-				});
-			});
-
-			return self;
-		},
-
-		stop : function stop(deferred) {
-			var self = this;
-
-			deferred = deferred || Deferred();
-
-			Deferred(function deferredFinalize(dfdFinalize) {
-				dfdFinalize.then(deferred.resolve, deferred.reject, deferred.notify);
-
-				Deferred(function deferredStop(dfdStop) {
-					dfdStop.then(function doneStop() {
-						self.signal("finalize", dfdFinalize);
-					}, dfdFinalize.reject, dfdFinalize.notify);
-
-					self.signal("stop", dfdStop);
-				});
-			});
+			// Unsubscribe
+			UNSUBSCRIBE.apply(hub, args);
 
 			return self;
 		}
