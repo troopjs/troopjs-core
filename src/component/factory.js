@@ -17,6 +17,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var ADVISED = "advised";
 	var BEFORE = "before";
 	var AFTER = "after";
+	var AROUND = "around";
 	var CONSTRUCTOR = "constructor";
 	var CONSTRUCTORS = "constructors";
 	var SPECIALS = "specials";
@@ -47,7 +48,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	}
 
 	/**
-	 * Creates new Advice
+	 * Creates new Advise
 	 * @param {Function} advised Original function
 	 * @param {Function} describe Function to re-write descriptor
 	 * @constructor
@@ -64,7 +65,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	}
 
 	/**
-	 * Before advice
+	 * Before advise
 	 * @param {Function} advised Original function
 	 * @returns {ComponentFactoryModule.Advise}
 	 */
@@ -78,19 +79,20 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @returns {*}
 	 */
 	before.describe = function (descriptor) {
-		var previous = descriptor[VALUE];
-		var next = this[ADVISED];
+		var previous = this[ADVISED];
+		var next = descriptor[VALUE];
 
 		descriptor[VALUE] = function () {
 			var self = this;
-			return next.apply(self, previous.apply(self, arguments) || arguments);
+			var args = arguments;
+			return next.apply(self, args = previous.apply(self, args) || args);
 		};
 
 		return descriptor;
 	};
 
 	/**
-	 * After advice
+	 * After advise
 	 * @param advise
 	 * @returns {ComponentFactoryModule.Advise}
 	 */
@@ -104,12 +106,40 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @returns {*}
 	 */
 	after.describe = function (descriptor) {
-		var previous = this[ADVISED];
-		var next = descriptor[VALUE];
+		var previous = descriptor[VALUE];
+		var next = this[ADVISED];
 
 		descriptor[VALUE] = function () {
 			var self = this;
-			return next.apply(self, previous.apply(self, arguments) || arguments);
+			var args = arguments;
+			return next.apply(self, args = previous.apply(self, args) || args);
+		};
+
+		return descriptor;
+	};
+
+	/**
+	 * Around advise
+	 * @param advise
+	 * @returns {ComponentFactoryModule.Advise}
+	 */
+	function around(advise) {
+		return new Advise(advise, around.describe);
+	}
+
+	/**
+	 * Describe around
+	 * @param descriptor
+	 * @returns {*}
+	 */
+	around.describe = function (descriptor) {
+		var outer = this[ADVISED];
+		var inner = descriptor[VALUE];
+
+		descriptor[VALUE] = function () {
+			var self = this;
+			var args = arguments;
+			return outer.apply(self, args = inner.apply(self, args = outer.apply(self, args) || args) || args);
 		};
 
 		return descriptor;
@@ -320,6 +350,11 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	// Add AFTER to factoryDescriptors
 	factoryDescriptors[AFTER] = {
 		"value" : after
+	};
+
+	// Add AROUND to factoryDescriptors
+	factoryDescriptors[AROUND] = {
+		"value" : around
 	};
 
 	// Define factoryDescriptors on Factory
