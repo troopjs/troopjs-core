@@ -14,6 +14,9 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var LENGTH = "length";
 	var EXTEND = "extend";
 	var CREATE = "create";
+	var ADVISED = "advised";
+	var BEFORE = "before";
+	var AFTER = "after";
 	var CONSTRUCTOR = "constructor";
 	var CONSTRUCTORS = "constructors";
 	var SPECIALS = "specials";
@@ -23,6 +26,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var TYPE = "type";
 	var NAME = "name";
 	var RE_SPECIAL = /^(\w+)(?::([^\/]+))?\/(.+)/;
+	var factoryDescriptors = {};
 
 	/**
 	 * Create a component
@@ -41,6 +45,75 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 		ARRAY_PUSH.apply(args, arguments);
 		return Factory.apply(null, args);
 	}
+
+	/**
+	 * Creates new Advice
+	 * @param {Function} advised Original function
+	 * @param {Function} describe Function to re-write descriptor
+	 * @constructor
+	 */
+	function Advise(advised, describe) {
+		Object.defineProperties(this, {
+			"advised" : {
+				"value" : advised
+			},
+			"describe" : {
+				"value" : describe
+			}
+		});
+	}
+
+	/**
+	 * Before advice
+	 * @param {Function} advised Original function
+	 * @returns {ComponentFactoryModule.Advise}
+	 */
+	function before(advised) {
+		return new Advise(advised, before.describe);
+	}
+
+	/**
+	 * Describe before
+	 * @param descriptor
+	 * @returns {*}
+	 */
+	before.describe = function (descriptor) {
+		var previous = descriptor[VALUE];
+		var next = this[ADVISED];
+
+		descriptor[VALUE] = function () {
+			var self = this;
+			return next.apply(self, previous.apply(self, arguments) || arguments);
+		};
+
+		return descriptor;
+	};
+
+	/**
+	 * After advice
+	 * @param advise
+	 * @returns {ComponentFactoryModule.Advise}
+	 */
+	function after(advise) {
+		return new Advise(advise, after.describe);
+	}
+
+	/**
+	 * Describe after
+	 * @param descriptor
+	 * @returns {*}
+	 */
+	after.describe = function (descriptor) {
+		var previous = this[ADVISED];
+		var next = descriptor[VALUE];
+
+		descriptor[VALUE] = function () {
+			var self = this;
+			return next.apply(self, previous.apply(self, arguments) || arguments);
+		};
+
+		return descriptor;
+	};
 
 	/**
 	 * Creates components
@@ -64,8 +137,11 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 		var group;
 		var type;
 		var matches;
+		var value;
+		var descriptor;
 		var prototype = {};
-		var descriptor = {};
+		var prototypeDescriptors = {};
+		var constructorDescriptors = {};
 
 		// Iterate arguments
 		for (i = 0; i < argsLength; i++) {
@@ -120,15 +196,24 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 					// Unshift special onto specials
 					ARRAY_UNSHIFT.call(specials, special);
 				}
-				// Otherwise just add to descriptor
+				// Otherwise just add to prototypeDescriptors
 				else {
-					descriptor[name] = Object.getOwnPropertyDescriptor(arg, name);
+					// Get descriptor for arg
+					descriptor = Object.getOwnPropertyDescriptor(arg, name);
+
+					// Get value
+					value = descriptor[VALUE];
+
+					// If value is instanceof Advice, we should re-describe, otherwise just use the original desciptor
+					prototypeDescriptors[name] = value instanceof Advise
+						? value.describe(prototypeDescriptors[name])
+						: descriptor;
 				}
 			}
 		}
 
 		// Define properties on prototype
-		Object.defineProperties(prototype, descriptor);
+		Object.defineProperties(prototype, prototypeDescriptors);
 
 		// Reduce constructors to unique values
 		constructorsLength = unique.call(constructors);
@@ -188,47 +273,58 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 			return instance;
 		}
 
-		// Reset descriptor
-		descriptor = {};
-
-		// Add PROTOTYPE to descriptor
-		descriptor[PROTOTYPE] = {
+		// Add PROTOTYPE to constructorDescriptors
+		constructorDescriptors[PROTOTYPE] = {
 			"value" : prototype
 		};
 
-		// Add CONSTRUCTORS to descriptor
-		descriptor[CONSTRUCTORS] = {
+		// Add CONSTRUCTORS to constructorDescriptors
+		constructorDescriptors[CONSTRUCTORS] = {
 			"value" : constructors
 		};
 
-		// Add SPECIALS to descriptor
-		descriptor[SPECIALS] = {
+		// Add SPECIALS to constructorDescriptors
+		constructorDescriptors[SPECIALS] = {
 			"value" : specials
 		};
 
-		// Add EXTEND to descriptor
-		descriptor[EXTEND] = {
+		// Add EXTEND to constructorDescriptors
+		constructorDescriptors[EXTEND] = {
 			"value" : extend
 		};
 
-		// Add CREATE to descriptor
-		descriptor[CREATE] = {
+		// Add CREATE to constructorDescriptors
+		constructorDescriptors[CREATE] = {
 			"value" : create
 		};
 
-		// Add descriptor to Constructor
-		Object.defineProperties(Constructor, descriptor);
+		// Define prototypeDescriptors on Constructor
+		Object.defineProperties(Constructor, constructorDescriptors);
 
 		// Return Constructor
 		return Constructor;
 	}
 
-	// Add descriptor for CREATE to Factory
-	Object.defineProperty(Factory, CREATE, {
+	// Add CREATE to factoryDescriptors
+	factoryDescriptors[CREATE] = {
 		"value" : function FactoryCreate() {
 			return Factory.apply(null, arguments).create();
 		}
-	});
+	};
 
+	// Add BEFORE to factoryDescriptors
+	factoryDescriptors[BEFORE] = {
+		"value" : before
+	};
+
+	// Add AFTER to factoryDescriptors
+	factoryDescriptors[AFTER] = {
+		"value" : after
+	};
+
+	// Define factoryDescriptors on Factory
+	Object.defineProperties(Factory, factoryDescriptors);
+
+	// Return Factory
 	return Factory;
 });
