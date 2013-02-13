@@ -13,6 +13,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var PROTOTYPE = "prototype";
 	var LENGTH = "length";
 	var EXTEND = "extend";
+	var CREATE = "create";
 	var CONSTRUCTOR = "constructor";
 	var CONSTRUCTORS = "constructors";
 	var SPECIALS = "specials";
@@ -22,6 +23,14 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var TYPE = "type";
 	var NAME = "name";
 	var RE_SPECIAL = /^(\w+)(?::([^\/]+))?\/(.+)/;
+
+	/**
+	 * Create a component
+	 * @returns {*}
+	 */
+	function create() {
+		return this.apply(null, arguments);
+	}
 
 	/**
 	 * Extends a component
@@ -202,12 +211,24 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 			"value" : extend
 		};
 
+		// Add CREATE to descriptor
+		descriptor[CREATE] = {
+			"value" : create
+		};
+
 		// Add descriptor to Constructor
 		Object.defineProperties(Constructor, descriptor);
 
 		// Return Constructor
 		return Constructor;
 	}
+
+	// Add descriptor for CREATE to Factory
+	Object.defineProperty(Factory, CREATE, {
+		"value" : function FactoryCreate() {
+			return Factory.apply(null, arguments).create();
+		}
+	});
 
 	return Factory;
 });
