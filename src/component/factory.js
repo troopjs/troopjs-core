@@ -14,7 +14,8 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var LENGTH = "length";
 	var EXTEND = "extend";
 	var CREATE = "create";
-	var ADVISED = "advised";
+	var DECORATE = "decorate";
+	var DECORATED = "decorated";
 	var BEFORE = "before";
 	var AFTER = "after";
 	var AROUND = "around";
@@ -27,6 +28,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var TYPE = "type";
 	var NAME = "name";
 	var RE_SPECIAL = /^(\w+)(?::([^\/]+))?\/(.+)/;
+	var NOOP = function noop () {};
 	var factoryDescriptors = {};
 
 	/**
@@ -48,29 +50,35 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	}
 
 	/**
-	 * Creates new Advise
-	 * @param {Function} advised Original function
-	 * @param {Function} describe Function to re-write descriptor
+	 * Creates new Decorator
+	 * @param {Function} decorated Original function
+	 * @param {Function} decorate Function to re-write descriptor
 	 * @constructor
 	 */
-	function Advise(advised, describe) {
-		Object.defineProperties(this, {
-			"advised" : {
-				"value" : advised
-			},
-			"describe" : {
-				"value" : describe
-			}
-		});
+	function Decorator(decorated, decorate) {
+		var descriptor = {};
+
+		// Add DECORATED to descriptor
+		descriptor[DECORATED] = {
+			"value" : decorated
+		};
+
+		// Add DECORATE to descriptor
+		descriptor[DECORATE] = {
+			"value" : decorate
+		};
+
+		// Define properties
+		Object.defineProperties(this, descriptor);
 	}
 
 	/**
 	 * Before advise
-	 * @param {Function} advised Original function
-	 * @returns {ComponentFactoryModule.Advise}
+	 * @param {Function} decorated Original function
+	 * @returns {ComponentFactoryModule.Decorator}
 	 */
-	function before(advised) {
-		return new Advise(advised, before.describe);
+	function before(decorated) {
+		return new Decorator(decorated, before[DECORATE]);
 	}
 
 	/**
@@ -78,69 +86,67 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @param descriptor
 	 * @returns {*}
 	 */
-	before.describe = function (descriptor) {
-		var previous = this[ADVISED];
+	before[DECORATE] = function (descriptor) {
+		var previous = this[DECORATED];
 		var next = descriptor[VALUE];
 
-		descriptor[VALUE] = function () {
+		descriptor[VALUE] = next
+			? function () {
 			var self = this;
 			var args = arguments;
 			return next.apply(self, args = previous.apply(self, args) || args);
-		};
+		}
+			: previous;
 
 		return descriptor;
 	};
 
 	/**
-	 * After advise
-	 * @param advise
-	 * @returns {ComponentFactoryModule.Advise}
+	 * After decorator
+	 * @param decorated
+	 * @returns {ComponentFactoryModule.Decorator}
 	 */
-	function after(advise) {
-		return new Advise(advise, after.describe);
+	function after(decorated) {
+		return new Decorator(decorated, after[DECORATE]);
 	}
 
 	/**
-	 * Describe after
+	 * Decorate after
 	 * @param descriptor
 	 * @returns {*}
 	 */
-	after.describe = function (descriptor) {
+	after[DECORATE] = function (descriptor) {
 		var previous = descriptor[VALUE];
-		var next = this[ADVISED];
+		var next = this[DECORATED];
 
-		descriptor[VALUE] = function () {
+
+		descriptor[VALUE] = previous
+			? function () {
 			var self = this;
 			var args = arguments;
 			return next.apply(self, args = previous.apply(self, args) || args);
-		};
+		}
+			: next;
 
 		return descriptor;
 	};
 
 	/**
-	 * Around advise
-	 * @param advise
-	 * @returns {ComponentFactoryModule.Advise}
+	 * Around decorator
+	 * @param decorated
+	 * @returns {ComponentFactoryModule.Decorator}
 	 */
-	function around(advise) {
-		return new Advise(advise, around.describe);
+	function around(decorated) {
+		return new Decorator(decorated, around[DECORATE]);
 	}
 
 	/**
-	 * Describe around
+	 * Decorate around
 	 * @param descriptor
 	 * @returns {*}
 	 */
-	around.describe = function (descriptor) {
-		var outer = this[ADVISED];
-		var inner = descriptor[VALUE];
-
-		descriptor[VALUE] = function () {
-			var self = this;
-			var args = arguments;
-			return outer.apply(self, args = inner.apply(self, args = outer.apply(self, args) || args) || args);
-		};
+	around[DECORATE] = function (descriptor) {
+		descriptor[VALUE] = this[DECORATED](descriptor[VALUE] || NOOP);
 
 		return descriptor;
 	};
@@ -235,8 +241,12 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 					value = descriptor[VALUE];
 
 					// If value is instanceof Advice, we should re-describe, otherwise just use the original desciptor
-					prototypeDescriptors[name] = value instanceof Advise
-						? value.describe(prototypeDescriptors[name])
+					prototypeDescriptors[name] = value instanceof Decorator
+						? value[DECORATE](prototypeDescriptors[name] || {
+							"enumerable" : true,
+							"configurable" : true,
+							"writable" : true
+						})
 						: descriptor;
 				}
 			}
