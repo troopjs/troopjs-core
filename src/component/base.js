@@ -10,7 +10,6 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var INSTANCE_COUNT = "instanceCount";
-	var LENGTH = "length";
 	var VALUE = "value";
 	var COUNT = 0;
 
@@ -29,23 +28,21 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 
 		/**
 		 * Signals the component
-		 * @param signal {String} Signal
+		 * @param _signal {String} Signal
 		 * @return {*}
 		 */
-		"signal" : function onSignal(signal) {
+		"signal" : function onSignal(_signal) {
 			var self = this;
-			var signals = self.constructor.specials.sig[signal];
-			var length = signals
-				? signals[LENGTH]
-				: 0;
-			var index = 0;
 			var args = ARRAY_SLICE.call(arguments);
+			var signals = self.constructor.specials.sig[_signal];
+			var signal;
+			var index = 0;
 
 			function next() {
-				// Return a chained promise of next callback, or a promise resolved with args
-				return length > index
-					? when(signals[index++][VALUE].apply(self, args), next)
-					: when.resolve(signal);
+				// Return a chained promise of next callback, or a promise resolved with _signal
+				return (signal = signals[index++])
+					? when(signal[VALUE].apply(self, args), next)
+					: when.resolve(_signal);
 			}
 
 			// Return promise
@@ -58,17 +55,17 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 		 */
 		"start" : function start() {
 			var self = this;
-			var _signal = self.signal;
+			var signal = self.signal;
 			var args = [ "initialize" ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return _signal.apply(self, args).then(function started() {
+			return signal.apply(self, args).then(function started() {
 				// Modify args to change signal
 				args[0] = "start";
 
-				return _signal.apply(self, args);
+				return signal.apply(self, args);
 			});
 		},
 
@@ -78,17 +75,17 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 		 */
 		"stop" : function stop() {
 			var self = this;
-			var _signal = self.signal;
+			var signal = self.signal;
 			var args = [ "stop" ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return _signal.apply(self, args).then(function stopped() {
+			return signal.apply(self, args).then(function stopped() {
 				// Modify args to change signal
 				args[0] = "finalize";
 
-				return _signal.apply(self, args);
+				return signal.apply(self, args);
 			});
 		},
 
