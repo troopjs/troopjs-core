@@ -11,7 +11,7 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 
 		self[SERVICES] = {};
 
-		self.add(self)
+		self.add(self);
 	},{
 		"displayName" : "core/registry/service",
 
