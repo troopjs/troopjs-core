@@ -6,29 +6,25 @@
 define([ "../component/service", "poly/object", "poly/array" ], function RegistryServiceModule(Service) {
 	var SERVICES = "services";
 
-	function add(service) {
-		this[SERVICES][service.toString()] = service;
-	}
-
 	return Service.extend(function RegistryService() {
-		this[SERVICES] = {};
+		var self = this;
+
+		self[SERVICES] = {};
+
+		self.add(self)
 	},{
 		"displayName" : "core/registry/service",
 
-		"sig/initialize" : function onInitialize() {
-			return add.call(this, this);
+		"add" : function add(service) {
+			this[SERVICES][service.toString()] = service;
 		},
 
-		"hub/registry/add" : function onAdd(topic, service) {
-			return add.call(this, service);
-		},
-
-		"hub/registry/remove" : function onRemove(topic, service) {
+		"remove": function remove(service) {
 			delete this[SERVICES][service.toString()];
 		},
 
-		"hub/registry/get" : function onGet(topic, name) {
-			var re = new RegExp(name);
+		"get" : function get(pattern) {
+			var re = new RegExp(pattern);
 			var services = this[SERVICES];
 
 			return Object.keys(services)
@@ -38,6 +34,18 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 				.map(function map(serviceName) {
 					return services[serviceName];
 				});
+		},
+
+		"hub/registry/add" : function onAdd(topic, service) {
+			return this.add(service);
+		},
+
+		"hub/registry/remove" : function onRemove(topic, service) {
+			return this.remove(service);
+		},
+
+		"hub/registry/get" : function onGet(topic, pattern) {
+			return this.get(pattern);
 		}
 	});
 });
