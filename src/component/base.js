@@ -39,26 +39,17 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 				? signals[LENGTH]
 				: 0;
 			var index = 0;
-			var args;
+			var args = ARRAY_SLICE.call(arguments);
 
-			function next(_args) {
-				// Update args
-				args = _args || args;
-
+			function next() {
 				// Return a chained promise of next callback, or a promise resolved with args
 				return length > index
 					? when(signals[index++][VALUE].apply(self, args), next)
-					: when.resolve(args);
+					: when.resolve(signal);
 			}
 
-			try {
-				// Return promise
-				return next(ARRAY_SLICE.call(arguments));
-			}
-			catch (e) {
-				// Return rejected promise
-				return when.reject(e);
-			}
+			// Return promise
+			return next();
 		},
 
 		/**
@@ -73,11 +64,11 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return _signal.apply(self, args).then(function started(_args) {
+			return _signal.apply(self, args).then(function started() {
 				// Modify args to change signal
-				_args[0] = "start";
+				args[0] = "start";
 
-				return _signal.apply(self, _args);
+				return _signal.apply(self, args);
 			});
 		},
 
