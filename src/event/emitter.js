@@ -312,14 +312,8 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					// Get first handler
 					handler = handlers[HEAD];
 
-					try {
-						// Return promise
-						return next(args);
-					}
-					catch (e) {
-						// Return promise rejected with exception
-						return when.reject(e);
-					}
+					// Return promise
+					return next(args);
 				}
 			}
 			// No event in handlers
