@@ -11,6 +11,7 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var INSTANCE_COUNT = "instanceCount";
 	var VALUE = "value";
+	var SIG = "sig";
 	var COUNT = 0;
 
 	return Factory(
@@ -34,7 +35,8 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 		"signal" : function onSignal(_signal) {
 			var self = this;
 			var args = ARRAY_SLICE.call(arguments);
-			var signals = self.constructor.specials.sig[_signal];
+			var specials = self.constructor.specials;
+			var signals = (SIG in specials && specials[SIG][_signal]) || [];
 			var signal;
 			var index = 0;
 
