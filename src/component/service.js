@@ -4,8 +4,6 @@
  */
 /*global define:false */
 define([ "./gadget" ], function ServiceModule(Gadget) {
-	var CONFIGURATION = "configuration";
-
 	return Gadget.extend({
 		"displayName" : "core/component/service",
 
@@ -19,14 +17,6 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 			var self = this;
 
 			return self.publish("registry/remove", self);
-		},
-
-		"configure" : function configure(configuration) {
-			var self = this;
-
-			self[CONFIGURATION] = configuration || {};
-
-			return self;
 		}
 	});
 });

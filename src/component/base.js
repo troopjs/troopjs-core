@@ -3,13 +3,14 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/factory", "when" ], function ComponentModule(Factory, when) {
+define([ "../component/factory", "when", "troopjs-utils/merge" ], function ComponentModule(Factory, when, merge) {
 	/*jshint laxbreak:true */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var INSTANCE_COUNT = "instanceCount";
+	var CONFIGURATION = "configuration";
 	var VALUE = "value";
 	var SIG = "sig";
 	var COUNT = 0;
@@ -20,12 +21,23 @@ define([ "../component/factory", "when" ], function ComponentModule(Factory, whe
 	 * @constructor
 	 */
 	function Component() {
+		var self = this;
+
 		// Update instance count
-		this[INSTANCE_COUNT] = ++COUNT;
+		self[INSTANCE_COUNT] = ++COUNT;
+		self[CONFIGURATION] = {};
 	}, {
 		"instanceCount" : COUNT,
 
 		"displayName" : "core/component/base",
+
+		/**
+		 * Configures component
+		 * @returns {Object} Updated configuration
+		 */
+		"configure" : function configure() {
+			return merge.apply(this[CONFIGURATION], arguments);
+		},
 
 		/**
 		 * Signals the component
