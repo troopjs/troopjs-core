@@ -197,17 +197,20 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		 * Reemit event from memory
 		 * @param {String} event to reemit
 		 * @param {Object} context to scope callback to
+		 * @param {Boolean} senile flag to indicate if already trigger callbacks should still be called
 		 * @param {...Function} callback to reemit
 		 * @returns {Object} instance of this
 		 */
-		"reemit" : function reemit(event, context, callback) {
+		"reemit" : function reemit(event, context, senile, callback) {
 			var self = this;
 			var args = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
+			var marked;
 			var length = args[LENGTH];
 			var offset;
+			var found;
 
 			// Have event in handlers
 			if (event in handlers) {
@@ -224,29 +227,38 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					// Get first handler
 					handler = handlers[HEAD];
 
-					// Compute next handled
-					handled = handlers[HANDLED] + 1;
+					// Compute marked handled (and store current handled)
+					marked = (handled = handlers[HANDLED]) + 1;
 
 					// Step through handlers
-					mark: do {
-						// Check if context matches
-						if (handler[CONTEXT] === context) {
-							// Continue if no callback was provided
-							if (length === 2) {
-								continue;
+					do {
+						// Start unmarked block
+						unmarked : {
+							// If context does not match we have to mark
+							if (handler[CONTEXT] !== context) {
+								break unmarked;
 							}
 
-							// Reset offset, then loop callbacks
-							for (offset = 2; offset < length; offset++) {
-								// Break if handler CALLBACK matches
+							// Reset found and offset, iterate args
+							for (found = false, offset = 3; offset < length; offset++) {
+								// If callback matches set found and break
 								if (handler[CALLBACK] === args[offset]) {
-									continue mark;
+									found = true;
+									break;
 								}
 							}
+
+							// If we can't find callback, or are unhandled and not senile, we have to mark
+							if (!found || handler[HANDLED] === handled && !senile) {
+								break unmarked;
+							}
+
+							// Don't mark
+							continue;
 						}
 
-						// Mark this handler as handled (to prevent reemit)
-						handler[HANDLED] = handled;
+						// Mark this handler as handled (to prevent emit)
+						handler[HANDLED] = marked;
 					} while ((handler = handler[NEXT]));
 
 					// Return self.emit with memory

@@ -78,7 +78,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				}
 
 				// Republish, store result
-				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], self, subscription[VALUE]);
+				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], self, false, subscription[VALUE]);
 			}
 
 			// Return promise that will be fulfilled when all results are
