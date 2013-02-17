@@ -59,13 +59,13 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 */
 		"sig/start" : function start() {
 			var self = this;
+			var args = arguments;
 			var subscription;
 			var subscriptions = self[SUBSCRIPTIONS];
 			var results = [];
 			var resultsLength = 0;
 			var i;
 			var iMax;
-			var deferred = when.defer();
 
 			// Iterate subscriptions
 			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
@@ -81,11 +81,11 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], self, subscription[VALUE]);
 			}
 
-			// Chain promise that will resolve when all results are fulfilled
-			when.chain(results, deferred.resolver, arguments);
-
-			// Return promise
-			return deferred.promise;
+			// Return promise that will be fulfilled when all results are
+			return when.all(results, function () {
+				// Return original arguments
+				return args;
+			});
 		},
 
 		/**
