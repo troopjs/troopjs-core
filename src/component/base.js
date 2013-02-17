@@ -11,6 +11,7 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var INSTANCE_COUNT = "instanceCount";
 	var CONFIGURATION = "configuration";
+	var PHASE = "phase";
 	var VALUE = "value";
 	var SIG = "sig";
 	var COUNT = 0;
@@ -75,11 +76,17 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return signal.apply(self, args).then(function started() {
+			return signal.apply(self, args).then(function initialized() {
+				// Update phase
+				self[PHASE] = args[0];
+
 				// Modify args to change signal
 				args[0] = "start";
 
-				return signal.apply(self, args);
+				return signal.apply(self, args).then(function started() {
+					// Update phase
+					return self[PHASE] = args[0];
+				});
 			});
 		},
 
@@ -96,10 +103,16 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 			ARRAY_PUSH.apply(args, arguments);
 
 			return signal.apply(self, args).then(function stopped() {
+				// Update phase
+				self[PHASE] = args[0];
+
 				// Modify args to change signal
 				args[0] = "finalize";
 
-				return signal.apply(self, args);
+				return signal.apply(self, args).then(function finalized() {
+					// Update phase
+					return self[PHASE] = args[0];
+				});
 			});
 		},
 
