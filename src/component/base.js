@@ -71,21 +71,18 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 		"start" : function start() {
 			var self = this;
 			var signal = self.signal;
-			var args = [ "initialize" ];
+			var args = [ self[PHASE] = "initialize" ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
 			return signal.apply(self, args).then(function initialized() {
-				// Update phase
-				self[PHASE] = args[0];
-
-				// Modify args to change signal
-				args[0] = "start";
+				// Modify args to change signal (and store in PHASE)
+				args[0] = self[PHASE] = "start";
 
 				return signal.apply(self, args).then(function started() {
 					// Update phase
-					return self[PHASE] = args[0];
+					return self[PHASE] = "started";
 				});
 			});
 		},
@@ -97,21 +94,18 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 		"stop" : function stop() {
 			var self = this;
 			var signal = self.signal;
-			var args = [ "stop" ];
+			var args = [ self[PHASE] = "stop" ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
 			return signal.apply(self, args).then(function stopped() {
-				// Update phase
-				self[PHASE] = args[0];
-
-				// Modify args to change signal
-				args[0] = "finalize";
+				// Modify args to change signal (and store in PHASE)
+				args[0] = self[PHASE] = "finalize";
 
 				return signal.apply(self, args).then(function finalized() {
 					// Update phase
-					return self[PHASE] = args[0];
+					return self[PHASE] = "finalized";
 				});
 			});
 		},
