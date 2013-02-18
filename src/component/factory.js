@@ -36,7 +36,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @returns {*}
 	 */
 	function create() {
-		return this.apply(null, arguments);
+		return extend.apply(this, arguments)();
 	}
 
 	/**
@@ -348,7 +348,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	// Add CREATE to factoryDescriptors
 	factoryDescriptors[CREATE] = {
 		"value" : function FactoryCreate() {
-			return Factory.apply(null, arguments).create();
+			return Factory.apply(null, arguments)();
 		}
 	};
 
