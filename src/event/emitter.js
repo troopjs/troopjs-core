@@ -281,34 +281,23 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
+			var unhandled;
+			var unhandledCount;
 
 			/**
-			 * Internal function for async execution of callbacks
+			 * Internal function for async execution of unhandled handlers
 			 * @private
-			 * @param {Array} [_arg] result from previous callback
-			 * @return {Promise} promise of next execution
+			 * @param {Array} [_arg] result from previous handler callback
+			 * @return {Promise} promise of next handler callback execution
 			 */
 			function next(_arg) {
-				// Update arg
+				// Update args
 				args = _arg || args;
 
-				// Step forward until we find a unhandled handler
-				while(handler[HANDLED] === handled) {
-					// No more handlers, escape!
-					if (!(handler = handler[NEXT])) {
-						// Remember arg
-						handlers[MEMORY] = args;
-
-						// Return promise resolved with arg
-						return when.resolve(args);
-					}
-				}
-
-				// Update handled
-				handler[HANDLED] = handled;
-
-				// Return promise of callback execution, chain next
-				return when(handler[CALLBACK].apply(handler[CONTEXT], args), next);
+				// Return a chained promise of next callback, or a promise resolved with args
+				return (handler = unhandled[unhandledCount++])
+					? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
+					: when.resolve(handlers[MEMORY] = args);
 			}
 
 			// Have event in handlers
@@ -321,10 +310,33 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 
 				// Have head in handlers
 				if (HEAD in handlers) {
+					// Create unhandled array and count
+					unhandled = [];
+					unhandledCount = 0;
+
 					// Get first handler
 					handler = handlers[HEAD];
 
-					// Return promise
+					// Step handlers
+					do {
+						// If we're already handled, continue
+						if (handler[HANDLED] === handled) {
+							continue;
+						}
+
+						// Update handled
+						handler[HANDLED] = handled;
+
+						// Push handler on unhandled
+						unhandled[unhandledCount++] = handler;
+					}
+					// While there is a next handler
+					while (handler = handler[NEXT]);
+
+					// Reset unhandledCount
+					unhandledCount = 0;
+
+					// Return promise (of unhandled execution)
 					return next(args);
 				}
 			}
