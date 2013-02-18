@@ -317,6 +317,9 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					// Get first handler
 					handler = handlers[HEAD];
 
+					// Update handled
+					handled = ++handlers[HANDLED];
+
 					// Step handlers
 					do {
 						// If we're already handled, continue
