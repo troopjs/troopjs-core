@@ -8,11 +8,11 @@ define([ "../event/emitter" ], function HubModule(Emitter) {
 
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
 
-	return Emitter.extend({
+	return Emitter.create({
 		"displayName": "core/pubsub/hub",
 		"subscribe" : COMPONENT_PROTOTYPE.on,
 		"unsubscribe" : COMPONENT_PROTOTYPE.off,
 		"publish" : COMPONENT_PROTOTYPE.emit,
 		"republish" : COMPONENT_PROTOTYPE.reemit
-	})();
+	});
 });
