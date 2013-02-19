@@ -331,7 +331,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 						unhandled[unhandledCount++] = handler;
 					}
 					// While there is a next handler
-					while (handler = handler[NEXT]);
+					while ((handler = handler[NEXT]));
 
 					// Reset unhandledCount
 					unhandledCount = 0;
