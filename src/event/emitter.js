@@ -305,9 +305,6 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				// Get handlers
 				handlers = handlers[event];
 
-				// Update handled
-				handled = ++handlers[HANDLED];
-
 				// Have head in handlers
 				if (HEAD in handlers) {
 					// Create unhandled array and count
