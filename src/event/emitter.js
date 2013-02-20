@@ -15,6 +15,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
+	var RE = /^(\w+)(?::(pipeline|sequence))/;
 
 	return Component.extend(
 	/**
@@ -283,22 +284,50 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			var handled;
 			var unhandled;
 			var unhandledCount;
+			var matches;
+			var method;
+			var next;
 
-			/**
-			 * Internal function for async execution of unhandled handlers
-			 * @private
-			 * @param {Array} [_arg] result from previous handler callback
-			 * @return {Promise} promise of next handler callback execution
-			 */
-			function next(_arg) {
-				// Update args
-				args = _arg || args;
-
-				// Return a chained promise of next callback, or a promise resolved with args
-				return (handler = unhandled[unhandledCount++])
-					? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
-					: when.resolve(handlers[MEMORY] = args);
+			// See if we should override method
+			if ((matches = RE.exec(event)) !== null) {
+				event = matches[1];
+				method = matches[2];
 			}
+
+			// Define next
+			next = method === "sequence"
+				/**
+				 * Internal function for sequential execution of unhandled handlers
+				 * @private
+				 * @param {Array} [_arg] result from previous handler callback
+				 * @return {Promise} promise of next handler callback execution
+				 */
+				? (function (result, resultCount) {
+					return function (_args) {
+						// Store result
+						result[resultCount++] = _args;
+
+						// Return a chained promise of next callback, or a promise resolved with args
+						return (handler = unhandled[unhandledCount++])
+							? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
+							: when.resolve(result);
+					}
+				})([], -1)
+				/**
+				 * Internal function for piped execution of unhandled handlers
+				 * @private
+				 * @param {Array} [_arg] result from previous handler callback
+				 * @return {Promise} promise of next handler callback execution
+				 */
+				: function (_args) {
+					// Update args
+					args = _args || args;
+
+					// Return a chained promise of next callback, or a promise resolved with args
+					return (handler = unhandled[unhandledCount++])
+						? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
+						: when.resolve(handlers[MEMORY] = args);
+				};
 
 			// Have event in handlers
 			if (event in handlers) {
