@@ -132,7 +132,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			var args = [ event, self, senile ];
 
 			// Add self as context
-			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 3));
+			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 2));
 
 			// Republish
 			return REPUBLISH.apply(hub, args);
@@ -149,7 +149,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			var args = [ event, self ];
 
 			// Add self as context
-			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 2));
+			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Subscribe
 			SUBSCRIBE.apply(hub, args);
@@ -168,7 +168,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			var args = [ event, self ];
 
 			// Add self as context
-			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 2));
+			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Unsubscribe
 			UNSUBSCRIBE.apply(hub, args);
