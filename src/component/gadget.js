@@ -6,7 +6,9 @@
 define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Emitter, when, hub) {
 	/*jshint laxbreak:true */
 
-	var ARRAY_PUSH = Array.prototype.push;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var PUBLISH = hub.publish;
 	var REPUBLISH = hub.republish;
 	var SUBSCRIBE = hub.subscribe;
@@ -109,21 +111,45 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Calls hub.publish in self context
+		 * Calls hub.publish
+		 * @arg {String} event to publish
+		 * @arg {...*} arg to pass to subscribed callbacks
+		 * @returns {Promise}
 		 */
-		"publish" : function publish() {
+		"publish" : function publish(event, arg) {
 			return PUBLISH.apply(hub, arguments);
 		},
 
 		/**
-		 * Calls hub.subscribe in self context
+		 * Calls hub.republish
+		 * @param {String} event to publish
+		 * @param {Boolean} senile flag
+		 * @param {...Function} callback to limit republish to
+		 * @returns {Promise}
 		 */
-		"subscribe" : function subscribe() {
+		"republish" : function republish(event, senile, callback) {
 			var self = this;
-			var args = [ self ];
+			var args = [ event, self, senile ];
 
 			// Add self as context
-			ARRAY_PUSH.call(args, arguments);
+			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 3));
+
+			// Republish
+			return REPUBLISH.apply(hub, args);
+		},
+
+		/**
+		 * Calls hub.subscribe
+		 * @param {String} event to subscribe to
+		 * @param {...Function} callback to subscribe
+		 * @returns {Object} instance of this
+		 */
+		"subscribe" : function subscribe(event, callback) {
+			var self = this;
+			var args = [ event, self ];
+
+			// Add self as context
+			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 2));
 
 			// Subscribe
 			SUBSCRIBE.apply(hub, args);
@@ -132,14 +158,17 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Calls hub.unsubscribe in self context
+		 * Calls hub.unsubscribe
+		 * @param {String} event to unsubscribe from
+		 * @param {...Function} callback to unsubscribe
+		 * @returns {Object} instance of this
 		 */
-		"unsubscribe" : function unsubscribe() {
+		"unsubscribe" : function unsubscribe(event, callback) {
 			var self = this;
-			var args = [ self ];
+			var args = [ event, self ];
 
 			// Add self as context
-			ARRAY_PUSH.call(args, arguments);
+			ARRAY_PUSH.call(args, ARRAY_SLICE.call(arguments, 2));
 
 			// Unsubscribe
 			UNSUBSCRIBE.apply(hub, args);
