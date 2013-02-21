@@ -322,13 +322,13 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				 * @return {Promise} promise of next handler callback execution
 				 */
 				: function (_args) {
-					// Update args
-					args = _args || args;
+					// Update memory and args
+					handlers[MEMORY] = args = _args || args;
 
 					// Return a chained promise of next callback, or a promise resolved with args
 					return (handler = unhandled[unhandledCount++])
 						? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
-						: when.resolve(handlers[MEMORY] = args);
+						: when.resolve(args);
 				};
 
 			// Have event in handlers
