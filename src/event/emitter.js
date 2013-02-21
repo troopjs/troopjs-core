@@ -305,7 +305,9 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				? (function (result, resultCount) {
 					return function (_args) {
 						// Store result
-						result[resultCount++] = _args;
+						if (resultCount++ >= 0) {
+							result[resultCount] = _args;
+						}
 
 						// Return a chained promise of next callback, or a promise resolved with args
 						return (handler = unhandled[unhandledCount++])
