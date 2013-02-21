@@ -52,16 +52,23 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 			var signals = (SIG in specials && specials[SIG][_signal]) || [];
 			var signal;
 			var index = 0;
+			var result = [];
+			var resultLength = -1;
 
-			function next() {
+			function next(_args) {
+				// Add result (if applicable)
+				if (resultLength++ >= 0) {
+					result[resultLength] = _args;
+				}
+
 				// Return a chained promise of next callback, or a promise resolved with _signal
 				return (signal = signals[index++])
 					? when(signal[VALUE].apply(self, args), next)
-					: when.resolve(_signal);
+					: when.resolve(result);
 			}
 
 			// Return promise
-			return next();
+			return next(args);
 		},
 
 		/**
@@ -76,13 +83,16 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return signal.apply(self, args).then(function initialized() {
+			return signal.apply(self, args).then(function initialized(_initialized) {
 				// Modify args to change signal (and store in PHASE)
 				args[0] = self[PHASE] = "start";
 
-				return signal.apply(self, args).then(function started() {
+				return signal.apply(self, args).then(function started(_started) {
 					// Update phase
-					return self[PHASE] = "started";
+					self[PHASE] = "started";
+
+					// Return concatenated result
+					return ARRAY_PROTO.concat(_initialized, _started);
 				});
 			});
 		},
@@ -99,13 +109,16 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return signal.apply(self, args).then(function stopped() {
+			return signal.apply(self, args).then(function stopped(_stopped) {
 				// Modify args to change signal (and store in PHASE)
 				args[0] = self[PHASE] = "finalize";
 
-				return signal.apply(self, args).then(function finalized() {
+				return signal.apply(self, args).then(function finalized(_finalized) {
 					// Update phase
-					return self[PHASE] = "finalized";
+					self[PHASE] = "finalized";
+
+					// Return concatenated result
+					return ARRAY_PROTO.concat(_stopped, _finalized);
 				});
 			});
 		},
