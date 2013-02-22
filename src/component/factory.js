@@ -6,11 +6,14 @@
 define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModule(unique) {
 	/*jshint laxbreak:true */
 
-	var ARRAY_PROTO = Array.prototype;
+	var PROTOTYPE = "prototype";
+	var TOSTRING = "toString";
+	var ARRAY_PROTO = Array[PROTOTYPE];
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
+	var OBJECT_TOSTRING = Object[PROTOTYPE][TOSTRING];
 	var TYPEOF_FUNCTION = typeof function () {};
-	var PROTOTYPE = "prototype";
+	var DISPLAYNAME = "displayName";
 	var LENGTH = "length";
 	var EXTEND = "extend";
 	var CREATE = "create";
@@ -150,6 +153,19 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 
 		return descriptor;
 	};
+
+	/**
+	 * Returns a string representation of this constructor
+	 * @returns {String}
+	 */
+	function ConstructorToString() {
+		var self = this;
+		var prototype = self[PROTOTYPE];
+
+		return DISPLAYNAME in prototype
+			? prototype[DISPLAYNAME]
+			: OBJECT_TOSTRING.call(self);
+	}
 
 	/**
 	 * Creates components
@@ -326,6 +342,10 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 		// Add SPECIALS to constructorDescriptors
 		constructorDescriptors[SPECIALS] = {
 			"value" : specials
+		};
+
+		constructorDescriptors[TOSTRING] = {
+			"value" : ConstructorToString
 		};
 
 		// Add EXTEND to constructorDescriptors
