@@ -111,6 +111,58 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
+		 * Reemits event with forced context to this
+		 * @param {String} event to publish
+		 * @param {Boolean} senile flag
+		 * @param {...Function} callback to limit reemit to
+		 * @returns {Promise}
+		 */
+		"reemit" : function reemit(event, senile, callback) {
+			var self = this;
+			var args = [ event, self, senile ];
+
+			// Add args
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
+
+			// Forward
+			return self.reemit.apply(self, args);
+		},
+
+		/**
+		 * Adds callback to event with forced context to this
+		 * @param {String} event to publish
+		 * @param {...Function} callback to add
+		 * @returns {Object} instance of this
+		 */
+		"on": function on(event, callback) {
+			var self = this;
+			var args = [ event, self ];
+
+			// Add args
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
+
+			// Forward
+			return self.on.apply(self, args);
+		},
+
+		/**
+		 * Removes callback from event with forced context to this
+		 * @param {String} event to remove callback from
+		 * @param {...Function} callback to remove
+		 * @returns {Object} instance of this
+		 */
+		"off" : function off(event, callback) {
+			var self = this;
+			var args = [ event, self ];
+
+			// Add args
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
+
+			// Forward
+			return self.off.apply(self, args);
+		},
+
+		/**
 		 * Calls hub.publish
 		 * @arg {String} event to publish
 		 * @arg {...*} arg to pass to subscribed callbacks
