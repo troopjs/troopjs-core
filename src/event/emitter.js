@@ -15,7 +15,9 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var RE = /^(\w+)(?::(pipeline|sequence))/;
+	var PHASE = "phase";
+	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
+	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	return Component.extend(
 	/**
@@ -289,28 +291,33 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			var next;
 
 			// See if we should override method
-			if ((matches = RE.exec(event)) !== null) {
+			if ((matches = RE_HINT.exec(event)) !== null) {
 				event = matches[1];
 				method = matches[2];
 			}
 
 			// Define next
 			next = method === "sequence"
-				/**
-				 * Internal function for sequential execution of unhandled handlers
-				 * @private
-				 * @param {Array} [_arg] result from previous handler callback
-				 * @return {Promise} promise of next handler callback execution
-				 */
 				? (function (result, resultCount) {
+					/**
+					 * Internal function for sequential execution of unhandled handlers
+					 * @private
+					 * @param {Array} [_arg] result from previous handler callback
+					 * @return {Promise} promise of next handler callback execution
+					 */
 					return function (_args) {
+						var context;
+
 						// Store result
 						if (resultCount++ >= 0) {
 							result[resultCount] = _args;
 						}
 
-						// Return a chained promise of next callback, or a promise resolved with args
-						return (handler = unhandled[unhandledCount++])
+						// Get next handler not in blocked phase
+						while ((handler = unhandled[unhandledCount++]) && (context = handler[CONTEXT]) && RE_PHASE.test(context[PHASE]));
+
+						// Return promise of next callback, or a promise resolved with result
+						return handler
 							? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
 							: when.resolve(result);
 					}
@@ -322,11 +329,16 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				 * @return {Promise} promise of next handler callback execution
 				 */
 				: function (_args) {
+					var context;
+
 					// Update memory and args
 					handlers[MEMORY] = args = _args || args;
 
-					// Return a chained promise of next callback, or a promise resolved with args
-					return (handler = unhandled[unhandledCount++])
+					// Get next handler not in blocked phase
+					while ((handler = unhandled[unhandledCount++]) && (context = handler[CONTEXT]) && RE_PHASE.test(context[PHASE]));
+
+					// Return promise of next callback,or promise resolved with args
+					return handler
 						? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
 						: when.resolve(args);
 				};
