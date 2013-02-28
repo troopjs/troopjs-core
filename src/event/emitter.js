@@ -21,23 +21,23 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	/**
-	 * Constructs a function that executes unhandled in sequence without overlap
+	 * Constructs a function that executes handlers in sequence without overlap
 	 * @private
-	 * @param {Array} unhandled
-	 * @param {Number} handled
-	 * @param {Array?} result
+	 * @param {Array} handlers Array of handlers
+	 * @param {Number} handled Handled counter
+	 * @param {Array} [result=[]] Result array
 	 * @returns {Function}
 	 */
-	function sequence(unhandled, handled, result) {
+	function sequence(handlers, handled, result) {
 		// Default value for result
 		result = result || [];
 
-		var unhandledCount = 0;
+		var handlersCount = 0;
 		var resultLength = result[LENGTH];
 		var resultCount = resultLength - 1;
 
 		/**
-		 * Internal function for sequential execution of unhandled handlers
+		 * Internal function for sequential execution of handlers handlers
 		 * @private
 		 * @param {Array} [args] result from previous handler callback
 		 * @return {Promise} promise of next handler callback execution
@@ -52,7 +52,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			}
 
 			// Iterate until we find a handler in a blocked phase
-			while ((handler = unhandled[unhandledCount++])	// Has next handler
+			while ((handler = handlers[handlersCount++])	// Has next handler
 				&& (context = handler[CONTEXT])				// Has context
 				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
 
@@ -66,22 +66,22 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	}
 
 	/**
-	 * Constructs a function that executes unhandled in a pipeline without overlap
+	 * Constructs a function that executes handlers in a pipeline without overlap
 	 * @private
-	 * @param {Array} unhandled
-	 * @param {Number} handled
-	 * @param {Object?} memoryHandle
+	 * @param {Array} handlers Array of handlers
+	 * @param {Number} handled Handled counter
+	 * @param {Object} [anchor={}] Object for saving MEMORY on
 	 * @returns {Function}
 	 */
-	function pipeline(unhandled, handled, memoryHandle) {
-		// Default value for memoryHandle
-		memoryHandle = memoryHandle || {};
+	function pipeline(handlers, handled, anchor) {
+		// Default value for anchor
+		anchor = anchor || {};
 
-		var unhandledCount = 0;
+		var handlersCount = 0;
 		var result;
 
 		/**
-		 * Internal function for piped execution of unhandled handlers
+		 * Internal function for piped execution of handlers handlers
 		 * @private
 		 * @param {Array} [args] result from previous handler callback
 		 * @return {Promise} promise of next handler callback execution
@@ -91,10 +91,10 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			var handler;
 
 			// Update memory and result
-			memoryHandle[MEMORY] = result = args || result;
+			anchor[MEMORY] = result = args || result;
 
 			// Iterate until we find a handler in a blocked phase
-			while ((handler = unhandled[unhandledCount++])	// Has next handler
+			while ((handler = handlers[handlersCount++])	// Has next handler
 				&& (context = handler[CONTEXT])				// Has context
 				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
 
@@ -363,6 +363,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					// While there's a next handler
 					while ((handler = handler[NEXT]));
 
+					// Return promise
 					return (method === "sequence")
 						? sequence(candidates, handled)(handlers[MEMORY])
 						: pipeline(candidates, handled)(handlers[MEMORY]);
