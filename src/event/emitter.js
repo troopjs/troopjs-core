@@ -6,6 +6,7 @@
 define([ "../component/base", "when" ], function EventEmitterModule(Component, when) {
 	/*jshint laxbreak:true */
 
+	var NULL = null;
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
@@ -18,6 +19,93 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var PHASE = "phase";
 	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
+
+	/**
+	 * Constructs a function that executes unhandled in sequence without overlap
+	 * @private
+	 * @param {Array} unhandled
+	 * @param {Number} handled
+	 * @param {Array?} result
+	 * @returns {Function}
+	 */
+	function sequence(unhandled, handled, result) {
+		// Default value for result
+		result = result || [];
+
+		var unhandledCount = 0;
+		var resultLength = result[LENGTH];
+		var resultCount = resultLength - 1;
+
+		/**
+		 * Internal function for sequential execution of unhandled handlers
+		 * @private
+		 * @param {Array} [args] result from previous handler callback
+		 * @return {Promise} promise of next handler callback execution
+		 */
+		var next = function (args) {
+			var context;
+			var handler;
+
+			// Store result
+			if (resultCount++ >= resultLength) {
+				result[resultCount] = args;
+			}
+
+			// Iterate until we find a handler in a blocked phase
+			while ((handler = unhandled[unhandledCount++])	// Has next handler
+				&& (context = handler[CONTEXT])				// Has context
+				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
+
+			// Return promise of next callback, or a promise resolved with result
+			return handler
+				? handler[HANDLED] = handled && when(handler[CALLBACK].apply(context, args), next)
+				: when.resolve(result);
+		};
+
+		return next;
+	}
+
+	/**
+	 * Constructs a function that executes unhandled in a pipeline without overlap
+	 * @private
+	 * @param {Array} unhandled
+	 * @param {Number} handled
+	 * @param {Object?} memoryHandle
+	 * @returns {Function}
+	 */
+	function pipeline(unhandled, handled, memoryHandle) {
+		// Default value for memoryHandle
+		memoryHandle = memoryHandle || {};
+
+		var unhandledCount = 0;
+		var result;
+
+		/**
+		 * Internal function for piped execution of unhandled handlers
+		 * @private
+		 * @param {Array} [args] result from previous handler callback
+		 * @return {Promise} promise of next handler callback execution
+		 */
+		var next = function (args) {
+			var context;
+			var handler;
+
+			// Update memory and result
+			memoryHandle[MEMORY] = result = args || result;
+
+			// Iterate until we find a handler in a blocked phase
+			while ((handler = unhandled[unhandledCount++])	// Has next handler
+				&& (context = handler[CONTEXT])				// Has context
+				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
+
+			// Return promise of next callback,or promise resolved with result
+			return handler
+				? handled[HANDLED] = handled && when(handler[CALLBACK].apply(context, result), next)
+				: when.resolve(result);
+		};
+
+		return next;
+	}
 
 	return Component.extend(
 	/**
@@ -207,13 +295,22 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		"reemit" : function reemit(event, context, senile, callback) {
 			var self = this;
 			var args = arguments;
+			var argsLength = args[LENGTH];
 			var handlers = self[HANDLERS];
 			var handler;
 			var handled;
-			var marked;
-			var length = args[LENGTH];
+			var candidates;
+			var candidatesCount;
+			var matches;
+			var method;
 			var offset;
 			var found;
+
+			// See if we should override event and method
+			if ((matches = RE_HINT.exec(event)) !== NULL) {
+				event = matches[1];
+				method = matches[2];
+			}
 
 			// Have event in handlers
 			if (event in handlers) {
@@ -227,23 +324,26 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 						return when.resolve(handlers[MEMORY]);
 					}
 
+					// Create candidates array and count
+					candidates = [];
+					candidatesCount = 0;
+
 					// Get first handler
 					handler = handlers[HEAD];
 
-					// Compute marked handled (and store current handled)
-					marked = (handled = handlers[HANDLED]) + 1;
+					// Get handled
+					handled = handlers[HANDLED];
 
-					// Step through handlers
+					// Iterate handlers
 					do {
-						// Start unmarked block
-						unmarked : {
-							// If context does not match we have to mark
+						add : {
+							// If context does not match break add
 							if (handler[CONTEXT] !== context) {
-								break unmarked;
+								break add;
 							}
 
 							// Reset found and offset, iterate args
-							for (found = false, offset = 3; offset < length; offset++) {
+							for (found = false, offset = 3; offset < argsLength; offset++) {
 								// If callback matches set found and break
 								if (handler[CALLBACK] === args[offset]) {
 									found = true;
@@ -251,21 +351,21 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 								}
 							}
 
-							// If we can't find callback, or are unhandled and not senile, we have to mark
-							if (!found || handler[HANDLED] === handled && !senile) {
-								break unmarked;
+							// If we found a callback and are already handled and not senile break add
+							if (found && handler[HANDLED] === handled && !senile) {
+								break add;
 							}
 
-							// Don't mark
-							continue;
+							// Push handler on candidates
+							candidates[candidatesCount++] = handler;
 						}
+					}
+					// While there's a next handler
+					while ((handler = handler[NEXT]));
 
-						// Mark this handler as handled (to prevent emit)
-						handler[HANDLED] = marked;
-					} while ((handler = handler[NEXT]));
-
-					// Return self.emit with memory
-					return self.emit.apply(self, handlers[MEMORY]);
+					return (method === "sequence")
+						? sequence(candidates, handled)(handlers[MEMORY])
+						: pipeline(candidates, handled)(handlers[MEMORY]);
 				}
 			}
 
@@ -283,65 +383,16 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			var args = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
-			var handled;
-			var unhandled;
-			var unhandledCount;
+			var candidates;
+			var candidatesCount;
 			var matches;
 			var method;
-			var next;
 
-			// See if we should override method
-			if ((matches = RE_HINT.exec(event)) !== null) {
+			// See if we should override event and method
+			if ((matches = RE_HINT.exec(event)) !== NULL) {
 				event = matches[1];
 				method = matches[2];
 			}
-
-			// Define next
-			next = method === "sequence"
-				? (function (result, resultCount) {
-					/**
-					 * Internal function for sequential execution of unhandled handlers
-					 * @private
-					 * @param {Array} [_arg] result from previous handler callback
-					 * @return {Promise} promise of next handler callback execution
-					 */
-					return function (_args) {
-						var context;
-
-						// Store result
-						if (resultCount++ >= 0) {
-							result[resultCount] = _args;
-						}
-
-						// Get next handler not in blocked phase
-						while ((handler = unhandled[unhandledCount++]) && (context = handler[CONTEXT]) && RE_PHASE.test(context[PHASE]));
-
-						// Return promise of next callback, or a promise resolved with result
-						return handler
-							? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
-							: when.resolve(result);
-					}
-				})([], -1)
-				/**
-				 * Internal function for piped execution of unhandled handlers
-				 * @private
-				 * @param {Array} [_arg] result from previous handler callback
-				 * @return {Promise} promise of next handler callback execution
-				 */
-				: function (_args) {
-					var context;
-
-					// Update memory and args
-					handlers[MEMORY] = args = _args || args;
-
-					// Get next handler not in blocked phase
-					while ((handler = unhandled[unhandledCount++]) && (context = handler[CONTEXT]) && RE_PHASE.test(context[PHASE]));
-
-					// Return promise of next callback,or promise resolved with args
-					return handler
-						? when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
-						: when.resolve(args);
-				};
 
 			// Have event in handlers
 			if (event in handlers) {
@@ -350,37 +401,25 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 
 				// Have head in handlers
 				if (HEAD in handlers) {
-					// Create unhandled array and count
-					unhandled = [];
-					unhandledCount = 0;
+					// Create candidates array and count
+					candidates = [];
+					candidatesCount = 0;
 
 					// Get first handler
 					handler = handlers[HEAD];
 
-					// Update handled
-					handled = ++handlers[HANDLED];
-
 					// Step handlers
 					do {
-						// If we're already handled, continue
-						if (handler[HANDLED] === handled) {
-							continue;
-						}
-
-						// Update handled
-						handler[HANDLED] = handled;
-
-						// Push handler on unhandled
-						unhandled[unhandledCount++] = handler;
+						// Push handler on candidates
+						candidates[candidatesCount++] = handler;
 					}
 					// While there is a next handler
 					while ((handler = handler[NEXT]));
 
-					// Reset unhandledCount
-					unhandledCount = 0;
-
-					// Return promise (of unhandled execution)
-					return next(args);
+					// Return promise
+					return (method === "sequence")
+						? sequence(candidates, ++handlers[HANDLED])(args)
+						: pipeline(candidates, ++handlers[HANDLED], handlers)(args);
 				}
 			}
 			// No event in handlers
