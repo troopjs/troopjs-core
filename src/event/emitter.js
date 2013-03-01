@@ -156,7 +156,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					: handlers[HEAD] = handler;
 
 				// Iterate handlers from offset
-				while (offset < length) {
+				while (offset < argsLength) {
 					// Set tail -> tail[NEXT] -> handler
 					tail = tail[NEXT] = handler = {};
 
@@ -182,7 +182,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				handler[CONTEXT] = context;
 
 				// Iterate handlers from offset
-				while (offset < length) {
+				while (offset < argsLength) {
 					// Set tail -> tail[NEXT] -> handler
 					tail = tail[NEXT] = handler = {};
 
@@ -208,18 +208,18 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		/**
 		 * Remove a listener for the specified event.
 		 * @param {String} event to remove callback from
-		 * @param {Object} context to scope callback to
+		 * @param {Object} [context] to scope callback to
 		 * @param {...Function} [callback] to remove
 		 * @returns {Object} instance of this
 		 */
 		"off" : function off(event, context, callback) {
 			var self = this;
 			var args = arguments;
+			var argsLength = args[LENGTH];
 			var handlers = self[HANDLERS];
 			var handler;
 			var head;
 			var tail;
-			var length = args[LENGTH];
 			var offset;
 
 			// Return fast if we don't have subscribers
@@ -238,22 +238,29 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			// Get first handler
 			handler = handlers[HEAD];
 
-			// Step through handlers
-			keep: do {
-				// Check if context matches
-				if (handler[CONTEXT] === context) {
-					// Continue if no callback was provided
-					if (length === 2) {
-						continue;
+			// Iterate handlers
+			do {
+				remove : {
+					// If no context or context does not match we should break remove
+					if (context && handler[CONTEXT] !== context) {
+						break remove;
+					}
+
+					// If there are no callbacks to check, we should break remove
+					if (argsLength === 2) {
+						break remove;
 					}
 
 					// Reset offset, then loop callbacks
-					for (offset = 2; offset < length; offset++) {
-						// Continue if handler CALLBACK matches
+					for (offset = 2; offset < argsLength; offset++) {
+						// If handler CALLBACK matches break remove
 						if (handler[CALLBACK] === args[offset]) {
-							continue keep;
+							break remove;
 						}
 					}
+
+					// Keep this handler, just continue
+					continue;
 				}
 
 				// It there's no head - link head -> tail -> handler
@@ -264,7 +271,9 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				else {
 					tail = tail[NEXT] = handler;
 				}
-			} while ((handler = handler[NEXT]));
+			}
+			// While there's a next handler
+			while ((handler = handler[NEXT]));
 
 			// If we have both head and tail we should update handlers
 			if (head && tail) {
