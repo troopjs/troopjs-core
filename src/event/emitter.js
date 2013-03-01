@@ -221,6 +221,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			var head;
 			var tail;
 			var offset;
+			var found;
 
 			// Return fast if we don't have subscribers
 			if (!(event in handlers)) {
@@ -247,17 +248,18 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 						break remove;
 					}
 
-					// If there are no callbacks to check, we should break
-					if (argsLength === 2) {
-						break remove;
+					// Reset offset, then loop callbacks
+					for (found = false, offset = 2; offset < argsLength; offset++) {
+						// If handler CALLBACK matches update found and break
+						if (handler[CALLBACK] === args[offset]) {
+							found = true;
+							break;
+						}
 					}
 
-					// Reset offset, then loop callbacks
-					for (offset = 2; offset < argsLength; offset++) {
-						// If handler CALLBACK matches break
-						if (handler[CALLBACK] === args[offset]) {
-							break remove;
-						}
+					// If nothing is found break
+					if (!found) {
+						break remove;
 					}
 
 					// Remove this handler, just continue
