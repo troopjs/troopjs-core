@@ -15,13 +15,13 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
         run({
             // POSITIVE TESTS
-            "on/publish no exception when there is no subscriber" : function () {
+            "publish no exception when there is no subscriber" : function () {
                 var g1 = new Gadget();
 
                 g1
                 .publish.apply(g1);
             },
-            "on/publish and on/subscribe" : function () {
+            "publish/subscribe" : function () {
                 var g1 = new Gadget();
 
                 g1
@@ -30,7 +30,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
                 })
                 .publish.apply(g1);
             },
-            "on/publish and on/subscribe with args" : function () {
+            "publish/subscribe with args" : function () {
                 var g1 = new Gadget();
 
                 g1
@@ -39,7 +39,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
                 })
                 .publish.apply(g1, test_args);
             },
-            "on/publish and on/subscribe multiple times and in order" : function () {
+            "publish/subscribe multiple times and in order" : function () {
                 var g1 = new Gadget();
 
                 var spy = this.spy();
@@ -54,7 +54,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
                 })
                 .publish.apply(g1, test_args)
             },
-            "on/publish and on/subscribe (cross gadget)" : function () {
+            "publish/subscribe (cross gadget)" : function () {
 
                 var g1 = new Gadget();
                 var g2 = new Gadget();
@@ -64,6 +64,53 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
                 });
 
                 g2.publish.apply(g2, test_args)
+            },
+            "emit to a topic that no handler is listening": function(){
+                var g1 = new Gadget();
+
+                g1.emit.apply(g1, test_args);
+            },
+            "on/emit": function(){
+                var arg = "foobar";
+                var g1 = new Gadget();
+
+                g1.on(test_args[0], function(topic, test){
+                    assert.same(test, arg);
+                });
+
+                g1.emit.call(g1, arg);
+            },
+            "on/emit on multiple instance should not interfere with each other": function(){
+                var arg = "foobar";
+                var g1 = new Gadget();
+                var g2 = new Gadget();
+
+                g1.on(test_args[0], function(topic, test){
+                    assert.same(test, arg);
+                });
+                g2.on(test_args[0], function(){
+                    assert(false);
+                });
+
+                g1.emit.call(g1, arg);
+            },
+            "on() multiple times and the handler received in order": function(){
+                var arg = "foobar";
+                var g1 = new Gadget();
+                var g2 = new Gadget();
+
+                var spy = this.spy();
+
+                g1.on(test_args[0], spy);
+                g1.on(test_args[0], function(topic, test){
+                    assert.called(spy);
+                    assert.same(test, arg);
+                });
+                g2.on(test_args[0], function(){
+                    assert(false);
+                });
+
+                g1.emit.call(g1, arg);
             }
         });
     });
