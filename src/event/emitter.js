@@ -243,7 +243,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				// Should we keep?
 				keep : {
 					// If no context or context does not match we should break
-					if (context && handler[CONTEXT] !== context) {
+					if (context && handler[CONTEXT] && handler[CONTEXT] !== context) {
 						break keep;
 					}
 
@@ -292,96 +292,6 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 			}
 
 			return self;
-		},
-
-		/**
-		 * Reemit event from memory
-		 * @param {String} event to reemit
-		 * @param {Boolean} senile flag to indicate if already trigger callbacks should still be called
-		 * @param {Object} [context] to scope callback to
-		 * @param {...Function} [callback] to reemit
-		 * @returns {Object} instance of this
-		 */
-		"reemit" : function reemit(event, senile, context, callback) {
-			var self = this;
-			var args = arguments;
-			var argsLength = args[LENGTH];
-			var handlers = self[HANDLERS];
-			var handler;
-			var handled;
-			var candidates;
-			var candidatesCount;
-			var matches;
-			var method;
-			var offset;
-			var found;
-
-			// See if we should override event and method
-			if ((matches = RE_HINT.exec(event)) !== NULL) {
-				event = matches[1];
-				method = matches[2];
-			}
-
-			// Have event in handlers
-			if (event in handlers) {
-				// Get handlers
-				handlers = handlers[event];
-
-				// Have memory in handlers
-				if (MEMORY in handlers) {
-					// If we have no HEAD we can return a promise resolved with memory
-					if (!(HEAD in handlers)) {
-						return when.resolve(handlers[MEMORY]);
-					}
-
-					// Create candidates array and count
-					candidates = [];
-					candidatesCount = 0;
-
-					// Get first handler
-					handler = handlers[HEAD];
-
-					// Get handled
-					handled = handlers[HANDLED];
-
-					// Iterate handlers
-					do {
-						add : {
-							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] !== context) {
-								break add;
-							}
-
-							// Reset found and offset, iterate args
-							for (found = false, offset = 3; offset < argsLength; offset++) {
-								// If callback matches set found and break
-								if (handler[CALLBACK] === args[offset]) {
-									found = true;
-									break;
-								}
-							}
-
-							// If we found a callback and are already handled and not senile break add
-							if (found && handler[HANDLED] === handled && !senile) {
-								break add;
-							}
-
-							// Push handler on candidates
-							candidates[candidatesCount++] = handler;
-						}
-					}
-					// While there's a next handler
-					while ((handler = handler[NEXT]));
-
-					// Return promise
-					return (method === "sequence")
-						? sequence(candidates, handled)(handlers[MEMORY])
-						: pipeline(candidates, handled)(handlers[MEMORY]);
-				}
-			}
-
-			// Return resolved promise
-			return when.resolve();
 		},
 
 		/**
@@ -447,6 +357,96 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 
 			// Return promise resolved with arg
 			return when.resolve(args);
+		},
+
+		/**
+		 * Reemit event from memory
+		 * @param {String} event to reemit
+		 * @param {Boolean} senile flag to indicate if already trigger callbacks should still be called
+		 * @param {Object} [context] to scope callback to
+		 * @param {...Function} [callback] to reemit
+		 * @returns {Object} instance of this
+		 */
+		"reemit" : function reemit(event, senile, context, callback) {
+			var self = this;
+			var args = arguments;
+			var argsLength = args[LENGTH];
+			var handlers = self[HANDLERS];
+			var handler;
+			var handled;
+			var candidates;
+			var candidatesCount;
+			var matches;
+			var method;
+			var offset;
+			var found;
+
+			// See if we should override event and method
+			if ((matches = RE_HINT.exec(event)) !== NULL) {
+				event = matches[1];
+				method = matches[2];
+			}
+
+			// Have event in handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
+
+				// Have memory in handlers
+				if (MEMORY in handlers) {
+					// If we have no HEAD we can return a promise resolved with memory
+					if (!(HEAD in handlers)) {
+						return when.resolve(handlers[MEMORY]);
+					}
+
+					// Create candidates array and count
+					candidates = [];
+					candidatesCount = 0;
+
+					// Get first handler
+					handler = handlers[HEAD];
+
+					// Get handled
+					handled = handlers[HANDLED];
+
+					// Iterate handlers
+					do {
+						add : {
+							// If no context or context does not match we should break
+							if (context && handler[CONTEXT] && handler[CONTEXT] !== context) {
+								break add;
+							}
+
+							// Reset found and offset, iterate args
+							for (found = false, offset = 3; offset < argsLength; offset++) {
+								// If callback matches set found and break
+								if (handler[CALLBACK] === args[offset]) {
+									found = true;
+									break;
+								}
+							}
+
+							// If we found a callback and are already handled and not senile break add
+							if (found && handler[HANDLED] === handled && !senile) {
+								break add;
+							}
+
+							// Push handler on candidates
+							candidates[candidatesCount++] = handler;
+						}
+					}
+					// While there's a next handler
+					while ((handler = handler[NEXT]));
+
+					// Return promise
+					return (method === "sequence")
+						? sequence(candidates, handled)(handlers[MEMORY])
+						: pipeline(candidates, handled)(handlers[MEMORY]);
+				}
+			}
+
+			// Return resolved promise
+			return when.resolve();
 		}
 	});
 });
