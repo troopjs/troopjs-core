@@ -139,7 +139,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			var args = [ event, self ];
 
 			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Forward
 			return self.on.apply(self, args);
