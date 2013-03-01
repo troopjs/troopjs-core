@@ -18,6 +18,10 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 	var TYPE = "type";
 	var VALUE = "value";
 	var SUBSCRIPTIONS = "subscriptions";
+	var EMITTER_PROTO = Emitter.prototype;
+	var ON = EMITTER_PROTO.on;
+	var OFF = EMITTER_PROTO.off;
+	var REEMITT = EMITTER_PROTO.reemit;
 
 	return Emitter.extend(function Gadget() {
 		this[SUBSCRIPTIONS] = [];
@@ -125,7 +129,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
 
 			// Forward
-			return self.reemit.apply(self, args);
+			return REEMITT.apply(self, args);
 		},
 
 		/**
@@ -142,7 +146,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Forward
-			return self.on.apply(self, args);
+			return ON.apply(self, args);
 		},
 
 		/**
@@ -159,7 +163,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Forward
-			return self.off.apply(self, args);
+			return OFF.apply(self, args);
 		},
 
 		/**
