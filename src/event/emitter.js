@@ -298,8 +298,8 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		 * Reemit event from memory
 		 * @param {String} event to reemit
 		 * @param {Boolean} senile flag to indicate if already trigger callbacks should still be called
-		 * @param {Object} context to scope callback to
-		 * @param {...Function} callback to reemit
+		 * @param {Object} [context] to scope callback to
+		 * @param {...Function} [callback] to reemit
 		 * @returns {Object} instance of this
 		 */
 		"reemit" : function reemit(event, senile, context, callback) {
@@ -347,8 +347,8 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					// Iterate handlers
 					do {
 						add : {
-							// If context does not match break add
-							if (handler[CONTEXT] !== context) {
+							// If no context or context does not match we should break
+							if (context && handler[CONTEXT] !== context) {
 								break add;
 							}
 
