@@ -240,22 +240,23 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 
 			// Iterate handlers
 			do {
-				remove : {
-					// If no context or context does not match we should break remove
+				// Should we keep?
+				keep : {
+					// If no context or context does not match we should break
 					if (context && handler[CONTEXT] !== context) {
-						break remove;
+						break keep;
 					}
 
-					// If there are no callbacks to check, we should break remove
+					// If there are no callbacks to check, we should break
 					if (argsLength === 2) {
-						break remove;
+						break keep;
 					}
 
 					// Reset offset, then loop callbacks
 					for (offset = 2; offset < argsLength; offset++) {
-						// If handler CALLBACK matches break remove
+						// If handler CALLBACK matches break
 						if (handler[CALLBACK] === args[offset]) {
-							break remove;
+							break keep;
 						}
 					}
 
