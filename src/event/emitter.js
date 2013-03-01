@@ -127,11 +127,11 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		"on" : function on(event, context, callback) {
 			var self = this;
 			var args = arguments;
+			var argsLength = args[LENGTH];
 			var handlers = self[HANDLERS];
 			var handler;
 			var head;
 			var tail;
-			var length = args[LENGTH];
 			var offset = 2;
 
 			// Have handlers
