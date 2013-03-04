@@ -19,6 +19,8 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var PHASE = "phase";
 	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
+	var OBJECT_TOSTRING = Object.prototype.toString;
+	var TOSTRING_FUNCTION = OBJECT_TOSTRING.call(Function.prototype);
 
 	/**
 	 * Constructs a function that executes handlers in sequence without overlap
@@ -127,12 +129,21 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		"on" : function on(event, context, callback) {
 			var self = this;
 			var args = arguments;
-			var argsLength = args[LENGTH];
 			var handlers = self[HANDLERS];
 			var handler;
 			var head;
 			var tail;
 			var offset = 2;
+
+			// Get callback from next arg
+			if (!(callback = args[offset++])) {
+				throw new Error("no callback provided");
+			}
+
+			// Test if callback is a function
+			if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
+				throw new Error(callback + " is not a function");
+			}
 
 			// Have handlers
 			if (event in handlers) {
@@ -142,8 +153,8 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				// Create new handler
 				handler = {};
 
-				// Set handler callback to next arg from offset
-				handler[CALLBACK] = args[offset++];
+				// Set handler callback
+				handler[CALLBACK] = callback;
 
 				// Set handler context
 				handler[CONTEXT] = context;
@@ -155,13 +166,18 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 					// Have no tail, update handlers[HEAD] to point to handler
 					: handlers[HEAD] = handler;
 
-				// Iterate handlers from offset
-				while (offset < argsLength) {
+				// Iterate callbacks
+				while ((callback = args[offset++])) {
+					// Test if callback is a function
+					if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
+						throw new Error(callback + " is not a function");
+					}
+
 					// Set tail -> tail[NEXT] -> handler
 					tail = tail[NEXT] = handler = {};
 
-					// Set handler callback to next arg from offset
-					handler[CALLBACK] = args[offset++];
+					// Set handler callback
+					handler[CALLBACK] = callback;
 
 					// Set handler context
 					handler[CONTEXT] = context;
@@ -175,19 +191,24 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 				// Create head and tail
 				head = tail = handler = {};
 
-				// Set handler callback to next arg from offset
-				handler[CALLBACK] = args[offset++];
+				// Set handler callback
+				handler[CALLBACK] = callback;
 
 				// Set handler context
 				handler[CONTEXT] = context;
 
-				// Iterate handlers from offset
-				while (offset < argsLength) {
+				// Iterate callbacks
+				while ((callback = args[offset++])) {
+					// Test if callback is a function
+					if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
+						throw new Error(callback + " is not a function");
+					}
+
 					// Set tail -> tail[NEXT] -> handler
 					tail = tail[NEXT] = handler = {};
 
-					// Set handler callback to next arg from offset
-					handler[CALLBACK] = args[offset++];
+					// Set handler callback
+					handler[CALLBACK] = callback;
 
 					// Set handler context
 					handler[CONTEXT] = context;
