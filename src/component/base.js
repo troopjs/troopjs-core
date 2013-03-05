@@ -47,7 +47,7 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 		 */
 		"signal" : function onSignal(_signal) {
 			var self = this;
-			var args = ARRAY_SLICE.call(arguments);
+			var args = ARRAY_SLICE.call(arguments, 1);
 			var specials = self.constructor.specials;
 			var signals = (SIG in specials && specials[SIG][_signal]) || [];
 			var signal;
