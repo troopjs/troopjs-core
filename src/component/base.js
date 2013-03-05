@@ -53,11 +53,11 @@ define([ "../component/factory", "when", "troopjs-utils/merge" ], function Compo
 			var signal;
 			var index = 0;
 			var result = [];
-			var resultLength = -1;
+			var resultLength = -2;
 
 			function next(_args) {
-				// Add result (if applicable)
-				if (resultLength++ >= 0) {
+				// Add result if resultLength is within bounds
+				if (++resultLength > -1) {
 					result[resultLength] = _args;
 				}
 
