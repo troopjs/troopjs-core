@@ -36,15 +36,15 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 				});
 		},
 
-		"hub/registry/add" : function onAdd(topic, service) {
+		"hub/registry/add" : function onAdd(service) {
 			return this.add(service);
 		},
 
-		"hub/registry/remove" : function onRemove(topic, service) {
+		"hub/registry/remove" : function onRemove(service) {
 			return this.remove(service);
 		},
 
-		"hub/registry/get" : function onGet(topic, pattern) {
+		"hub/registry/get" : function onGet(pattern) {
 			return this.get(pattern);
 		}
 	});

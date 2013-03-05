@@ -19,6 +19,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var PHASE = "phase";
 	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_FUNCTION = OBJECT_TOSTRING.call(Function.prototype);
 
@@ -324,7 +325,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		 */
 		"emit" : function emit(event) {
 			var self = this;
-			var args = arguments;
+			var args = ARRAY_SLICE.call(arguments, 1);
 			var handlers = self[HANDLERS];
 			var handler;
 			var candidates;
