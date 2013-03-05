@@ -9,7 +9,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 
 				Emitter()
-					.on("test", context, function onTest(topic, test) {
+					.on("test", context, function onTest(test) {
 						assert.same(arg, test);
 					})
 					.emit("test", arg);
@@ -23,7 +23,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var count = 0;
 				
 
-				emitter.on("test", context, function(topic, test){
+				emitter.on("test", context, function(test){
 					count++;
 				});
 
@@ -45,7 +45,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var last;
 				var dfd = when.defer();
 
-				emitter.on("test", context, function(topic, test) {
+				emitter.on("test", context, function(test) {
 					last = test;
 				});
 
@@ -64,10 +64,10 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 				var context = this;
 
-				emitter1.on("one", context, function(topic, arg) {
+				emitter1.on("one", context, function(arg) {
 					assert.same(arg, "one");
 				});
-				emitter2.on("two", context, function(topic, arg){
+				emitter2.on("two", context, function(arg){
 					assert.same(arg, 2);
 				});
 
@@ -80,7 +80,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 				var last;
 				var dfd = when.defer();
-				var callback = function(topic, arg) {
+				var callback = function(arg) {
 					last = arg;
 				};
 
@@ -101,7 +101,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 				var count = 0;
 				
-				emitter.on("test", context, function(topic, message){
+				emitter.on("test", context, function(message){
 					assert.equals(message, "test");
 					last = message;
 					count++;
@@ -109,7 +109,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 				emitter.emit("test", "test");
 
-				emitter.reemit("test", context, function(topic, message) {
+				emitter.reemit("test", context, function(message) {
 					assert.equals(message, "test");
 				});
 			}
