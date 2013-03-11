@@ -175,8 +175,6 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 				$element.unbind($proxy[0], $proxy[1]);
 			}
 
-			delete self[$ELEMENT];
-
 			if (deferred) {
 				deferred.resolve();
 			}
