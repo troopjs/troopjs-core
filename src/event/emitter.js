@@ -61,7 +61,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 
 			// Return promise of next callback, or a promise resolved with result
 			return handler
-				? (handler[HANDLED] = handled) && when(handler[CALLBACK].apply(context, args), next)
+				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
 				: when.resolve(result);
 		};
 
@@ -103,7 +103,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 
 			// Return promise of next callback,or promise resolved with result
 			return handler
-				? (handler[HANDLED] = handled) && when(handler[CALLBACK].apply(context, result), next)
+				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, result), next)
 				: when.resolve(result);
 		};
 
