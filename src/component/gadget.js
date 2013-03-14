@@ -103,7 +103,7 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 							var _deferred = head;
 
 							// Add done handler
-							dfd.done(function done() {
+							dfd.always(function done() {
 								_callback.call(_self, signal, _deferred);
 							});
 						});
