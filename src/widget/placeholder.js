@@ -3,112 +3,100 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-/*jshint strict:false, smarttabs:true, laxbreak:true */
 /*global define:true */
-define([ "../component/widget", "troopjs-utils/deferred", "require" ], function WidgetPlaceholderModule(Widget, Deferred, parentRequire) {
+define([ "jquery", "../component/widget" ], function WidgetPlaceholderModule($, Widget) {
+	/*jshint strict:false, laxbreak:true */
+
 	var FUNCTION = Function;
-	var POP = Array.prototype.pop;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_POP = ARRAY_PROTO.pop;
+	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var LENGTH = "length";
+	var THEN = "then";
 	var HOLDING = "holding";
-	var DATA_HOLDING = "data-" + HOLDING;
 	var $ELEMENT = "$element";
 	var TARGET = "target";
-	var THEN = "then";
 
-	function release(/* arg, arg, arg, deferred*/) {
+	function release() {
 		var self = this;
-		var arg = arguments;
-		var argc = arg.length;
+		var $element = self[$ELEMENT];
+		var release_args = arguments;
 
-		// If deferred not a true Deferred, make it so
-		var deferred = argc > 0 && arg[argc - 1][THEN] instanceof FUNCTION
-			? POP.call(arg)
-			: Deferred();
+		// Get or create deferred
+		var deferred = release_args[LENGTH] > 0 && release_args[release_args[LENGTH] - 1][THEN] instanceof FUNCTION
+			? ARRAY_POP.call(release_args)
+			: $.Deferred();
 
-		Deferred(function deferredRelease(dfdRelease) {
-			var i;
-			var iMax;
-			var name;
-			var argv;
+		// We're already holding something, resolve with cache
+		if (HOLDING in self) {
+			deferred.resolve(self[HOLDING]);
+		}
+		else {
+			$.Deferred(function (dfdWeave) {
+				// Clone release_args
+				var weave_args = ARRAY_SLICE.call(release_args);
 
-			// We're already holding something, resolve with cache
-			if (HOLDING in self) {
-				dfdRelease
-					.done(deferred.resolve)
-					.resolve(self[HOLDING]);
-			}
-			else {
-				// Add done handler to release
-				dfdRelease.then([ function doneRelease(widget) {
-					// Set DATA_HOLDING attribute
-					self[$ELEMENT].attr(DATA_HOLDING, widget);
+				// Add dfdWeave to end of weave_args
+				weave_args.push(dfdWeave);
 
-					// Store widget
-					self[HOLDING] = widget;
-				}, deferred.resolve ], deferred.reject, deferred.notify);
+				// Weave
+				$element
+					// Add data-weave attribute from self[TARGET]
+					.attr("data-weave", self[TARGET])
+					// Weave (passing arguments)
+					.weave.apply($element, weave_args)
+			})
+			.then(function (widget) {
+				// Store widget in holding
+				self[HOLDING] = widget;
 
-				// Get widget name
-				name = self[TARGET];
-
-				// Set initial argv
-				argv = [ self[$ELEMENT], name ];
-
-				// Append values from arg to argv
-				for (i = 0, iMax = arg.length; i < iMax; i++) {
-					argv[i + 2] = arg[i];
-				}
-
-				// Require widget by name
-				parentRequire([ name ], function required(Widget) {
-					// Defer require
-					Deferred(function deferredStart(dfdRequire) {
-						// Constructed and initialized instance
-						var widget = Widget
-							.apply(Widget, argv);
-
-						// Link deferred
-						dfdRequire.then(function doneStart() {
-							dfdRelease.resolve(widget);
-						}, dfdRelease.reject, dfdRelease.notify);
-
-						// Start
-						widget.start(dfdRequire);
-					});
-				});
-			}
-		});
-
-		return self;
+				// Resolve deferred with widget
+				deferred.resolve(widget);
+			}, deferred.reject, deferred.progress);
+		}
 	}
 
-	function hold(deferred) {
+	function hold() {
 		var self = this;
+		var widget;
+		var $element = self[$ELEMENT];
+		var hold_args = arguments;
 
-		deferred = deferred || Deferred();
+		// Get or create deferred
+		var deferred = hold_args[LENGTH] > 0 && hold_args[hold_args[LENGTH] - 1][THEN] instanceof FUNCTION
+			? ARRAY_POP.call(hold_args)
+			: $.Deferred();
 
-		Deferred(function deferredHold(dfdHold) {
-			var widget;
+		// Check that we are holding
+		if (HOLDING in self) {
+			// Get what we're holding
+			widget = self[HOLDING];
 
-			// Link deferred
-			dfdHold.then(deferred.resolve, deferred.reject, deferred.notify);
+			// Cleanup
+			delete self[HOLDING];
 
-			// Check that we are holding
-			if (HOLDING in self) {
-				// Get what we're holding
-				widget = self[HOLDING];
+			$.Deferred(function (dfdUnweave) {
 
-				// Cleanup
-				delete self[HOLDING];
+				// Clone hold_args
+				var unweave_args = ARRAY_SLICE.call(hold_args);
 
-				// Remove DATA_HOLDING attribute
-				self[$ELEMENT].removeAttr(DATA_HOLDING);
+				// Add dfdUnweave to end of unweave_args
+				unweave_args.push(dfdUnweave);
 
-				// Stop
-				widget.stop(dfdHold);
-			}
-			else {
-				dfdHold.resolve();
-			}
-		});
+				// Unweave
+				$element
+					// Add data-unweave attribute from widget
+					.attr("data-unweave", widget)
+					// Unweave (passing arguments)
+					.unweave.apply($element, unweave_args);
+			})
+			.then(function () {
+				deferred.resolve(widget);
+			}, deferred.reject, deferred.progress);
+		}
+		else {
+			return deferred.resolve();
+		}
 
 		return self;
 	}
