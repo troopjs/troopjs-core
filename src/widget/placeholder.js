@@ -44,7 +44,7 @@ define([ "jquery", "../component/widget" ], function WidgetPlaceholderModule($, 
 					// Add data-weave attribute from self[TARGET]
 					.attr("data-weave", self[TARGET])
 					// Weave (passing arguments)
-					.weave.apply($element, weave_args)
+					.weave.apply($element, weave_args);
 			})
 			.then(function (widget) {
 				// Store widget in holding

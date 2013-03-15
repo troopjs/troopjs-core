@@ -300,7 +300,9 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 				self[$ELEMENT].empty();
 
 				// Resolve deferred
-				deferred && deferred.resolve();
+				if (deferred) {
+					deferred.resolve();
+				}
 			}, 0);
 
 			return self;
