@@ -294,35 +294,14 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 		empty : function empty(deferred) {
 			var self = this;
 
-			// Ensure we have deferred
-			deferred = deferred || Deferred();
+			// Yield
+			setTimeout(function () {
+				// Actually empty
+				self[$ELEMENT].empty();
 
-			// Create deferred for emptying
-			Deferred(function emptyDeferred(dfdEmpty) {
-				// Link deferred
-				dfdEmpty.then(deferred.resolve, deferred.reject, deferred.notify);
-
-				// Get element
-				var $element = self[$ELEMENT];
-
-				// Detach contents
-				var $contents = $element.contents().detach();
-
-				// Trigger refresh
-				$element.trigger(REFRESH, self);
-
-				// Use timeout in order to yield
-				setTimeout(function emptyTimeout() {
-					// Get DOM elements
-					var contents = $contents.get();
-
-					// Remove elements from DOM
-					$contents.remove();
-
-					// Resolve deferred
-					dfdEmpty.resolve(contents);
-				}, 0);
-			});
+				// Resolve deferred
+				deferred && deferred.resolve();
+			}, 0);
 
 			return self;
 		}
