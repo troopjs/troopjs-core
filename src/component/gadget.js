@@ -16,6 +16,7 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 	var UNSUBSCRIBE = hub.unsubscribe;
 	var MEMORY = "memory";
 	var SUBSCRIPTIONS = "subscriptions";
+	var PHASE = "phase";
 
 	return Component.extend(function Gadget() {
 		var self = this;
@@ -102,7 +103,7 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 							var _callback = _callbacks[_j];
 							var _deferred = head;
 
-							// Add done handler
+							// Add always handler
 							dfd.always(function done() {
 								_callback.call(_self, signal, _deferred);
 							});
@@ -225,13 +226,24 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 			deferred = deferred || Deferred();
 
 			Deferred(function deferredStart(dfdStart) {
-				dfdStart.then(deferred.resolve, deferred.reject, deferred.notify);
+				dfdStart.then(function () {
+					// Set phase
+					self[PHASE] = "started";
+					// Resolve deferred
+					deferred.resolveWith(self, arguments);
+				}, deferred.reject, deferred.notify);
 
 				Deferred(function deferredInitialize(dfdInitialize) {
 					dfdInitialize.then(function doneInitialize() {
+						// Set phase
+						self[PHASE] = "start";
+						// Signal
 						self.signal("start", dfdStart);
 					}, dfdStart.reject, dfdStart.notify);
 
+					// Set phase
+					self[PHASE] = "initialize";
+					// Signal
 					self.signal("initialize", dfdInitialize);
 				});
 			});
@@ -245,13 +257,24 @@ define([ "compose", "./base", "troopjs-utils/deferred", "../pubsub/hub" ], funct
 			deferred = deferred || Deferred();
 
 			Deferred(function deferredFinalize(dfdFinalize) {
-				dfdFinalize.then(deferred.resolve, deferred.reject, deferred.notify);
+				dfdFinalize.then(function () {
+					// Set phase
+					self[PHASE] = "finalized";
+					// Resolve deferred
+					deferred.resolveWith(self, arguments);
+				}, deferred.reject, deferred.notify);
 
 				Deferred(function deferredStop(dfdStop) {
 					dfdStop.then(function doneStop() {
+						// Set phase
+						self[PHASE] = "finalize";
+						// Signal
 						self.signal("finalize", dfdFinalize);
 					}, dfdFinalize.reject, dfdFinalize.notify);
 
+					// Set phase
+					self[PHASE] = "stop";
+					// Signal
 					self.signal("stop", dfdStop);
 				});
 			});
