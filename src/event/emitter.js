@@ -47,6 +47,10 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 			var head;
 			var tail;
 			var offset;
+			var candidate;
+			var candidates = [];
+			var candidatesLength = 0;
+			var candidatesCount;
 
 			// No context or memory was supplied
 			if (context instanceof FUNCTION) {
@@ -113,44 +117,45 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 					// Get handled
 					handled = memory[HANDLED];
 
+					// Loop through handlers
+					while(handler) {
+						// Skip to next handler if this handler has already been handled
+						if (handler[HANDLED] === handled) {
+							handler = handler[NEXT];
+							continue;
+						}
+
+						// Update handled
+						handler[HANDLED] = handled;
+
+						// Add to candidates
+						candidates[candidatesLength++] = handler;
+
+						// Update handler
+						handler = handler[NEXT];
+					}
+
 					// Optimize for arguments
 					if (memory[LENGTH] > 0 ) {
-						// Loop through handlers
-						while(handler) {
-							// Skip to next handler if this handler has already been handled
-							if (handler[HANDLED] === handled) {
-								handler = handler[NEXT];
-								continue;
-							}
-
-							// Store handled
-							handler[HANDLED] = handled;
+						// Iterate candidates
+						for (candidatesCount = 0; candidatesCount < candidatesLength; candidatesCount++) {
+							// Get candidate
+							candidate = candidates[candidatesCount];
 
 							// Apply handler callback
-							handler[CALLBACK].apply(handler[CONTEXT], memory);
-
-							// Update handler
-							handler = handler[NEXT];
+							candidate[CALLBACK].apply(candidate[CONTEXT], memory);
 						}
+
 					}
 					// Optimize for no arguments
 					else {
-						// Loop through handlers
-						while(handler) {
-							// Skip to next handler if this handler has already been handled
-							if (handler[HANDLED] === handled) {
-								handler = handler[NEXT];
-								continue;
-							}
-
-							// Store handled
-							handler[HANDLED] = handled;
+						// Iterate candidates
+						for (candidatesCount = 0; candidatesCount < candidatesLength; candidatesCount++) {
+							// Get candidate
+							candidate = candidates[candidatesCount];
 
 							// Call handler callback
-							handler[CALLBACK].call(handler[CONTEXT]);
-
-							// Update handler
-							handler = handler[NEXT];
+							candidate[CALLBACK].call(candidate[CONTEXT]);
 						}
 					}
 				}
@@ -284,6 +289,10 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 			var arg = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
+			var candidate;
+			var candidates = [];
+			var candidatesLength = 0;
+			var candidatesCount;
 
 			// Store handled
 			var handled = arg[HANDLED] = COUNT++;
@@ -299,44 +308,44 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 				// Get first handler
 				handler = handlers[HEAD];
 
+				// Loop through handlers
+				while(handler) {
+					// Skip to next handler if this handler has already been handled
+					if (handler[HANDLED] === handled) {
+						handler = handler[NEXT];
+						continue;
+					}
+
+					// Update handled
+					handler[HANDLED] = handled;
+
+					// Add to candidates
+					candidates[candidatesLength++] = handler;
+
+					// Update handler
+					handler = handler[NEXT];
+				}
+
 				// Optimize for arguments
 				if (arg[LENGTH] > 0) {
-					// Loop through handlers
-					while(handler) {
-						// Skip to next handler if this handler has already been handled
-						if (handler[HANDLED] === handled) {
-							handler = handler[NEXT];
-							continue;
-						}
-
-						// Update handled
-						handler[HANDLED] = handled;
+					// Iterate candidates
+					for (candidatesCount = 0; candidatesCount < candidatesLength; candidatesCount++) {
+						// Get candidate
+						candidate = candidates[candidatesCount];
 
 						// Apply handler callback
-						handler[CALLBACK].apply(handler[CONTEXT], arg);
-
-						// Update handler
-						handler = handler[NEXT];
+						candidate[CALLBACK].apply(candidate[CONTEXT], arg);
 					}
 				}
 				// Optimize for no arguments
 				else {
-					// Loop through handlers
-					while(handler) {
-						// Skip to next handler if this handler has already been handled
-						if (handler[HANDLED] === handled) {
-							handler = handler[NEXT];
-							continue;
-						}
-
-						// Update handled
-						handler[HANDLED] = handled;
+					// Iterate candidates
+					for (candidatesCount = 0; candidatesCount < candidatesLength; candidatesCount++) {
+						// Get candidate
+						candidate = candidates[candidatesCount];
 
 						// Call handler callback
-						handler[CALLBACK].call(handler[CONTEXT]);
-
-						// Update handler
-						handler = handler[NEXT];
+						candidate[CALLBACK].call(candidate[CONTEXT]);
 					}
 				}
 			}
