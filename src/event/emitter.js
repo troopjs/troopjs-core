@@ -158,7 +158,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 
 			// Test if callback is a function
 			if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
-				throw new Error(callback + " is not a function");
+				throw new Error(OBJECT_TOSTRING.call(callback) + " is not a function");
 			}
 
 			// Have handlers
@@ -183,10 +183,10 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 					: handlers[HEAD] = handler;
 
 				// Iterate callbacks
-				while ((callback = args[offset++])) {
+				while ((callback = args[offset++]) !== UNDEFINED) {
 					// Test if callback is a function
 					if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
-						throw new Error(callback + " is not a function");
+						throw new Error(OBJECT_TOSTRING.call(callback) + " is not a function");
 					}
 
 					// Set tail -> tail[NEXT] -> handler
@@ -214,10 +214,10 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 				handler[CONTEXT] = context;
 
 				// Iterate callbacks
-				while ((callback = args[offset++])) {
+				while ((callback = args[offset++]) !== UNDEFINED) {
 					// Test if callback is a function
 					if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
-						throw new Error(callback + " is not a function");
+						throw new Error(OBJECT_TOSTRING.call(callback) + " is not a function");
 					}
 
 					// Set tail -> tail[NEXT] -> handler
