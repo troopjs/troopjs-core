@@ -6,6 +6,7 @@
 define([ "../component/base", "when", "poly/array" ], function EventEmitterModule(Component, when) {
 	/*jshint laxbreak:true */
 
+	var UNDEFINED;
 	var NULL = null;
 	var MEMORY = "memory";
 	var CONTEXT = "context";
@@ -99,13 +100,16 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 			var context;
 			var handler;
 
-			// Check that args is an array
-			if (!ARRAY_ISARRAY(args)) {
-				throw new Error("Result from handler has to be of type array");
-			}
+			// Check that we have args
+			if (args !== UNDEFINED) {
 
-			// Update memory and result
-			anchor[MEMORY] = result = args || result;
+				if (!ARRAY_ISARRAY(args)) {
+					throw new Error("Result from handler has to be of type array");
+				}
+
+				// Update memory and result
+				anchor[MEMORY] = result = args;
+			}
 
 			// Iterate until we find a handler in a blocked phase
 			while ((handler = handlers[handlersCount++])	// Has next handler
