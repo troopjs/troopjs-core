@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/base", "when" ], function EventEmitterModule(Component, when) {
+define([ "../component/base", "when", "poly/array" ], function EventEmitterModule(Component, when) {
 	/*jshint laxbreak:true */
 
 	var NULL = null;
@@ -20,6 +20,7 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var ARRAY_SLICE = Array.prototype.slice;
+	var ARRAY_ISARRAY = Array.isArray;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_FUNCTION = OBJECT_TOSTRING.call(Function.prototype);
 
@@ -48,6 +49,11 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		var next = function (args) {
 			var context;
 			var handler;
+
+			// Check that args is an array
+			if (!ARRAY_ISARRAY(args)) {
+				throw new Error("Result from handler has to be of type array");
+			}
 
 			// Store result
 			if (resultCount++ >= resultLength) {
@@ -92,6 +98,11 @@ define([ "../component/base", "when" ], function EventEmitterModule(Component, w
 		var next = function (args) {
 			var context;
 			var handler;
+
+			// Check that args is an array
+			if (!ARRAY_ISARRAY(args)) {
+				throw new Error("Result from handler has to be of type array");
+			}
 
 			// Update memory and result
 			anchor[MEMORY] = result = args || result;
