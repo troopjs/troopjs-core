@@ -152,7 +152,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 			var offset = 2;
 
 			// Get callback from next arg
-			if (!(callback = args[offset++])) {
+			if ((callback = args[offset++]) === UNDEFINED) {
 				throw new Error("no callback provided");
 			}
 
