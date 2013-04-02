@@ -175,6 +175,8 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 				$element.unbind($proxy[0], $proxy[1]);
 			}
 
+			delete self[$ELEMENT];
+
 			if (deferred) {
 				deferred.resolve();
 			}
@@ -294,16 +296,38 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 		empty : function empty(deferred) {
 			var self = this;
 
-			// Yield
-			setTimeout(function () {
-				// Actually empty
-				self[$ELEMENT].empty();
+			// Get element
+			var $element = self[$ELEMENT];
+			var $contents;
 
-				// Resolve deferred
-				if (deferred) {
-					deferred.resolve();
-				}
-			}, 0);
+			// If a deferred was passed we should try to be async
+			if (deferred) {
+				// Detach contents
+				$contents = $element.contents().detach();
+
+				// Trigger refresh
+				$element.trigger(REFRESH, self);
+
+				// Use timeout in order to yield
+				setTimeout(function emptyTimeout() {
+					// Get DOM elements
+					var contents = $contents.get();
+
+					// Remove elements from DOM
+					$contents.remove();
+
+					// Resolve deferred
+					deferred.resolve(contents);
+				}, 0);
+			}
+			// Otherwise it's OK to be sync
+			else {
+				$element
+					// Empty
+					.empty()
+					// Trigger refresh
+					.trigger(REFRESH, self);
+			}
 
 			return self;
 		}
