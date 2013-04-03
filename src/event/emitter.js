@@ -10,6 +10,7 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 	var TRUE = true;
 	var FALSE = false;
 	var FUNCTION = Function;
+	var PHASE = "phase";
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
@@ -21,6 +22,7 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 	var HANDLERS = "handlers";
 	var ROOT = {};
 	var COUNT = 0;
+	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	return Compose(function EventEmitter() {
 		this[HANDLERS] = {};
@@ -289,6 +291,7 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 			var arg = arguments;
 			var handlers = self[HANDLERS];
 			var handler;
+			var context;
 			var candidate;
 			var candidates = [];
 			var candidatesLength = 0;
@@ -333,8 +336,16 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 						// Get candidate
 						candidate = candidates[candidatesCount];
 
+						// Get context
+						context = candidate[CONTEXT];
+
+						// Continue if in a protected phase
+						if (RE_PHASE.test(context[PHASE])) {
+							continue;
+						}
+
 						// Apply handler callback
-						candidate[CALLBACK].apply(candidate[CONTEXT], arg);
+						candidate[CALLBACK].apply(context, arg);
 					}
 				}
 				// Optimize for no arguments
@@ -344,8 +355,16 @@ define([ "compose" ], function EventEmitterModule(Compose) {
 						// Get candidate
 						candidate = candidates[candidatesCount];
 
+						// Get context
+						context = candidate[CONTEXT];
+
+						// Continue if in a protected phase
+						if (RE_PHASE.test(context[PHASE])) {
+							continue;
+						}
+
 						// Call handler callback
-						candidate[CALLBACK].call(candidate[CONTEXT]);
+						candidate[CALLBACK].call(context);
 					}
 				}
 			}
