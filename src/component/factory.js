@@ -12,7 +12,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_UNSHIFT = ARRAY_PROTO.unshift;
 	var OBJECT_TOSTRING = Object[PROTOTYPE][TOSTRING];
-	var TYPEOF_FUNCTION = typeof function () {};
+	var TYPEOF_FUNCTION = "function";
 	var DISPLAYNAME = "displayName";
 	var LENGTH = "length";
 	var EXTEND = "extend";
