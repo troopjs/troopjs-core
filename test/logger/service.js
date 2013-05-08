@@ -1,6 +1,5 @@
 buster.testCase("troopjs-core/logger/service", function (run) {
 	var assert = buster.assert;
-	var LOGGER_LOG = "logger/log";
 
 	define("config", {});
 
@@ -10,6 +9,9 @@ buster.testCase("troopjs-core/logger/service", function (run) {
 				var a = 0;
 				// setInterval(function(){
 					logger.log('Test Message' + (++a));
+					logger.warn('Test Message' + (++a));
+					logger.debug('Test Message' + (++a));
+					logger.info('Test Message' + (++a));
 				// },49);
 			}
 		});

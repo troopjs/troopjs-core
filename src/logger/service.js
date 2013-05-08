@@ -20,7 +20,7 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
             'cat': cat,
             'href': window.location.href,
             'referer': window.document.referrer,
-            'browse': $.browse
+            'browser': $.browser
         }
     }
 
@@ -84,8 +84,7 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
             var batches = self[BATCHES];
             var logObj = initLog('log');
 
-            mergeLog.call(logObj, log);
-            PUSH.call(batches, logObj);
+            PUSH.call(batches, mergeLog(logObj, log));
         },
 
         "hub/logger/warn" : function logger(topic, log, deferred) {
@@ -93,8 +92,7 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
             var batches = self[BATCHES];
             var logObj = initLog('warn');
 
-            mergeLog.call(logObj, log);
-            PUSH.call(batches, logObj);
+            PUSH.call(batches, mergeLog(logObj, log));
         },
 
         "hub/logger/debug" : function logger(topic, log, deferred) {
@@ -102,8 +100,7 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
             var batches = self[BATCHES];
             var logObj = initLog('debug');
 
-            mergeLog.call(logObj, log);
-            PUSH.call(batches, logObj);
+            PUSH.call(batches, mergeLog(logObj, log));
         },
 
         "hub/logger/info" : function logger(topic, log, deferred) {
@@ -111,8 +108,7 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
             var batches = self[BATCHES];
             var logObj = initLog('info');
 
-            mergeLog.call(logObj, log);
-            PUSH.call(batches, logObj);
+            PUSH.call(batches, mergeLog(logObj, log));
         }
 
     }).apply(Service).start();
