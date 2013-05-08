@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../pubsub/topic", "troopjs-utils/deferred", "troopjs-utils/merge" ], function PubSubLogger(Topic, Deferred, merge) {
+define([ "../component/service" ], function logger(Service) {
     var UNDEFINED = undefined;
     var ARRAY_PROTO = Array.prototype;
     var SLICE = ARRAY_PROTO.slice;
@@ -21,6 +21,8 @@ define([ "../pubsub/topic", "troopjs-utils/deferred", "troopjs-utils/merge" ], f
         "sig/start" : function start(signal, deferred) {
             var self = this;
 
+            console.log('sig/start');
+
             if (!(INTERVAL in self)) {
                 self[INTERVAL] = setInterval(function batchInterval() {
                     if(self[BATCHES].length === 0){
@@ -30,7 +32,12 @@ define([ "../pubsub/topic", "troopjs-utils/deferred", "troopjs-utils/merge" ], f
                     console.log(self[BATCHES]);
 
                     self[BATCHES] = [];
+
                 }, 200);
+            }
+
+            if (deferred) {
+                deferred.resolve();
             }
         },
 
@@ -56,6 +63,28 @@ define([ "../pubsub/topic", "troopjs-utils/deferred", "troopjs-utils/merge" ], f
             var batches = self[BATCHES];
 
             batches.push(log);
-        }
-    });
+        },
+
+        // "hub/logger/warn" : function logger(topic, log, deferred) {
+        //     var self = this;
+        //     var batches = self[BATCHES];
+
+        //     batches.push(log);
+        // },
+
+        // "hub/logger/debug" : function logger(topic, log, deferred) {
+        //     var self = this;
+        //     var batches = self[BATCHES];
+
+        //     batches.push(log);
+        // },
+
+        // "hub/logger/info" : function logger(topic, log, deferred) {
+        //     var self = this;
+        //     var batches = self[BATCHES];
+
+        //     batches.push(log);
+        // },
+
+    }).apply(Service).start();
 });
