@@ -6,8 +6,6 @@
 define([ "../component/service", "troopjs-utils/merge" ], function logger(Service, Merge) {
     var UNDEFINED = undefined;
     var ARRAY_PROTO = Array.prototype;
-    var SLICE = ARRAY_PROTO.slice;
-    var CONCAT = ARRAY_PROTO.concat;
     var PUSH = ARRAY_PROTO.push;
     var LENGTH = "length";
     var BATCHES = "batches";
@@ -107,6 +105,14 @@ define([ "../component/service", "troopjs-utils/merge" ], function logger(Servic
             var self = this;
             var batches = self[BATCHES];
             var logObj = initLog('info');
+
+            PUSH.call(batches, mergeLog(logObj, log));
+        },
+
+        "hub/logger/error" : function logger(topic, log, deferred) {
+            var self = this;
+            var batches = self[BATCHES];
+            var logObj = initLog('error');
 
             PUSH.call(batches, mergeLog(logObj, log));
         }

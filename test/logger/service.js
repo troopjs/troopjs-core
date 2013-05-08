@@ -15,6 +15,7 @@ buster.testCase("troopjs-core/logger/service", function (run) {
 					logger.warn('Test Message' + (++a));
 					logger.debug('Test Message' + (++a));
 					logger.info('Test Message' + (++a));
+					logger.error('Test Message' + (++a));
 				// },49);
 			}
 		});

@@ -10,6 +10,7 @@ define([ "compose", "../component/base" ], function ConsoleLogger(Compose, Compo
 		"log" : CONSOLE.log.bind(CONSOLE),
 		"warn" : CONSOLE.warn.bind(CONSOLE),
 		"debug" : CONSOLE.debug.bind(CONSOLE),
-		"info" : CONSOLE.info.bind(CONSOLE)
+		"info" : CONSOLE.info.bind(CONSOLE),
+		"error" : CONSOLE.error.bind(CONSOLE)
 	});
 });
