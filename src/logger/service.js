@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/service" ], function logger(Service) {
+define([ "../component/service", "troopjs-utils/merge" ], function logger(Service, Merge) {
     var UNDEFINED = undefined;
     var ARRAY_PROTO = Array.prototype;
     var SLICE = ARRAY_PROTO.slice;
@@ -12,6 +12,16 @@ define([ "../component/service" ], function logger(Service) {
     var LENGTH = "length";
     var BATCHES = "batches";
     var INTERVAL = "interval";
+    var STRING = 'string';
+    var OBJECT = 'object';
+
+    function initLog(cat){
+        return {
+            'cat': cat,
+            'href': window.location.href,
+            'referer': window.document.referrer
+        }
+    }
 
     return Service.extend(function loggerService() {
         this[BATCHES] = [];
@@ -25,7 +35,7 @@ define([ "../component/service" ], function logger(Service) {
 
             if (!(INTERVAL in self)) {
                 self[INTERVAL] = setInterval(function batchInterval() {
-                    if(self[BATCHES].length === 0){
+                    if(self[BATCHES][LENGTH] === 0){
                         return;
                     }
 
@@ -61,9 +71,16 @@ define([ "../component/service" ], function logger(Service) {
         "hub/logger/log" : function logger(topic, log, deferred) {
             var self = this;
             var batches = self[BATCHES];
+            var logObj = initLog();
 
-            batches.push(log);
-        },
+            if(typeof log === STRING){
+                logObj['msg'] = log;
+            }
+            else if(typeof log === OBJECT){
+                Merge.call(logObj, log);
+            }
+            batches.push(logObj);
+        }
 
         // "hub/logger/warn" : function logger(topic, log, deferred) {
         //     var self = this;
