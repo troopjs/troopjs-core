@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/service", "troopjs-utils/merge" ], function logger(Service, Merge) {
+define([ "../component/service", "troopjs-utils/merge", "jquery" ], function logger(Service, Merge, $) {
     var UNDEFINED = undefined;
     var ARRAY_PROTO = Array.prototype;
     var SLICE = ARRAY_PROTO.slice;
@@ -19,8 +19,19 @@ define([ "../component/service", "troopjs-utils/merge" ], function logger(Servic
         return {
             'cat': cat,
             'href': window.location.href,
-            'referer': window.document.referrer
+            'referer': window.document.referrer,
+            'browse': $.browse
         }
+    }
+
+    function mergeLog(logObj, log){
+        if(typeof log === STRING){
+            logObj['msg'] = log;
+        }
+        else if(typeof log === OBJECT){
+            Merge.call(logObj, log);
+        }
+        return logObj;
     }
 
     return Service.extend(function loggerService() {
@@ -71,37 +82,38 @@ define([ "../component/service", "troopjs-utils/merge" ], function logger(Servic
         "hub/logger/log" : function logger(topic, log, deferred) {
             var self = this;
             var batches = self[BATCHES];
-            var logObj = initLog();
+            var logObj = initLog('log');
 
-            if(typeof log === STRING){
-                logObj['msg'] = log;
-            }
-            else if(typeof log === OBJECT){
-                Merge.call(logObj, log);
-            }
-            batches.push(logObj);
+            mergeLog.call(logObj, log);
+            PUSH.call(batches, logObj);
+        },
+
+        "hub/logger/warn" : function logger(topic, log, deferred) {
+            var self = this;
+            var batches = self[BATCHES];
+            var logObj = initLog('warn');
+
+            mergeLog.call(logObj, log);
+            PUSH.call(batches, logObj);
+        },
+
+        "hub/logger/debug" : function logger(topic, log, deferred) {
+            var self = this;
+            var batches = self[BATCHES];
+            var logObj = initLog('debug');
+
+            mergeLog.call(logObj, log);
+            PUSH.call(batches, logObj);
+        },
+
+        "hub/logger/info" : function logger(topic, log, deferred) {
+            var self = this;
+            var batches = self[BATCHES];
+            var logObj = initLog('info');
+
+            mergeLog.call(logObj, log);
+            PUSH.call(batches, logObj);
         }
-
-        // "hub/logger/warn" : function logger(topic, log, deferred) {
-        //     var self = this;
-        //     var batches = self[BATCHES];
-
-        //     batches.push(log);
-        // },
-
-        // "hub/logger/debug" : function logger(topic, log, deferred) {
-        //     var self = this;
-        //     var batches = self[BATCHES];
-
-        //     batches.push(log);
-        // },
-
-        // "hub/logger/info" : function logger(topic, log, deferred) {
-        //     var self = this;
-        //     var batches = self[BATCHES];
-
-        //     batches.push(log);
-        // },
 
     }).apply(Service).start();
 });
