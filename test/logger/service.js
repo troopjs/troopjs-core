@@ -5,6 +5,9 @@ buster.testCase("troopjs-core/logger/service", function (run) {
 
 	require( [ "troopjs-core/logger/service", "troopjs-core/logger/pubsub" ] , function (service, logger) {
 		run({
+			"setUp":function(){
+				service().start();
+			},
 			"log" : function () {
 				var a = 0;
 				// setInterval(function(){

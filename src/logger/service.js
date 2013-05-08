@@ -111,5 +111,5 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
             PUSH.call(batches, mergeLog(logObj, log));
         }
 
-    }).apply(Service).start();
+    });
 });
