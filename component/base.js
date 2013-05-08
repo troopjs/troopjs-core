@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/factory", "when", "troopjs-utils/merge" ], function ComponentModule(Factory, when, merge) {
+define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(Factory, when, merge) {
 	/*jshint laxbreak:true */
 
 	var ARRAY_PROTO = Array.prototype;
