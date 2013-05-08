@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/service", "troopjs-utils/merge", "jquery" ], function logger(Service, Merge, $) {
+define([ "../component/service", "troopjs-utils/merge" ], function logger(Service, Merge) {
     var UNDEFINED = undefined;
     var ARRAY_PROTO = Array.prototype;
     var SLICE = ARRAY_PROTO.slice;
@@ -19,8 +19,8 @@ define([ "../component/service", "troopjs-utils/merge", "jquery" ], function log
         return {
             'cat': cat,
             'href': window.location.href,
-            'referer': window.document.referrer,
-            'browser': $.browser
+            'browser': navigator.userAgent,
+            'time': new Date().getTime()
         }
     }
 
