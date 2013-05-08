@@ -4,5 +4,12 @@
  */
 /*global define:false */
 define([ "compose", "../component/base" ], function ConsoleLogger(Compose, Component) {
-    return Compose.create(Component, console);
+	var CONSOLE = console;
+
+	return Compose.create(Component, {
+		"log" : CONSOLE.log.bind(CONSOLE),
+		"warn" : CONSOLE.warn.bind(CONSOLE),
+		"debug" : CONSOLE.debug.bind(CONSOLE),
+		"info" : CONSOLE.info.bind(CONSOLE)
+	});
 });
