@@ -4,6 +4,7 @@ buster.testCase("troopjs-core/logger/pubsub", function (run) {
 	var LOGGER_WARN = "logger/warn";
 	var LOGGER_DEBUG = "logger/debug";
 	var LOGGER_INFO = "logger/info";
+	var LOGGER_INFO = "logger/error";
 
 	define("config", {});
 
@@ -31,6 +32,10 @@ buster.testCase("troopjs-core/logger/pubsub", function (run) {
 			"info" : function (done) {
 				hub.subscribe(LOGGER_INFO, done);
 				logger.info("this is a info message");
+			},
+			"error" : function (done) {
+				hub.subscribe(LOGGER_INFO, done);
+				logger.info("this is a error message");
 			}
 		});
 	});

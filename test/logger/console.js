@@ -16,6 +16,9 @@ buster.testCase("troopjs-core/logger/console", function (run) {
 			},
 			"info" : function () {
 				logger.info("this is a info message");
+			},
+			"error" : function () {
+				logger.error("this is a error message");
 			}
 		});
 	});

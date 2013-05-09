@@ -27,6 +27,11 @@ define([ "compose", "../component/base", "../pubsub/hub" ], function PubSubLogge
 			var args = [ "logger/info" ];
 			ARRAY_PUSH.apply(args, arguments);
 			PUBLISH.apply(hub, args);
+		},
+		"error" : function info() {
+			var args = [ "logger/error" ];
+			ARRAY_PUSH.apply(args, arguments);
+			PUBLISH.apply(hub, args);
 		}
 	});
 });
