@@ -36,10 +36,10 @@ define([ "../component/service", "troopjs-utils/merge",  "troopjs-utils/tr", "tr
 		};
 
 		if (OBJECT_TOSTRING.call(message) === TOSTRING_OBJECT) {
-			merge.call(result, message)
+			merge.call(result, message);
 		}
 		else {
-			result["msg"] = message;
+			result.msg = message;
 		}
 
 		return result;
