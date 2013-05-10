@@ -1,22 +1,42 @@
 buster.testCase("troopjs-core/logger/service", function (run) {
+	var ARRAY_PUSH = Array.prototype.push;
 	var assert = buster.assert;
 
 	define("config", {});
 
-	require( [ "troopjs-core/logger/service", "troopjs-core/logger/pubsub" ] , function (service, logger) {
+	require( [ "troopjs-core/logger/service", "troopjs-core/component/gadget", "troopjs-core/pubsub/hub", "troopjs-utils/deferred" ] , function (Service, Gadget, hub, Deferred) {
+		var Appender = Gadget.extend({
+			"append" : function () {
+				var args = [ this.toString() ];
+
+				ARRAY_PUSH.apply(args, arguments);
+
+				console.log.apply(console, args);
+			}
+		});
+
 		run({
-			"setUp":function(){
-				service().start();
-			},
-			"log" : function () {
-				var a = 0;
-				// setInterval(function(){
-					logger.log('Test Message' + (++a));
-					logger.warn('Test Message' + (++a));
-					logger.debug('Test Message' + (++a));
-					logger.info('Test Message' + (++a));
-					logger.error('Test Message' + (++a));
-				// },49);
+			"log" : function (done) {
+				Deferred(function (dfd) {
+					Service(Appender(), Appender()).start(dfd);
+				})
+					.done(function () {
+						var self = this;
+
+						hub.publish("logger/log", "message");
+						hub.publish("logger/warn", "message");
+						hub.publish("logger/debug", "message");
+						hub.publish("logger/info", "message");
+						hub.publish("logger/error", "message");
+
+						Deferred(function (dfd) {
+							self.stop(dfd);
+						})
+							.done(function () {
+								assert(true);
+								done();
+							});
+					});
 			}
 		});
 	});
