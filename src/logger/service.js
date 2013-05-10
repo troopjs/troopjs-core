@@ -3,119 +3,86 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 /*global define:false */
-define([ "../component/service", "troopjs-utils/merge" ], function logger(Service, Merge) {
-    var UNDEFINED = undefined;
-    var ARRAY_PROTO = Array.prototype;
-    var PUSH = ARRAY_PROTO.push;
-    var LENGTH = "length";
-    var BATCHES = "batches";
-    var INTERVAL = "interval";
-    var STRING = 'string';
-    var OBJECT = 'object';
+define([ "../component/service", "troopjs-utils/merge",  "troopjs-utils/tr", "troopjs-utils/when", "troopjs-utils/deferred" ], function logger(Service, merge, tr, when, Deferred) {
+	var ARRAY_SLICE = Array.prototype.slice;
+	var OBJECT_TOSTRING = String.prototype.toString;
+	var TOSTRING_OBJECT = "[object Object]";
+	var LENGTH = "length";
+	var APPENDERS = "appenders";
+	var BROWSER = navigator.userAgent;
 
-    function initLog(cat){
-        return {
-            'cat': cat,
-            'href': window.location.href,
-            'browser': navigator.userAgent,
-            'time': new Date().getTime()
-        }
-    }
+	function forward(signal, deferred) {
+		var self = this;
 
-    function mergeLog(logObj, log){
-        if(typeof log === STRING){
-            logObj['msg'] = log;
-        }
-        else if(typeof log === OBJECT){
-            Merge.call(logObj, log);
-        }
-        return logObj;
-    }
+		var appenders = tr.call(self[APPENDERS], function (appender) {
+			return Deferred(function (dfd) {
+				appender.signal(signal, dfd);
+			});
+		});
 
-    return Service.extend(function loggerService() {
-        this[BATCHES] = [];
-    }, {
-        displayName : "ef/service/logger",
+		if (deferred) {
+			when.apply($, appenders).then(deferred.resolve, deferred.reject, deferred.notify);
+		}
 
-        "sig/start" : function start(signal, deferred) {
-            var self = this;
+		return self;
+	}
 
-            console.log('sig/start');
+	function convert(cat, message) {
+		var result = {
+			"cat" : cat,
+			"href": window.location.href,
+			"browser" : BROWSER,
+			"time": new Date().getTime()
+		};
 
-            if (!(INTERVAL in self)) {
-                self[INTERVAL] = setInterval(function batchInterval() {
-                    if(self[BATCHES][LENGTH] === 0){
-                        return;
-                    }
+		if (OBJECT_TOSTRING.call(message) === TOSTRING_OBJECT) {
+			merge.call(result, message)
+		}
+		else {
+			result["msg"] = message;
+		}
 
-                    console.log(self[BATCHES]);
+		return result;
+	}
 
-                    self[BATCHES] = [];
+	function append(obj) {
+		var self = this;
+		var appenders = self[APPENDERS];
+		var i;
+		var iMax;
 
-                }, 200);
-            }
+		for (i = 0, iMax = appenders[LENGTH]; i < iMax; i++) {
+			appenders[i].append(obj);
+		}
+	}
 
-            if (deferred) {
-                deferred.resolve();
-            }
-        },
+	return Service.extend(function loggerService() {
+		this[APPENDERS] = ARRAY_SLICE.call(arguments);
+	}, {
+		displayName : "core/logger/service",
+		"sig/initialize" : forward,
+		"sig/finalize" : forward,
+		"sig/start" : forward,
+		"sig/stop" : forward,
 
-        "sig/stop" : function stop(signal, deferred) {
-            var self = this;
+		"hub/logger/log" : function onLog(topic, message) {
+			append.call(this, convert("log", message));
+		},
 
-            // Only do this if we have an interval
-            if (INTERVAL in self) {
-                // Clear interval
-                clearInterval(self[INTERVAL]);
+		"hub/logger/warn" : function onWarn(topic, message) {
+			append.call(this, convert("warn", message));
+		},
 
-                // Reset interval
-                delete self[INTERVAL];
-            }
+		"hub/logger/debug" : function onDebug(topic, message) {
+			append.call(this, convert("debug", message));
+		},
 
-            if (deferred) {
-                deferred.resolve();
-            }
-        },
+		"hub/logger/info" : function onInfo(topic, message) {
+			append.call(this, convert("info", message));
+		},
 
-        "hub/logger/log" : function logger(topic, log, deferred) {
-            var self = this;
-            var batches = self[BATCHES];
-            var logObj = initLog('log');
-
-            PUSH.call(batches, mergeLog(logObj, log));
-        },
-
-        "hub/logger/warn" : function logger(topic, log, deferred) {
-            var self = this;
-            var batches = self[BATCHES];
-            var logObj = initLog('warn');
-
-            PUSH.call(batches, mergeLog(logObj, log));
-        },
-
-        "hub/logger/debug" : function logger(topic, log, deferred) {
-            var self = this;
-            var batches = self[BATCHES];
-            var logObj = initLog('debug');
-
-            PUSH.call(batches, mergeLog(logObj, log));
-        },
-
-        "hub/logger/info" : function logger(topic, log, deferred) {
-            var self = this;
-            var batches = self[BATCHES];
-            var logObj = initLog('info');
-
-            PUSH.call(batches, mergeLog(logObj, log));
-        },
-
-        "hub/logger/error" : function logger(topic, log, deferred) {
-            var self = this;
-            var batches = self[BATCHES];
-            var logObj = initLog('error');
-
-            PUSH.call(batches, mergeLog(logObj, log));
-        }
-
-    });
+		"hub/logger/error" : function onError(topic, message) {
+			append.call(this, convert("error", message));
+		}
+	});
 });
