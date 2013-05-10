@@ -14,17 +14,17 @@ buster.testCase("troopjs-core/logger/service", function (run) {
 		});
 
 		run({
-			"log" : function (done) {
-				Service(Appender(), Appender()).start().then(function () {
-					var self = this;
+			"with two appenders" : function (done) {
+				var service = Service(Appender(), Appender());
 
-					hub.publish("logger/log", "message");
-					hub.publish("logger/warn", "message");
-					hub.publish("logger/debug", "message");
-					hub.publish("logger/info", "message");
-					hub.publish("logger/error", "message");
+				service.start().then(function () {
+					hub.publish("logger/log", "log message");
+					hub.publish("logger/warn", "warn message");
+					hub.publish("logger/debug", "debug message");
+					hub.publish("logger/info", "info message");
+					hub.publish("logger/error", "error message");
 
-					self.stop().then(function () {
+					service.stop().then(function () {
 						assert(true);
 						done();
 					});

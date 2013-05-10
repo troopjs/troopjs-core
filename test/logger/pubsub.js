@@ -13,17 +13,17 @@ buster.testCase("troopjs-core/logger/pubsub", function (run) {
 	require( [ "troopjs-core/logger/pubsub", "troopjs-core/pubsub/hub" ] , function (logger, hub) {
 		run({
 			"setUp" : function () {
-				hub.subscribe(LOGGER_LOG, done);
-				hub.subscribe(LOGGER_WARN, done);
-				hub.subscribe(LOGGER_DEBUG, done);
-				hub.subscribe(LOGGER_INFO, done);
+				hub.subscribe(LOGGER_LOG, this, done);
+				hub.subscribe(LOGGER_WARN, this, done);
+				hub.subscribe(LOGGER_DEBUG, this, done);
+				hub.subscribe(LOGGER_INFO, this, done);
 			},
 
 			"tearDown" : function () {
-				hub.unsubscribe(LOGGER_LOG, done);
-				hub.unsubscribe(LOGGER_WARN, done);
-				hub.unsubscribe(LOGGER_DEBUG, done);
-				hub.unsubscribe(LOGGER_INFO, done);
+				hub.unsubscribe(LOGGER_LOG, this, done);
+				hub.unsubscribe(LOGGER_WARN, this, done);
+				hub.unsubscribe(LOGGER_DEBUG, this, done);
+				hub.unsubscribe(LOGGER_INFO, this, done);
 			},
 
 			"log" : function () {
