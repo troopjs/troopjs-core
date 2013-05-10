@@ -21,7 +21,7 @@ define([ "../component/service", "troopjs-utils/merge",  "troopjs-utils/tr", "tr
 		});
 
 		if (deferred) {
-			when.apply($, appenders).then(deferred.resolve, deferred.reject, deferred.notify);
+			when.apply(null, appenders).then(deferred.resolve, deferred.reject, deferred.notify);
 		}
 
 		return self;
