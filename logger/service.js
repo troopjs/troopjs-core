@@ -7,7 +7,7 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var OBJECT_TOSTRING = String.prototype.toString;
+	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_OBJECT = "[object Object]";
 	var LENGTH = "length";
 	var APPENDERS = "appenders";
