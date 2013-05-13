@@ -5,7 +5,7 @@
 /*global define:false */
 define([ "../component/service", "troopjs-utils/merge",  "troopjs-utils/tr", "troopjs-utils/when", "troopjs-utils/deferred" ], function logger(Service, merge, tr, when, Deferred) {
 	var ARRAY_SLICE = Array.prototype.slice;
-	var OBJECT_TOSTRING = String.prototype.toString;
+	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_OBJECT = "[object Object]";
 	var LENGTH = "length";
 	var APPENDERS = "appenders";
