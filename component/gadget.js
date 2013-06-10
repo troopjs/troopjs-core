@@ -87,11 +87,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], false, self, subscription[VALUE]);
 			}
 
-			// Return promise that will be fulfilled when all results are
-			return when.all(results, function () {
-				// Return original arguments
-				return args;
-			});
+			// Return promise that will be fulfilled when all results are, and yield args
+			return when.all(results).yield(args);
 		},
 
 		/**
