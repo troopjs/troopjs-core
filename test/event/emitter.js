@@ -76,6 +76,37 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				emitter2.emit("two", 2);
 			},
 
+			"on/emit async subscribers": function(done) {
+				var emitter = Emitter();
+				var context = this;
+				var start = new Date().getTime();
+
+				this.timeout = 1000;
+
+				emitter.on("one", context, function (started) {
+					var deferred = when.defer();
+
+					assert.equals(started, start);
+
+					setTimeout(function () {
+						deferred.resolver.resolve([ started, new Date().getTime() ]);
+					}, 500);
+
+					return deferred.promise;
+				});
+
+				emitter.on("one", context, function (started, first) {
+
+					assert.equals(start, started);
+					assert.greater(first, started);
+					assert.near(first - started, 500, 10);
+
+					done(true);
+				});
+
+				emitter.emit("one", start);
+			},
+
 			"off/emit": function() {
 				var emitter = Emitter();
 				var context = this;
