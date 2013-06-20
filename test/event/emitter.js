@@ -1,4 +1,6 @@
+/*global buster:false, require:false*/
 buster.testCase("troopjs-core/event/emitter", function (run) {
+	"use strict";
 	var assert = buster.assert;
 
 	require( [ "troopjs-core/event/emitter", "when" ] , function (Emitter, when) {
@@ -23,7 +25,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var count = 0;
 				
 
-				emitter.on("test", context, function(test){
+				emitter.on("test", context, function(){
 					count++;
 				});
 
@@ -41,7 +43,6 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 			"on/emit again with different arg": function() {
 				var emitter = Emitter();
 				var context = this;
-				var count = 0;
 				var last;
 				var dfd = when.defer();
 
@@ -50,7 +51,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				});
 
 				dfd.promise.then(function(){
-					assert.same(last, "test2")
+					assert.same(last, "test2");
 				});
 
 				emitter.emit("test", "test");
@@ -103,7 +104,6 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				
 				emitter.on("test", context, function(message){
 					assert.equals(message, "test");
-					last = message;
 					count++;
 				});
 
