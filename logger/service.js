@@ -2,8 +2,9 @@
  * TroopJS core/logger/pubsub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../component/service", "troopjs-utils/merge", "when" ], function logger(Service, merge, when) {
+	"use strict";
+
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
@@ -13,6 +14,7 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 	var APPENDERS = "appenders";
 
 	function forward(_signal, _args) {
+		/*jshint validthis:true*/
 		var self = this;
 		var signal = self.signal;
 		var args = [ _signal ];
@@ -49,6 +51,7 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 	}
 
 	function append(obj) {
+		/*jshint validthis:true*/
 		var self = this;
 		var appenders = self[APPENDERS];
 		var i;

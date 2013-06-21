@@ -1,9 +1,12 @@
+/*globals buster:false*/
 buster.testCase("troopjs-core/logger/pubsub", function (run) {
+	"use strict";
+
 	var LOGGER_LOG = "logger/log";
 	var LOGGER_WARN = "logger/warn";
 	var LOGGER_DEBUG = "logger/debug";
 	var LOGGER_INFO = "logger/info";
-	var LOGGER_INFO = "logger/error";
+	var LOGGER_ERROR = "logger/error";
 	var assert = buster.assert;
 
 	function done() {
@@ -17,6 +20,7 @@ buster.testCase("troopjs-core/logger/pubsub", function (run) {
 				hub.subscribe(LOGGER_WARN, this, done);
 				hub.subscribe(LOGGER_DEBUG, this, done);
 				hub.subscribe(LOGGER_INFO, this, done);
+				hub.subscribe(LOGGER_ERROR, this, done);
 			},
 
 			"tearDown" : function () {
@@ -24,6 +28,7 @@ buster.testCase("troopjs-core/logger/pubsub", function (run) {
 				hub.unsubscribe(LOGGER_WARN, this, done);
 				hub.unsubscribe(LOGGER_DEBUG, this, done);
 				hub.unsubscribe(LOGGER_INFO, this, done);
+				hub.unsubscribe(LOGGER_ERROR, this, done);
 			},
 
 			"log" : function () {

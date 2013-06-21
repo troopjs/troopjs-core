@@ -2,8 +2,9 @@
  * TroopJS core/registry/service
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../component/service", "poly/object", "poly/array" ], function RegistryServiceModule(Service) {
+	"use strict";
+
 	var SERVICES = "services";
 
 	return Service.extend(function RegistryService() {

@@ -2,9 +2,8 @@
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../event/emitter" ], function HubModule(Emitter) {
-	/*jshint strict:false */
+	"use strict";
 
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
 

@@ -1,6 +1,7 @@
-/*global buster:false, require:false*/
+/*globals buster:false*/
 buster.testCase("troopjs-core/event/emitter", function (run) {
 	"use strict";
+
 	var assert = buster.assert;
 
 	require( [ "troopjs-core/event/emitter", "when" ] , function (Emitter, when) {

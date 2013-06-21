@@ -1,223 +1,225 @@
+/*globals buster:false*/
 buster.testCase("troopjs-core/component/gadget", function (run) {
-    var assert = buster.assert;
-    var ARRAY_PROTO = Array.prototype;
-    var ARRAY_CONCAT = ARRAY_PROTO.concat;
-    var TOPIC = 'TEST';
-    var TEST_ARGS = ["abc", "", 1, 0, false, true, {}];
-    var APPLY_ARGS = ARRAY_CONCAT.call(ARRAY_PROTO, [TOPIC], TEST_ARGS);
-    var EMPTY = '';
-    var TIMEOUT = 50;
-    var NAME_HANDLER = '__test_handlers';
+	"use strict";
 
-    /**
-     * compare a array of expected result with actual result
-     */
-    function allSame(actual, expected){
-        for(var l = expected.length; l--;){
-            assert.same(expected[l], actual[l]);
-        }
-    }
+	var assert = buster.assert;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_CONCAT = ARRAY_PROTO.concat;
+	var TOPIC = "TEST";
+	var TEST_ARGS = ["abc", "", 1, 0, false, true, {}];
+	var APPLY_ARGS = ARRAY_CONCAT.call(ARRAY_PROTO, [TOPIC], TEST_ARGS);
+	var EMPTY = "";
+	var NAME_HANDLER = "__test_handlers";
 
-    require( [ "troopjs-core/component/gadget", "when" ] , function (Gadget, when) {
+	/**
+	 * compare a array of expected result with actual result
+	 */
+	function allSame(actual, expected){
+		for(var l = expected.length; l--;){
+			assert.same(expected[l], actual[l]);
+		}
+	}
 
-        run({
-            "publish/subscribe": {
-                setUp: function(){
-                    var me = this;
+	require( [ "troopjs-core/component/gadget" ] , function (Gadget) {
 
-                    var insts = me.instances = [];
+		run({
+			"publish/subscribe": {
+				setUp: function(){
+					var me = this;
 
-                    me.registerInstance = function(instance){
-                        var found = false;
+					var insts = me.instances = [];
 
-                        for(var l = insts.length; l--;){
-                            var inst = insts[l];
+					me.registerInstance = function(instance){
+						var found = false;
 
-                            if (inst == instance){
-                                found = true;
-                                break;
-                            }
-                        }
+						for(var l = insts.length; l--;){
+							var inst = insts[l];
 
-                        if (found){
-                            return;
-                        }
+							if (inst === instance){
+								found = true;
+								break;
+							}
+						}
 
-                        me.instances.push(instance);
-                    };
+						if (found){
+							return;
+						}
 
-                    // helper to subscribe topic, 
-                    // all subscription will be cleaned in teardown
-                    me.subscribe = function(context, topic, func){
-                        if (!context[NAME_HANDLER]){
-                            context[NAME_HANDLER] = [];
-                        }
+						me.instances.push(instance);
+					};
 
-                        me.registerInstance(context);
+					// helper to subscribe topic,
+					// all subscription will be cleaned in teardown
+					me.subscribe = function(context, topic, func){
+						if (!context[NAME_HANDLER]){
+							context[NAME_HANDLER] = [];
+						}
 
-                        // call the real subscribe
-                        context.subscribe(topic, func);
+						me.registerInstance(context);
 
-                        context[NAME_HANDLER].push({
-                            topic: topic,
-                            func: func
-                        });
+						// call the real subscribe
+						context.subscribe(topic, func);
 
-                        return me;
-                        
-                    };
-                },
-                tearDown: function(){
-                    var me = this;
-                    var insts = me.instances;
+						context[NAME_HANDLER].push({
+							topic: topic,
+							func: func
+						});
 
-                    // clear up all subscription
-                    for(var l = insts.length; l--;){
+						return me;
 
-                        var inst = insts[l];
+					};
+				},
+				tearDown: function(){
+					var me = this;
+					var insts = me.instances;
 
-                        if (!inst[NAME_HANDLER]){
-                            continue;
-                        }
+					// clear up all subscription
+					for(var l = insts.length; l--;){
 
-                        var handlers = inst[NAME_HANDLER];
+						var inst = insts[l];
 
-                        for(var m = handlers.length; m--;){
-                            var handler = handlers[m];
+						if (!inst[NAME_HANDLER]){
+							continue;
+						}
 
-                            inst.unsubscribe(handler.topic, handler.func);
-                        }
+						var handlers = inst[NAME_HANDLER];
 
-                        // pop out instance at last
-                        insts.pop();
+						for(var m = handlers.length; m--;){
+							var handler = handlers[m];
 
-                    }
-                },
-                // POSITIVE TESTS
-                "without exception" : function () {
-                    var g1 = new Gadget();
+							inst.unsubscribe(handler.topic, handler.func);
+						}
 
-                    this.subscribe(g1, TOPIC, function(test){
-                        assert(test);
-                    });
+						// pop out instance at last
+						insts.pop();
 
-                    g1
-                    .publish(TOPIC, true);
-                },
-                "without exception when there is no subscriber" : function () {
-                    var g1 = new Gadget();
+					}
+				},
+				// POSITIVE TESTS
+				"without exception" : function () {
+					var g1 = new Gadget();
 
-                    g1
-                    .publish(TOPIC);
-                },
-                "subscribe empty topic": function(){
-                    var g1 = new Gadget();
+					this.subscribe(g1, TOPIC, function(test){
+						assert(test);
+					});
 
-                    this.subscribe(g1, EMPTY, function(test){
-                        assert(test);
-                    });
+					g1
+					.publish(TOPIC, true);
+				},
+				"without exception when there is no subscriber" : function () {
+					var g1 = new Gadget();
 
-                    g1.publish(EMPTY, true);
-                },
-                "different topics should not interfere with each other": function(){
-                    var g1 = new Gadget();
+					g1
+					.publish(TOPIC);
+				},
+				"subscribe empty topic": function(){
+					var g1 = new Gadget();
 
-                    this                    
-                    .subscribe(g1, TOPIC + 'diff', function(){
-                        assert(false);
-                    })
-                    .subscribe(g1, TOPIC, function(test){
-                        assert(test);
-                    });
+					this.subscribe(g1, EMPTY, function(test){
+						assert(test);
+					});
 
-                    g1.publish(TOPIC, true);
-                },
-                "with args" : function () {
-                    var g1 = new Gadget();
+					g1.publish(EMPTY, true);
+				},
+				"different topics should not interfere with each other": function(){
+					var g1 = new Gadget();
 
-                    this
-                    .subscribe(g1, TOPIC, function(){
-                        allSame(arguments, TEST_ARGS);
-                    });
+					this
+					.subscribe(g1, TOPIC + "diff", function(){
+						assert(false);
+					})
+					.subscribe(g1, TOPIC, function(test){
+						assert(test);
+					});
 
-                    g1
-                    .publish.apply(g1, APPLY_ARGS);
-                },
-                "multiple times and in order" : function () {
-                    var g1 = new Gadget();
+					g1.publish(TOPIC, true);
+				},
+				"with args" : function () {
+					var g1 = new Gadget();
 
-                    var spy = this.spy();
+					this
+					.subscribe(g1, TOPIC, function(){
+						allSame(arguments, TEST_ARGS);
+					});
 
-                    this
-                    .subscribe(g1, TOPIC, spy)
-                    .subscribe(g1, TOPIC, function(){
+					g1
+					.publish.apply(g1, APPLY_ARGS);
+				},
+				"multiple times and in order" : function () {
+					var g1 = new Gadget();
 
-                        assert.called(spy);
-                        
-                        allSame(arguments, TEST_ARGS);
-                    });
+					var spy = this.spy();
 
-                    g1
-                    .publish.apply(g1, APPLY_ARGS);
-                },
-                "cross gadget" : function () {
+					this
+					.subscribe(g1, TOPIC, spy)
+					.subscribe(g1, TOPIC, function(){
 
-                    var g1 = new Gadget();
-                    var g2 = new Gadget();
+						assert.called(spy);
 
-                    this.subscribe(g1, TOPIC, function(){
-                        allSame(arguments, TEST_ARGS);
-                    });
+						allSame(arguments, TEST_ARGS);
+					});
 
-                    g2.publish.apply(g2, APPLY_ARGS);
-                }
-            },
-            "on/off/emit": {
-                "emit to a topic that no handler is listening": function(){
-                    var g1 = new Gadget();
+					g1
+					.publish.apply(g1, APPLY_ARGS);
+				},
+				"cross gadget" : function () {
 
-                    g1.emit.apply(g1, TEST_ARGS);
-                },
-                "without exception": function(){
-                    var g1 = new Gadget();
+					var g1 = new Gadget();
+					var g2 = new Gadget();
 
-                    g1.on(TOPIC, function(){
-                        allSame(arguments, TEST_ARGS);
-                    });
+					this.subscribe(g1, TOPIC, function(){
+						allSame(arguments, TEST_ARGS);
+					});
 
-                    g1.emit.apply(g1, APPLY_ARGS);
-                },
-                "on multiple instance should not interfere with each other": function(){
-                    var g1 = new Gadget();
-                    var g2 = new Gadget();
+					g2.publish.apply(g2, APPLY_ARGS);
+				}
+			},
+			"on/off/emit": {
+				"emit to a topic that no handler is listening": function(){
+					var g1 = new Gadget();
 
-                    g1.on(TOPIC, function(){
-                        allSame(arguments, TEST_ARGS);
-                    });
-                    g2.on(TOPIC, function(){
-                        assert(false);
-                    });
+					g1.emit.apply(g1, TEST_ARGS);
+				},
+				"without exception": function(){
+					var g1 = new Gadget();
 
-                    g1.emit.call(g1, TEST_ARGS);
-                },
-                "on() multiple times and the handler received in order": function(){
-                    var g1 = new Gadget();
-                    var g2 = new Gadget();
+					g1.on(TOPIC, function(){
+						allSame(arguments, TEST_ARGS);
+					});
 
-                    var spy = this.spy();
+					g1.emit.apply(g1, APPLY_ARGS);
+				},
+				"on multiple instance should not interfere with each other": function(){
+					var g1 = new Gadget();
+					var g2 = new Gadget();
 
-                    g1.on(TOPIC, spy);
-                    g1.on(TOPIC, function(test){
-                        assert.called(spy);
-                        allSame(arguments, TEST_ARGS)
-                    });
-                    g2.on(TOPIC, function(){
-                        assert(false);
-                    });
+					g1.on(TOPIC, function(){
+						allSame(arguments, TEST_ARGS);
+					});
+					g2.on(TOPIC, function(){
+						assert(false);
+					});
 
-                    g1.emit.apply(g1, APPLY_ARGS);
-                }
-            }
-        });
-    });
+					g1.emit.call(g1, TEST_ARGS);
+				},
+				"on() multiple times and the handler received in order": function(){
+					var g1 = new Gadget();
+					var g2 = new Gadget();
+
+					var spy = this.spy();
+
+					g1.on(TOPIC, spy);
+					g1.on(TOPIC, function(test){
+						assert.called(spy);
+						allSame(arguments, TEST_ARGS);
+					});
+					g2.on(TOPIC, function(){
+						assert(false);
+					});
+
+					g1.emit.apply(g1, APPLY_ARGS);
+				}
+			}
+		});
+	});
 });

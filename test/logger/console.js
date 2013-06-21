@@ -1,4 +1,7 @@
+/*globals buster:false*/
 buster.testCase("troopjs-core/logger/console", function (run) {
+	"use strict";
+
 	var assert = buster.assert;
 
 	require( [ "troopjs-core/logger/console" ] , function (logger) {

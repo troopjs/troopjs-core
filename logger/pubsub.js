@@ -2,8 +2,9 @@
  * TroopJS core/logger/pubsub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../component/base", "../pubsub/hub" ], function PubSubLogger(Component, hub) {
+	"use strict";
+
 	var ARRAY_PUSH = Array.prototype.push;
 	var PUBLISH = hub.publish;
 

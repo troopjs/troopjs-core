@@ -2,9 +2,8 @@
  * TroopJS core/component/base
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(Factory, when, merge) {
-	/*jshint laxbreak:true */
+	"use strict";
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
@@ -13,6 +12,8 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var CONFIGURATION = "configuration";
 	var PHASE = "phase";
 	var VALUE = "value";
+	var INITIALIZE = "initialize";
+	var STOP = "stop";
 	var SIG = "sig";
 	var COUNT = 0;
 
@@ -78,7 +79,10 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		"start" : function start() {
 			var self = this;
 			var signal = self.signal;
-			var args = [ self[PHASE] = "initialize" ];
+			var args = [ INITIALIZE ];
+
+			// Set phase
+			self[PHASE] = INITIALIZE;
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
@@ -104,7 +108,10 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		"stop" : function stop() {
 			var self = this;
 			var signal = self.signal;
-			var args = [ self[PHASE] = "stop" ];
+			var args = [ STOP ];
+
+			// Set phase
+			self[PHASE] = STOP;
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);

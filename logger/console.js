@@ -2,8 +2,10 @@
  * TroopJS core/logger/console
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../component/base" ], function ConsoleLogger(Component) {
+	"use strict";
+
+	/*jshint devel:true*/
 	var CONSOLE = console;
 
 	function noop() {}

@@ -2,8 +2,9 @@
  * TroopJS core/pubsub/proxy/to1x
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../../component/service", "when", "when/apply", "poly/array", "poly/object" ], function To1xModule(Service, when, apply) {
+	"use strict";
+
 	var PUBLISH = "publish";
 	var SUBSCRIBE = "subscribe";
 	var HUB = "hub";
@@ -72,7 +73,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 							return deferred.promise;
 						};
 
-						self.subscribe(source, callback)
+						self.subscribe(source, callback);
 					});
 
 					// Iterate subscribe keys

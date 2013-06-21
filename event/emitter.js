@@ -2,9 +2,8 @@
  * TroopJS core/event/emitter
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:false */
 define([ "../component/base", "when", "poly/array" ], function EventEmitterModule(Component, when) {
-	/*jshint laxbreak:true */
+	"use strict";
 
 	var UNDEFINED;
 	var NULL = null;
@@ -48,6 +47,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * @return {Promise} promise of next handler callback execution
 		 */
 		var next = function (args) {
+			/*jshint curly:false*/
 			var context;
 			var handler;
 
@@ -97,6 +97,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * @return {Promise} promise of next handler callback execution
 		 */
 		var next = function (args) {
+			/*jshint curly:false*/
 			var context;
 			var handler;
 

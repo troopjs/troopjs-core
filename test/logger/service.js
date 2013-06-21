@@ -1,4 +1,7 @@
+/*globals buster:false*/
 buster.testCase("troopjs-core/logger/service", function (run) {
+	"use strict";
+
 	var ARRAY_PUSH = Array.prototype.push;
 	var assert = buster.assert;
 
@@ -9,7 +12,7 @@ buster.testCase("troopjs-core/logger/service", function (run) {
 
 				ARRAY_PUSH.apply(args, arguments);
 
-				console.log.apply(console, args);
+				buster.log.apply(buster, args);
 			}
 		});
 

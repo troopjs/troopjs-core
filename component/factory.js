@@ -2,9 +2,8 @@
  * TroopJS core/component/factory
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-/*global define:true*/
 define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModule(unique) {
-	/*jshint laxbreak:true */
+	"use strict";
 
 	var PROTOTYPE = "prototype";
 	var TOSTRING = "toString";
@@ -39,6 +38,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @returns {*}
 	 */
 	function create() {
+		/*jshint validthis:true*/
 		return extend.apply(this, arguments)();
 	}
 
@@ -47,7 +47,8 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @returns {*} New component
 	 */
 	function extend() {
-		var args = [this];
+		/*jshint validthis:true*/
+		var args = [ this ];
 		ARRAY_PUSH.apply(args, arguments);
 		return Factory.apply(null, args);
 	}
