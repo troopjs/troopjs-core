@@ -144,9 +144,9 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * @returns {Object} instance of this
 		 */
 		"on" : function on(event, context, callback) {
-			var self = this;
+			var me = this;
 			var args = arguments;
-			var handlers = self[HANDLERS];
+			var handlers = me[HANDLERS];
 			var handler;
 			var head;
 			var tail;
@@ -240,7 +240,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 				handlers[HANDLED] = 0;
 			}
 
-			return self;
+			return me;
 		},
 
 		/**
@@ -251,10 +251,10 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * @returns {Object} instance of this
 		 */
 		"off" : function off(event, context, callback) {
-			var self = this;
+			var me = this;
 			var args = arguments;
 			var argsLength = args[LENGTH];
-			var handlers = self[HANDLERS];
+			var handlers = me[HANDLERS];
 			var handler;
 			var head;
 			var tail;
@@ -263,7 +263,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 
 			// Return fast if we don't have subscribers
 			if (!(event in handlers)) {
-				return self;
+				return me;
 			}
 
 			// Get handlers
@@ -271,7 +271,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 
 			// Return fast if there's no HEAD
 			if (!(HEAD in handlers)) {
-				return self;
+				return me;
 			}
 
 			// Get first handler
@@ -331,7 +331,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 				delete handlers[TAIL];
 			}
 
-			return self;
+			return me;
 		},
 
 		/**
@@ -340,9 +340,9 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * @returns {Promise} promise that resolves with results from all listeners
 		 */
 		"emit" : function emit(event) {
-			var self = this;
+			var me = this;
 			var args = ARRAY_SLICE.call(arguments, 1);
-			var handlers = self[HANDLERS];
+			var handlers = me[HANDLERS];
 			var handler;
 			var candidates;
 			var candidatesCount;
@@ -408,10 +408,10 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * @returns {Object} instance of this
 		 */
 		"reemit" : function reemit(event, senile, context, callback) {
-			var self = this;
+			var me = this;
 			var args = arguments;
 			var argsLength = args[LENGTH];
-			var handlers = self[HANDLERS];
+			var handlers = me[HANDLERS];
 			var handler;
 			var handled;
 			var candidates;

@@ -23,11 +23,11 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	 * @constructor
 	 */
 	function Component() {
-		var self = this;
+		var me = this;
 
 		// Update instance count
-		self[INSTANCE_COUNT] = ++COUNT;
-		self[CONFIGURATION] = {};
+		me[INSTANCE_COUNT] = ++COUNT;
+		me[CONFIGURATION] = {};
 	}, {
 		"instanceCount" : COUNT,
 
@@ -47,9 +47,9 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		 * @return {*}
 		 */
 		"signal" : function onSignal(_signal) {
-			var self = this;
+			var me = this;
 			var args = ARRAY_SLICE.call(arguments, 1);
-			var specials = self.constructor.specials;
+			var specials = me.constructor.specials;
 			var signals = (SIG in specials && specials[SIG][_signal]) || [];
 			var signal;
 			var index = 0;
@@ -64,7 +64,7 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 
 				// Return a chained promise of next callback, or a promise resolved with _signal
 				return (signal = signals[index++])
-					? when(signal[VALUE].apply(self, args), next)
+					? when(signal[VALUE].apply(me, args), next)
 					: when.resolve(result);
 			}
 
@@ -77,23 +77,23 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		 * @return {*}
 		 */
 		"start" : function start() {
-			var self = this;
-			var signal = self.signal;
+			var me = this;
+			var signal = me.signal;
 			var args = [ INITIALIZE ];
 
 			// Set phase
-			self[PHASE] = INITIALIZE;
+			me[PHASE] = INITIALIZE;
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return signal.apply(self, args).then(function initialized(_initialized) {
+			return signal.apply(me, args).then(function initialized(_initialized) {
 				// Modify args to change signal (and store in PHASE)
-				args[0] = self[PHASE] = "start";
+				args[0] = me[PHASE] = "start";
 
-				return signal.apply(self, args).then(function started(_started) {
+				return signal.apply(me, args).then(function started(_started) {
 					// Update phase
-					self[PHASE] = "started";
+					me[PHASE] = "started";
 
 					// Return concatenated result
 					return ARRAY_PROTO.concat(_initialized, _started);
@@ -106,23 +106,23 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		 * @return {*}
 		 */
 		"stop" : function stop() {
-			var self = this;
-			var signal = self.signal;
+			var me = this;
+			var signal = me.signal;
 			var args = [ STOP ];
 
 			// Set phase
-			self[PHASE] = STOP;
+			me[PHASE] = STOP;
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
 
-			return signal.apply(self, args).then(function stopped(_stopped) {
+			return signal.apply(me, args).then(function stopped(_stopped) {
 				// Modify args to change signal (and store in PHASE)
-				args[0] = self[PHASE] = "finalize";
+				args[0] = me[PHASE] = "finalize";
 
-				return signal.apply(self, args).then(function finalized(_finalized) {
+				return signal.apply(me, args).then(function finalized(_finalized) {
 					// Update phase
-					self[PHASE] = "finalized";
+					me[PHASE] = "finalized";
 
 					// Return concatenated result
 					return ARRAY_PROTO.concat(_stopped, _finalized);
@@ -135,9 +135,9 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		 * @returns {string} displayName and instanceCount
 		 */
 		"toString" : function _toString() {
-			var self = this;
+			var me = this;
 
-			return self.displayName + "@" + self[INSTANCE_COUNT];
+			return me.displayName + "@" + me[INSTANCE_COUNT];
 		}
 	});
 });

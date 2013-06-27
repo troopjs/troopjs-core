@@ -15,10 +15,10 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 
 	function forward(_signal, _args) {
 		/*jshint validthis:true*/
-		var self = this;
-		var signal = self.signal;
+		var me = this;
+		var signal = me.signal;
 		var args = [ _signal ];
-		var appenders = self[APPENDERS];
+		var appenders = me[APPENDERS];
 		var index = 0;
 
 		ARRAY_PUSH.apply(args, _args);
@@ -52,8 +52,8 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 
 	function append(obj) {
 		/*jshint validthis:true*/
-		var self = this;
-		var appenders = self[APPENDERS];
+		var me = this;
+		var appenders = me[APPENDERS];
 		var i;
 		var iMax;
 

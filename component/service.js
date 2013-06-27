@@ -9,15 +9,15 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 		"displayName" : "core/component/service",
 
 		"sig/initialize" : function onStart() {
-			var self = this;
+			var me = this;
 
-			return self.publish("registry/add", self);
+			return me.publish("registry/add", me);
 		},
 
 		"sig/finalize" : function onFinalize() {
-			var self = this;
+			var me = this;
 
-			return self.publish("registry/remove", self);
+			return me.publish("registry/remove", me);
 		}
 	});
 });

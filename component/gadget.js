@@ -31,11 +31,11 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * Signal handler for 'initialize'
 		 */
 		"sig/initialize" : function initialize() {
-			var self = this;
+			var me = this;
 			var subscription;
-			var subscriptions = self[SUBSCRIPTIONS];
+			var subscriptions = me[SUBSCRIPTIONS];
 			var special;
-			var specials = self.constructor.specials.hub;
+			var specials = me.constructor.specials.hub;
 			var i;
 			var iMax;
 			var type;
@@ -55,7 +55,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				subscription[VALUE] = value = special[VALUE];
 
 				// Subscribe
-				SUBSCRIBE.call(hub, type, self, value);
+				SUBSCRIBE.call(hub, type, me, value);
 			}
 		},
 
@@ -63,10 +63,10 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * Signal handler for 'start'
 		 */
 		"sig/start" : function start() {
-			var self = this;
+			var me = this;
 			var args = arguments;
 			var subscription;
-			var subscriptions = self[SUBSCRIPTIONS];
+			var subscriptions = me[SUBSCRIPTIONS];
 			var results = [];
 			var resultsLength = 0;
 			var i;
@@ -83,7 +83,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				}
 
 				// Republish, store result
-				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], false, self, subscription[VALUE]);
+				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], false, me, subscription[VALUE]);
 			}
 
 			// Return promise that will be fulfilled when all results are, and yield args
@@ -94,9 +94,9 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * Signal handler for 'finalize'
 		 */
 		"sig/finalize" : function finalize() {
-			var self = this;
+			var me = this;
 			var subscription;
-			var subscriptions = self[SUBSCRIPTIONS];
+			var subscriptions = me[SUBSCRIPTIONS];
 			var i;
 			var iMax;
 
@@ -106,7 +106,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				subscription = subscriptions[i];
 
 				// Unsubscribe
-				UNSUBSCRIBE.call(hub, subscription[TYPE], self, subscription[VALUE]);
+				UNSUBSCRIBE.call(hub, subscription[TYPE], me, subscription[VALUE]);
 			}
 		},
 
@@ -118,14 +118,14 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * @returns {Promise}
 		 */
 		"reemit" : function reemit(event, senile, callback) {
-			var self = this;
-			var args = [ event, senile, self ];
+			var me = this;
+			var args = [ event, senile, me ];
 
 			// Add args
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
 
 			// Forward
-			return REEMITT.apply(self, args);
+			return REEMITT.apply(me, args);
 		},
 
 		/**
@@ -135,14 +135,14 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * @returns {Object} instance of this
 		 */
 		"on": function on(event, callback) {
-			var self = this;
-			var args = [ event, self ];
+			var me = this;
+			var args = [ event, me ];
 
 			// Add args
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Forward
-			return ON.apply(self, args);
+			return ON.apply(me, args);
 		},
 
 		/**
@@ -152,14 +152,14 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * @returns {Object} instance of this
 		 */
 		"off" : function off(event, callback) {
-			var self = this;
-			var args = [ event, self ];
+			var me = this;
+			var args = [ event, me ];
 
 			// Add args
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Forward
-			return OFF.apply(self, args);
+			return OFF.apply(me, args);
 		},
 
 		/**
@@ -180,8 +180,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * @returns {Promise}
 		 */
 		"republish" : function republish(event, senile, callback) {
-			var self = this;
-			var args = [ event, senile, self ];
+			var me = this;
+			var args = [ event, senile, me ];
 
 			// Add args
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
@@ -197,8 +197,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * @returns {Object} instance of this
 		 */
 		"subscribe" : function subscribe(event, callback) {
-			var self = this;
-			var args = [ event, self ];
+			var me = this;
+			var args = [ event, me ];
 
 			// Add args
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
@@ -206,7 +206,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			// Subscribe
 			SUBSCRIBE.apply(hub, args);
 
-			return self;
+			return me;
 		},
 
 		/**
@@ -216,8 +216,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		 * @returns {Object} instance of this
 		 */
 		"unsubscribe" : function unsubscribe(event, callback) {
-			var self = this;
-			var args = [ event, self ];
+			var me = this;
+			var args = [ event, me ];
 
 			// Add args
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
@@ -225,7 +225,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			// Unsubscribe
 			UNSUBSCRIBE.apply(hub, args);
 
-			return self;
+			return me;
 		}
 	});
 });

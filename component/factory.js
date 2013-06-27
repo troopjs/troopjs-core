@@ -96,9 +96,9 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 
 		descriptor[VALUE] = next
 			? function () {
-			var self = this;
+			var me = this;
 			var args = arguments;
-			return next.apply(self, args = previous.apply(self, args) || args);
+			return next.apply(me, args = previous.apply(me, args) || args);
 		}
 			: previous;
 
@@ -126,9 +126,9 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 
 		descriptor[VALUE] = previous
 			? function () {
-			var self = this;
+			var me = this;
 			var args = arguments;
-			return next.apply(self, args = previous.apply(self, args) || args);
+			return next.apply(me, args = previous.apply(me, args) || args);
 		}
 			: next;
 
@@ -160,12 +160,12 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	 * @returns {String}
 	 */
 	function ConstructorToString() {
-		var self = this;
-		var prototype = self[PROTOTYPE];
+		var me = this;
+		var prototype = me[PROTOTYPE];
 
 		return DISPLAYNAME in prototype
 			? prototype[DISPLAYNAME]
-			: OBJECT_TOSTRING.call(self);
+			: OBJECT_TOSTRING.call(me);
 	}
 
 	/**

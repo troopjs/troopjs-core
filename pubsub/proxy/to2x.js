@@ -26,10 +26,10 @@ define([ "../../component/service", "poly/array", "poly/object" ], function To2x
 			"displayName" : "core/pubsub/proxy/to2x",
 
 			"sig/initialize" : function ()  {
-				var self = this;
+				var me = this;
 
 				// Iterate SETTINGS
-				self[SETTINGS].forEach(function (setting) {
+				me[SETTINGS].forEach(function (setting) {
 					if (!(HUB in setting)) {
 						throw new Error("'" + HUB + "' is missing from setting");
 					}
@@ -54,7 +54,7 @@ define([ "../../component/service", "poly/array", "poly/object" ], function To2x
 							return hub.publish.apply(hub, args);
 						};
 
-						self.subscribe(source, callback);
+						me.subscribe(source, callback);
 					});
 
 					// Iterate subscribe keys
@@ -71,19 +71,19 @@ define([ "../../component/service", "poly/array", "poly/object" ], function To2x
 							ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments));
 
 							// Publish and store promise as result
-							return self.publish.apply(self, args);
+							return me.publish.apply(me, args);
 						};
 
-						hub.subscribe(source, self, callback);
+						hub.subscribe(source, me, callback);
 					});
 				});
 			},
 
 			"sig/finalize" : function () {
-				var self = this;
+				var me = this;
 
 				// Iterate SETTINGS
-				self[SETTINGS].forEach(function (setting) {
+				me[SETTINGS].forEach(function (setting) {
 					if (!(HUB in setting)) {
 						throw new Error("'" + HUB + "' is missing from setting");
 					}
@@ -94,12 +94,12 @@ define([ "../../component/service", "poly/array", "poly/object" ], function To2x
 
 					// Iterate publish keys and unsubscribe
 					OBJECT_KEYS(publish).forEach(function (source) {
-						self.unsubscribe(source, publish[source]);
+						me.unsubscribe(source, publish[source]);
 					});
 
 					// Iterate subscribe keys and unsubscribe
 					OBJECT_KEYS(subscribe).forEach(function (source) {
-						hub.unsubscribe(source, self, subscribe[source]);
+						hub.unsubscribe(source, me, subscribe[source]);
 					});
 				});
 			}

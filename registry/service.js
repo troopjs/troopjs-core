@@ -8,11 +8,11 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 	var SERVICES = "services";
 
 	return Service.extend(function RegistryService() {
-		var self = this;
+		var me = this;
 
-		self[SERVICES] = {};
+		me[SERVICES] = {};
 
-		self.add(self);
+		me.add(me);
 	},{
 		"displayName" : "core/registry/service",
 

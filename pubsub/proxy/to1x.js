@@ -27,10 +27,10 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 			"displayName" : "core/pubsub/proxy/to1x",
 
 			"sig/initialize" : function ()  {
-				var self = this;
+				var me = this;
 
 				// Iterate SETTINGS
-				self[SETTINGS].forEach(function (setting) {
+				me[SETTINGS].forEach(function (setting) {
 					if (!(HUB in setting)) {
 						throw new Error("'" + HUB + "' is missing from setting");
 					}
@@ -73,7 +73,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 							return deferred.promise;
 						};
 
-						self.subscribe(source, callback);
+						me.subscribe(source, callback);
 					});
 
 					// Iterate subscribe keys
@@ -97,7 +97,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 							}
 
 							// Publish and store promise as result
-							result = self.publish.apply(self, args);
+							result = me.publish.apply(me, args);
 
 							// If we have a deferred we should chain it to result
 							if (deferred) {
@@ -108,16 +108,16 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 							return result;
 						};
 
-						hub.subscribe(source, self, callback);
+						hub.subscribe(source, me, callback);
 					});
 				});
 			},
 
 			"sig/finalize" : function () {
-				var self = this;
+				var me = this;
 
 				// Iterate SETTINGS
-				self[SETTINGS].forEach(function (setting) {
+				me[SETTINGS].forEach(function (setting) {
 					if (!(HUB in setting)) {
 						throw new Error("'" + HUB + "' is missing from setting");
 					}
@@ -128,12 +128,12 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 
 					// Iterate publish keys and unsubscribe
 					OBJECT_KEYS(publish).forEach(function (source) {
-						self.unsubscribe(source, publish[source]);
+						me.unsubscribe(source, publish[source]);
 					});
 
 					// Iterate subscribe keys and unsubscribe
 					OBJECT_KEYS(subscribe).forEach(function (source) {
-						hub.unsubscribe(source, self, subscribe[source]);
+						hub.unsubscribe(source, me, subscribe[source]);
 					});
 				});
 			}
