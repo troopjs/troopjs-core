@@ -3,7 +3,7 @@
  * @license TroopJS Copyright 2012, Mikael Karon <mikael@karon.se>
  * Released under the MIT license.
  */
-define([ "../component/widget", "troopjs-utils/deferred", "troopjs-utils/when" ], function ApplicationModule(Widget, Deferred, When) {
+define([ "../component/widget", "troopjs-utils/deferred", "troopjs-utils/when", "troopjs-utils/tr" ], function ApplicationModule(Widget, Deferred, When, tr) {
 	var ARRAY_SLICE = Array.prototype.slice;
 	var SERVICES = "services";
 
