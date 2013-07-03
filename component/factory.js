@@ -29,7 +29,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var FEATURES = "features";
 	var TYPE = "type";
 	var NAME = "name";
-	var RE_SPECIAL = /^(\w+)(?::([^\/]+))?\/(.+)/;
+	var RE_SPECIAL = /^(\w+)(?::(\[.*?\]|[^\/]*))?\/(.+)/g;
 	var NOOP = function noop () {};
 	var factoryDescriptors = {};
 
