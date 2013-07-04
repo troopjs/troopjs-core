@@ -5,15 +5,21 @@
 define([ "../../component/service", "when", "when/apply", "poly/array", "poly/object" ], function To1xModule(Service, when, apply) {
 	"use strict";
 
+	var UNDEFINED;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var OBJECT_KEYS = Object.keys;
+	var OBJECT_TOSTRING = Object.prototype.toString;
+	var TOSTRING_STRING = "[object String]";
 	var PUBLISH = "publish";
 	var SUBSCRIBE = "subscribe";
 	var HUB = "hub";
 	var SETTINGS = "settings";
 	var LENGTH = "length";
-	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
-	var OBJECT_KEYS = Object.keys;
+	var RESOLVE = "resolve";
+	var TOPIC = "topic";
+	var DEFER = "defer";
 
 	return Service.extend(
 		/**
@@ -43,34 +49,64 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 					OBJECT_KEYS(publish).forEach(function (source) {
 						// Extract target
 						var target = publish[source];
+						var topic;
+						var defer;
+
+						// If target is not a string, make it into an object
+						if (OBJECT_TOSTRING.call(target) === TOSTRING_STRING) {
+							topic = target;
+							defer = false;
+							target = publish[source] = {};
+							target[TOPIC] = topic;
+							target[DEFER] = defer;
+						}
+						// Otherwise just grab from the properties
+						else {
+							// Make sure we have a topic
+							if (!(TOPIC in target)) {
+								throw new Error("'" + TOPIC + "' is missing from target '" + source + "'");
+							}
+
+							// Get topic
+							topic = target[TOPIC];
+							// Make sure defer is a boolean
+							defer = !!target[DEFER];
+						}
 
 						// Create callback
 						var callback = publish[source] = function () {
-							// Initialize args with target as the first argument
-							var args = [ target ];
+							// Initialize args with topic as the first argument
+							var args = [ topic ];
+							var deferred;
+							var resolve;
 
 							// Push original arguments on args
 							ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments));
 
-							// Create deferred
-							var deferred = when.defer();
-							// Store original resolve method
-							var resolve = deferred.resolve;
+							if (defer) {
+								// Create deferred
+								deferred = when.defer();
 
-							// Since the deferred implementation in jQuery (that we use in 1.x) allows
-							// to resolve with multiple arguments, we monkey-patch resolve here
-							deferred.resolve = deferred.resolver.resolve = function () {
-								resolve(ARRAY_SLICE.call(arguments));
-							};
+								// Store original resolve method
+								resolve = deferred[RESOLVE];
 
-							// Push deferred as last argument on args
-							ARRAY_PUSH.call(args, deferred);
+								// Since the deferred implementation in jQuery (that we use in 1.x) allows
+								// to resolve with multiple arguments, we monkey-patch resolve here
+								deferred[RESOLVE] = deferred.resolver[RESOLVE] = function () {
+									resolve(ARRAY_SLICE.call(arguments));
+								};
+
+								// Push deferred as last argument on args
+								ARRAY_PUSH.call(args, deferred);
+							}
 
 							// Publish with args
 							hub.publish.apply(hub, args);
 
 							// Return promise
-							return deferred.promise;
+							return deferred
+								? deferred.promise
+								: UNDEFINED;
 						};
 
 						me.subscribe(source, callback);
@@ -128,7 +164,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 
 					// Iterate publish keys and unsubscribe
 					OBJECT_KEYS(publish).forEach(function (source) {
-						me.unsubscribe(source, publish[source]);
+						me.unsubscribe(source, publish[source][TOPIC]);
 					});
 
 					// Iterate subscribe keys and unsubscribe
