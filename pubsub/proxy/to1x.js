@@ -20,6 +20,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 	var RESOLVE = "resolve";
 	var TOPIC = "topic";
 	var DEFER = "defer";
+	var MEMORY = "memory";
 
 	return Service.extend(
 		/**
@@ -32,7 +33,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 		}, {
 			"displayName" : "core/pubsub/proxy/to1x",
 
-			"sig/initialize" : function ()  {
+			"sig/initialize" : function () {
 				var me = this;
 
 				// Iterate SETTINGS
@@ -52,15 +53,12 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 						var topic;
 						var defer;
 
-						// If target is not a string, make it into an object
+						// If target is a string set topic to target and defer to false
 						if (OBJECT_TOSTRING.call(target) === TOSTRING_STRING) {
 							topic = target;
 							defer = false;
-							target = publish[source] = {};
-							target[TOPIC] = topic;
-							target[DEFER] = defer;
 						}
-						// Otherwise just grab from the properties
+						// Otherwise just grab topic and defer from target
 						else {
 							// Make sure we have a topic
 							if (!(TOPIC in target)) {
@@ -109,6 +107,11 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 								: UNDEFINED;
 						};
 
+						// Transfer topic and defer to callback
+						callback[TOPIC] = topic;
+						callback[DEFER] = defer;
+
+						// Subscribe from me
 						me.subscribe(source, callback);
 					});
 
@@ -116,11 +119,31 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 					OBJECT_KEYS(subscribe).forEach(function (source) {
 						// Extract target
 						var target = subscribe[source];
+						var topic;
+						var memory;
+
+						// If target is not a string, make it into an object
+						if (OBJECT_TOSTRING.call(target) === TOSTRING_STRING) {
+							topic = target;
+							memory = false;
+						}
+						// Otherwise just grab from the properties
+						else {
+							// Make sure we have a topic
+							if (!(TOPIC in target)) {
+								throw new Error("'" + TOPIC + "' is missing from target '" + source + "'");
+							}
+
+							// Get topic
+							topic = target[TOPIC];
+							// Make sure memory is a boolean
+							memory = !!target[MEMORY];
+						}
 
 						// Create callback
 						var callback = subscribe[source] = function () {
 							// Initialize args with target as the first argument
-							var args = [ target ];
+							var args = [ topic ];
 							var deferred;
 							var result;
 
@@ -144,7 +167,13 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 							return result;
 						};
 
-						hub.subscribe(source, me, callback);
+						// Transfer topic and memory to callback
+						callback[TOPIC] = topic;
+						callback[MEMORY] = memory;
+
+						// Subscribe from hub,notice that since we're pushing memory there _is_ a chance that
+						// we'll get a callback before sig/start
+						hub.subscribe(source, me, memory, callback);
 					});
 				});
 			},
@@ -169,7 +198,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 
 					// Iterate subscribe keys and unsubscribe
 					OBJECT_KEYS(subscribe).forEach(function (source) {
-						hub.unsubscribe(source, me, subscribe[source]);
+						hub.unsubscribe(source, me, subscribe[source][TOPIC]);
 					});
 				});
 			}
