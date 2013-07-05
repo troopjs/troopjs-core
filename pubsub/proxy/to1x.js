@@ -142,7 +142,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 
 						// Create callback
 						var callback = subscribe[source] = function () {
-							// Initialize args with target as the first argument
+							// Initialize args with topic as the first argument
 							var args = [ topic ];
 							var deferred;
 							var result;
