@@ -193,12 +193,12 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 
 					// Iterate publish keys and unsubscribe
 					OBJECT_KEYS(publish).forEach(function (source) {
-						me.unsubscribe(source, publish[source][TOPIC]);
+						me.unsubscribe(source, publish[source]);
 					});
 
 					// Iterate subscribe keys and unsubscribe
 					OBJECT_KEYS(subscribe).forEach(function (source) {
-						hub.unsubscribe(source, me, subscribe[source][TOPIC]);
+						hub.unsubscribe(source, me, subscribe[source]);
 					});
 				});
 			}
