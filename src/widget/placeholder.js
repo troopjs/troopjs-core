@@ -50,6 +50,9 @@ define([ "jquery", "../component/widget" ], function WidgetPlaceholderModule($, 
 				// Store widget in holding
 				self[HOLDING] = widget;
 
+				// Tell the world
+				$element.triggerHandler("released", [ widget ]);
+
 				// Resolve deferred with widget
 				deferred.resolve(widget);
 			}, deferred.reject, deferred.progress);
@@ -91,6 +94,9 @@ define([ "jquery", "../component/widget" ], function WidgetPlaceholderModule($, 
 					.unweave.apply($element, unweave_args);
 			})
 			.then(function () {
+				// Tell the world
+				$element.triggerHandler("held", [ widget ]);
+
 				deferred.resolve(widget);
 			}, deferred.reject, deferred.progress);
 		}
