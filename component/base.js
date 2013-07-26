@@ -15,7 +15,8 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var INITIALIZE = "initialize";
 	var STOP = "stop";
 	var SIG = "sig";
-	var COUNT = 0;
+	var INSTANCE_COUNTER = 0;
+	var TASK_COUNTER = 0;
 
 	return Factory(
 	/**
@@ -26,10 +27,12 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		var me = this;
 
 		// Update instance count
-		me[INSTANCE_COUNT] = ++COUNT;
+		me[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
+
+		// Set configuration
 		me[CONFIGURATION] = {};
 	}, {
-		"instanceCount" : COUNT,
+		"instanceCount" : INSTANCE_COUNTER,
 
 		"displayName" : "core/component/base",
 
@@ -127,6 +130,27 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 					// Return concatenated result
 					return ARRAY_PROTO.concat(_stopped, _finalized);
 				});
+			});
+		},
+
+		/**
+		 * Creates new task
+		 * @param {Function} resolver
+		 * @param {String} [name]
+		 * @returns {Promise}
+		 */
+		"task" : function task(resolver, name) {
+			var me = this;
+			var id = ++TASK_COUNTER;
+
+			// Signal task start
+			return me.signal("task/start", id, name).then(function () {
+				return when
+					.promise(resolver)
+					.ensure(function () {
+						// Signal task finish
+						return me.signal("task/finish", id, name);
+					});
 			});
 		},
 
