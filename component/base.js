@@ -10,8 +10,13 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var INSTANCE_COUNT = "instanceCount";
 	var CONFIGURATION = "configuration";
-	var PHASE = "phase";
+	var CONTEXT = "context";
+	var ID = "id";
+	var NAME = "name";
 	var VALUE = "value";
+	var PHASE = "phase";
+	var STARTED = "started";
+	var FINISHED = "finished";
 	var INITIALIZE = "initialize";
 	var STOP = "stop";
 	var SIG = "sig";
@@ -141,16 +146,20 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		 */
 		"task" : function task(resolver, name) {
 			var me = this;
-			var id = ++TASK_COUNTER;
 
-			// Signal task start
-			return me.signal("task/start", id, name).then(function () {
-				return when
-					.promise(resolver)
-					.ensure(function () {
-						// Signal task finish
-						return me.signal("task/finish", id, name);
-					});
+			var promise = when
+				.promise(resolver)
+				.ensure(function () {
+					promise[FINISHED] = new Date();
+				});
+
+			promise[ID] = ++TASK_COUNTER;
+			promise[CONTEXT] = me;
+			promise[STARTED] = new Date();
+			promise[NAME] = name;
+
+			return me.signal("task", promise).then(function () {
+				return promise;
 			});
 		},
 

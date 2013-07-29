@@ -111,27 +111,12 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Signal handler for 'task/start'
-		 * @param {Number} id
-		 * @param {String} [name]
+		 * Signal handler for 'task'
+		 * @param {Promise} task
 		 * @returns {Promise}
 		 */
-		"sig/task/start" : function taskStart(id, name) {
-			var me = this;
-
-			return me.publish("task/start", me, id, name);
-		},
-
-		/**
-		 * Signal handler for 'task/finish'
-		 * @param {Number} id
-		 * @param {String} [name]
-		 * @returns {Promise}
-		 */
-		"sig/task/finish" : function taskFinish(id, name) {
-			var me = this;
-
-			return me.publish("task/finish", me, id, name);
+		"sig/task" : function onTask(task) {
+			return this.publish("task", task);
 		},
 
 		/**
