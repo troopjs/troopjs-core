@@ -30,7 +30,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		/**
 		 * Signal handler for 'initialize'
 		 */
-		"sig/initialize" : function initialize() {
+		"sig/initialize" : function onInitialize() {
 			var me = this;
 			var subscription;
 			var subscriptions = me[SUBSCRIPTIONS];
@@ -62,7 +62,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		/**
 		 * Signal handler for 'start'
 		 */
-		"sig/start" : function start() {
+		"sig/start" : function onStart() {
 			var me = this;
 			var args = arguments;
 			var subscription;
@@ -93,7 +93,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		/**
 		 * Signal handler for 'finalize'
 		 */
-		"sig/finalize" : function finalize() {
+		"sig/finalize" : function onFinalize() {
 			var me = this;
 			var subscription;
 			var subscriptions = me[SUBSCRIPTIONS];
