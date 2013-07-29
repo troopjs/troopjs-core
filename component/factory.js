@@ -126,10 +126,10 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 
 		descriptor[VALUE] = previous
 			? function () {
-			var me = this;
-			var args = arguments;
-			return next.apply(me, args = previous.apply(me, args) || args);
-		}
+				var me = this;
+				var args = arguments;
+				return next.apply(me, args = previous.apply(me, args) || args);
+			}
 			: next;
 
 		return descriptor;
