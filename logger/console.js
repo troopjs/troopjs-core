@@ -2,7 +2,7 @@
  * TroopJS core/logger/console
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../component/base" ], function ConsoleLogger(Component) {
+define([ "../component/base", "poly/function"], function ConsoleLogger(Component) {
 	"use strict";
 
 	/*jshint devel:true*/
