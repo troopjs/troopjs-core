@@ -21,7 +21,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
-	var TOSTRING_FUNCTION = OBJECT_TOSTRING.call(Function.prototype);
+	var TOSTRING_FUNCTION = "[object Function]";
 
 	/**
 	 * Constructs a function that executes handlers in sequence without overlap
