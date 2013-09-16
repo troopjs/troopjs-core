@@ -20,8 +20,6 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var ARRAY_SLICE = Array.prototype.slice;
-	var OBJECT_TOSTRING = Object.prototype.toString;
-	var TOSTRING_FUNCTION = "[object Function]";
 
 	/**
 	 * Constructs a function that executes handlers in sequence without overlap
@@ -146,11 +144,6 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 				throw new Error("no callback provided");
 			}
 
-			// Test if callback is a function
-			if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
-				throw new Error(OBJECT_TOSTRING.call(callback) + " is not a function");
-			}
-
 			// Have handlers
 			if (event in handlers) {
 				// Get handlers
@@ -174,11 +167,6 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 
 				// Iterate callbacks
 				while ((callback = args[offset++]) !== UNDEFINED) {
-					// Test if callback is a function
-					if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
-						throw new Error(OBJECT_TOSTRING.call(callback) + " is not a function");
-					}
-
 					// Set tail -> tail[NEXT] -> handler
 					tail = tail[NEXT] = handler = {};
 
@@ -205,11 +193,6 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 
 				// Iterate callbacks
 				while ((callback = args[offset++]) !== UNDEFINED) {
-					// Test if callback is a function
-					if (OBJECT_TOSTRING.call(callback) !== TOSTRING_FUNCTION) {
-						throw new Error(OBJECT_TOSTRING.call(callback) + " is not a function");
-					}
-
 					// Set tail -> tail[NEXT] -> handler
 					tail = tail[NEXT] = handler = {};
 
