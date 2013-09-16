@@ -49,12 +49,6 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 			/*jshint curly:false*/
 			var context;
 			var handler;
-			var length = args[LENGTH];
-
-			// Check that args is _not_ array like
-			if (!(typeof length === "number" && length === 0 || length > 0 && 0 in args && length - 1 in args)) {
-				throw new Error("Result from handler has to be of type array");
-			}
 
 			// Store result
 			if (resultCount++ >= resultLength) {
@@ -100,16 +94,9 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 			/*jshint curly:false*/
 			var context;
 			var handler;
-			var length = args[LENGTH];
 
 			// Check that we have args
 			if (args !== UNDEFINED) {
-
-				// Check that args is _not_ array like
-				if (!(typeof length === "number" && length === 0 || length > 0 && 0 in args && length - 1 in args)) {
-					throw new Error("Result from handler has to be of type array");
-				}
-
 				// Update memory and result
 				anchor[MEMORY] = result = args;
 			}
