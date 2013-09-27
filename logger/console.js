@@ -10,22 +10,15 @@ define([ "../component/base", "poly/function" ], function ConsoleLogger(Componen
 
 	function noop() {}
 
+	var spec = {};
+	["info","log","debug","warn","error"].reduce(function(memo, feature) {
+			memo[feature] =
+				typeof CONSOLE != 'undefined' && CONSOLE[feature] ? CONSOLE[feature] : noop;
+			return memo;
+	}, spec);
+
 	return Component.create({
 			"displayName" : "core/logger/console"
 		},
-		CONSOLE
-			? {
-			"log" : CONSOLE.log.bind(CONSOLE),
-			"warn" : CONSOLE.warn.bind(CONSOLE),
-			"debug" : CONSOLE.debug.bind(CONSOLE),
-			"info" : CONSOLE.info.bind(CONSOLE),
-			"error" : CONSOLE.error.bind(CONSOLE)
-		}
-			: {
-			"log" : noop,
-			"warn" : noop,
-			"debug" : noop,
-			"info" : noop,
-			"error" : noop
-		});
+		spec);
 });
