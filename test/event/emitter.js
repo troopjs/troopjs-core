@@ -30,34 +30,28 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					count++;
 				});
 
-				var dfd = when.defer();
-
-				dfd.promise.then(function(){
+				emitter.emit("test", arg);
+				emitter.emit("test", arg);
+				return when(1, function() {
 					assert.equals(count, 2);
-				});
-
-				emitter.emit("test", arg);
-				emitter.emit("test", arg);
-				dfd.resolve();
+				})
 			},
 
 			"on/emit again with different arg": function() {
 				var emitter = Emitter();
 				var context = this;
 				var last;
-				var dfd = when.defer();
 
 				emitter.on("test", context, function(test) {
 					last = test;
 				});
 
-				dfd.promise.then(function(){
-					assert.same(last, "test2");
-				});
 
 				emitter.emit("test", "test");
 				emitter.emit("test", "test2");
-				dfd.resolve();
+				return when(1, function() {
+					assert.equals(last, "test2");
+				})
 			},
 
 			"on/emit 2 emitters": function() {
@@ -112,21 +106,18 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var emitter = Emitter();
 				var context = this;
 				var last;
-				var dfd = when.defer();
 				var callback = function(arg) {
 					last = arg;
 				};
 
 				emitter.on("test", context, callback);
 			
-				dfd.promise.then(function(){
-					assert.equals(last, "test");
-				});
-
 				emitter.emit("test", "test");
 				emitter.off("test", context, callback);
 				emitter.emit("test", "test2");
-				dfd.resolve();
+				return when(1, function() {
+					assert.equals(last, "test");
+				})
 			},
 
 			"on/reemit": function() {
