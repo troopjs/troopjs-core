@@ -20,7 +20,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 		}
 	}
 
-	require( [ "troopjs-core/component/gadget" ] , function (Gadget) {
+	require( [ "troopjs-core/component/gadget", "when" ] , function (Gadget, when) {
 
 		run({
 			"publish/subscribe": {
@@ -111,6 +111,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					g1
 					.publish(TOPIC);
+					assert(true);
 				},
 				"subscribe empty topic": function(){
 					var g1 = new Gadget();
@@ -161,6 +162,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					g1
 					.publish.apply(g1, APPLY_ARGS);
+					return when(1);
 				},
 				"cross gadget" : function () {
 
@@ -179,6 +181,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 					var g1 = new Gadget();
 
 					g1.emit.apply(g1, TEST_ARGS);
+					assert(true);
 				},
 				"without exception": function(){
 					var g1 = new Gadget();
@@ -200,7 +203,8 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						assert(false);
 					});
 
-					g1.emit.call(g1, TEST_ARGS);
+					g1.emit.apply(g1, APPLY_ARGS);
+					return when(1);
 				},
 				"on() multiple times and the handler received in order": function(){
 					var g1 = new Gadget();
@@ -218,6 +222,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 					});
 
 					g1.emit.apply(g1, APPLY_ARGS);
+					return when(1);
 				}
 			}
 		});
