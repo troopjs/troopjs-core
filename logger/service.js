@@ -1,4 +1,4 @@
-/**
+/*
  * TroopJS core/logger/pubsub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
@@ -62,6 +62,13 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 		}
 	}
 
+	/**
+	 * Provides logging as a service, with appender support.
+	 * @class core.logger.service
+	 * @constructor
+	 * @param {Function...} appenders One or more message appender(s).
+	 * @extends core.component.service
+	 */
 	return Service.extend(function LoggerService() {
 		this[APPENDERS] = ARRAY_SLICE.call(arguments);
 	}, {
@@ -80,22 +87,47 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 			return forward.call(this, "finalize", arguments);
 		},
 
+		/**
+		 * Log a message on hub event.
+		 * @event
+		 * @param message
+		 */
 		"hub/logger/log" : function onLog(message) {
 			append.call(this, convert("log", message));
 		},
 
+		/**
+		 * Log a warn on hub event.
+		 * @event
+		 * @param message
+		 */
 		"hub/logger/warn" : function onWarn(message) {
 			append.call(this, convert("warn", message));
 		},
 
+		/**
+		 * Log a debug on hub event.
+		 * @event
+		 * @param message
+		 */
 		"hub/logger/debug" : function onDebug(message) {
 			append.call(this, convert("debug", message));
 		},
 
+		/**
+		 * Log an info on hub event.
+		 * @event
+		 * @param message
+		 */
 		"hub/logger/info" : function onInfo(message) {
 			append.call(this, convert("info", message));
 		},
 
+		/**
+		 * Log an error on hub event.
+		 * @event
+		 * @param message
+		 */
 		"hub/logger/error" : function onError(message) {
 			append.call(this, convert("error", message));
 		}

@@ -1,4 +1,4 @@
-/**
+/*
  * TroopJS core/event/emitter
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
@@ -21,7 +21,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var ARRAY_SLICE = Array.prototype.slice;
 
-	/**
+	/*
 	 * Constructs a function that executes handlers in sequence without overlap
 	 * @private
 	 * @param {Array} handlers Array of handlers
@@ -37,7 +37,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		var resultLength = result[LENGTH];
 		var resultCount = resultLength - 1;
 
-		/**
+		/*
 		 * Internal function for sequential execution of handlers handlers
 		 * @private
 		 * @param {Array} [args] result from previous handler callback
@@ -67,7 +67,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		return next;
 	}
 
-	/**
+	/*
 	 * Constructs a function that executes handlers in a pipeline without overlap
 	 * @private
 	 * @param {Array} handlers Array of handlers
@@ -82,7 +82,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		var handlersCount = 0;
 		var result;
 
-		/**
+		/*
 		 * Internal function for piped execution of handlers handlers
 		 * @private
 		 * @param {Array} [args] result from previous handler callback
@@ -113,22 +113,47 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		return next;
 	}
 
-	return Component.extend(
 	/**
-	 * Creates a new EventEmitter
-	 * @constructor
+	 * The event module of TroopJS that provides common event handling capability, and some highlights:
+	 *
+	 * ## Asynchronous handlers
+	 * Any event handler can be asynchronous depending on the **return value**:
+	 *
+	 *  - a Promise value makes this handler be considered asynchronous, where the next handler will be called
+	 *  upon the completion of this promise.
+	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
+	 *
+	 * ## Mutable event data
+	 * Additional event data can be passed to listeners when calling @{link #emit}, which can be further altered by the
+	 * returning value of the handler, depending on **event type** we're emitting:
+	 *
+	 *  - **foo[:pipleline]** (default) In a piplelined event, handler shall return **an array** of params, that is the input for the next handler.
+	 *  - **foo:sequence**  In a sequential event, handler shall return **a single** param, that is appended to a list of params, that forms
+	 *  the input for the next handler.
+	 *
+	 *  On the caller side, the return value of the {@link #emit} or {@link #reemit} call also depends on the event type described above:
+	 *
+	 *  - **foo[:pipleline]** (default) In a piplelined event, it will be **one value** that is the return value from the last handler.
+	 *  - **foo:sequence**  In a sequential event, it will be **an array** that accumulated the return value from all of the handlers.
+	 *
+	 * ## Memorized emitting
+	 * A fired event will memorize the event data yields from the last handler, for listeners that are registered
+	 * after the event emitted that thus missing from the call, {@link #reemit} will compensate the call with memorized data.
+	 *
+	 * @class core.event.emitter
+	 * @extends core.component.base
 	 */
-	function EventEmitter() {
+	return Component.extend(function EventEmitter() {
 		this[HANDLERS] = {};
 	}, {
 		"displayName" : "core/event/emitter",
 
 		/**
 		 * Adds a listener for the specified event.
-		 * @param {String} event to subscribe to
-		 * @param {Object} context to scope callbacks to
-		 * @param {...Function} callback for this event
-		 * @returns {Object} instance of this
+		 * @param {String} event The event name to subscribe to.
+		 * @param {Object} [context] The context to scope callbacks to.
+		 * @param {Function} [callback] The event listener function.
+		 * @returns this
 		 */
 		"on" : function on(event, context, callback) {
 			var me = this;
@@ -216,11 +241,13 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		},
 
 		/**
-		 * Remove a listener for the specified event.
-		 * @param {String} event to remove callback from
-		 * @param {Object} [context] to scope callback to
-		 * @param {...Function} [callback] to remove
-		 * @returns {Object} instance of this
+		 * Remove listener(s) from a subscribed event, if no listener is specified,
+		 * remove all listeners of this event.
+		 *
+		 * @param {String} event The event that the listener subscribes to.
+		 * @param {Object} [context] The context that bind to the listener.
+		 * @param {Function...} [listener] One more more callback listeners to remove.
+		 * @returns this
 		 */
 		"off" : function off(event, context, callback) {
 			var me = this;
@@ -307,9 +334,12 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		},
 
 		/**
-		 * Execute each of the listeners in order with the supplied arguments
-		 * @param {String} event to emit
-		 * @returns {Promise} promise that resolves with results from all listeners
+		 * Trigger an event which notifies each of the listeners in sequence of their subscribing,
+		 * optionally pass data values to the listeners.
+		 *
+		 * @param {String} event The event name to emit
+		 * @param {Mixed...} [args] Data params that are passed to the listener function.
+		 * @returns {Promise} promise Promise of the return values yield from the listeners at all.
 		 */
 		"emit" : function emit(event) {
 			var me = this;
@@ -372,12 +402,33 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		},
 
 		/**
-		 * Reemit event from memory
-		 * @param {String} event to reemit
-		 * @param {Boolean} senile flag to indicate if already trigger callbacks should still be called
-		 * @param {Object} [context] to scope callback to
-		 * @param {...Function} [callback] to reemit
-		 * @returns {Object} instance of this
+		 * Re-emit any event that are **previously triggered**, any (new) listeners will be called with the memorized data
+		 * from the previous event emitting procedure.
+		 *
+		 * 	// start widget1 upon the app loaded.
+		 * 	app.on('load', function(url) {
+		 * 		widget1.start(url);
+		 * 	});
+		 *
+		 * 	// Emits the load event on app.
+		 * 	app.emit('load', window.location.hash);
+		 *
+		 * 	// start of widget2 comes too late for the app start.
+		 * 	app.on('load', function(url) {
+		 * 		// Widget should have with the same URL as with widget1.
+		 * 		widget2.start(url);
+		 * 	});
+		 *
+		 * 	$.ready(function() {
+		 * 		// Compensate the "load" event listeners that are missed.
+		 * 		app.reemit();
+		 * 	});
+		 *
+		 * @param {String} event The event name to re-emit, dismiss if it's the first time to emit this event.
+		 * @param {Boolean} senile=false Whether to trigger listeners that are already handled in previous emitting.
+		 * @param {Object} [context] The context object to scope this re-emitting.
+		 * @param {Function...} [callback] One or more specific listeners that should be affected in the re-emitting.
+		 * @returns this
 		 */
 		"reemit" : function reemit(event, senile, context, callback) {
 			var me = this;

@@ -1,4 +1,4 @@
-/**
+/*
  * TroopJS core/component/factory
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
@@ -34,8 +34,11 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var factoryDescriptors = {};
 
 	/**
-	 * Create a component
-	 * @returns {*}
+	 * Sub classing from this component, and to instantiate it immediately.
+	 * @member core.component.factory
+	 * @static
+	 * @inheritdoc core.component.factory#Factory
+	 * @returns {Object} Instance of this class.
 	 */
 	function create() {
 		/*jshint validthis:true*/
@@ -43,8 +46,11 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	}
 
 	/**
-	 * Extends a component
-	 * @returns {*} New component
+	 * Sub classing from this component.
+	 * @member core.component.factory
+	 * @static
+	 * @inheritdoc core.component.factory#Factory
+	 * @returns {Function} The extended subclass.
 	 */
 	function extend() {
 		/*jshint validthis:true*/
@@ -55,9 +61,10 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 
 	/**
 	 * Creates new Decorator
+	 * @private
+	 * @class core.component.factory.Decorator
 	 * @param {Function} decorated Original function
 	 * @param {Function} decorate Function to re-write descriptor
-	 * @constructor
 	 */
 	function Decorator(decorated, decorate) {
 		var descriptor = {};
@@ -77,19 +84,18 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	}
 
 	/**
-	 * Before advise
-	 * @param {Function} decorated Original function
-	 * @returns {ComponentFactoryModule.Decorator}
+	 * Create a decorator function property to override the original one from prototype, that runs before
+	 * the start of the former.
+	 *
+	 * @member core.component.factory
+	 * @static
+	 * @param {Function} decorated The decorator function which receives the same arguments as with the original.
+	 * @returns {core.component.factory.Decorator}
 	 */
 	function before(decorated) {
 		return new Decorator(decorated, before[DECORATE]);
 	}
 
-	/**
-	 * Describe before
-	 * @param descriptor
-	 * @returns {*}
-	 */
 	before[DECORATE] = function (descriptor) {
 		var previous = this[DECORATED];
 		var next = descriptor[VALUE];
@@ -106,19 +112,18 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	};
 
 	/**
-	 * After decorator
-	 * @param decorated
-	 * @returns {ComponentFactoryModule.Decorator}
+	 * Create a decorator function property to override the original one from prototype, that runs after
+	 * the completion of the former.
+	 *
+	 * @member core.component.factory
+	 * @static
+	 * @param {Function} decorated The decorator function which receives the return value from the original.
+	 * @returns {core.component.factory.Decorator}
 	 */
 	function after(decorated) {
 		return new Decorator(decorated, after[DECORATE]);
 	}
 
-	/**
-	 * Decorate after
-	 * @param descriptor
-	 * @returns {*}
-	 */
 	after[DECORATE] = function (descriptor) {
 		var previous = descriptor[VALUE];
 		var next = this[DECORATED];
@@ -136,18 +141,22 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	};
 
 	/**
-	 * Around decorator
-	 * @param decorated
-	 * @returns {ComponentFactoryModule.Decorator}
+	 * Create a decorator function property to override the original one from prototype, that get passed the original
+	 * function, eventually reach the maximum flexibility on execution flow.
+	 *
+	 * @member core.component.factory
+	 * @static
+	 * @param {Function} decorated The decorator function which receives the original function as parameter.
+	 * @returns {core.component.factory.Decorator}
 	 */
 	function around(decorated) {
 		return new Decorator(decorated, around[DECORATE]);
 	}
 
 	/**
-	 * Decorate around
-	 * @param descriptor
-	 * @returns {*}
+	 *
+	 * @param {Function} descriptor
+	 * @returns {Mixed}
 	 */
 	around[DECORATE] = function (descriptor) {
 		descriptor[VALUE] = this[DECORATED](descriptor[VALUE] || NOOP);
@@ -155,8 +164,10 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 		return descriptor;
 	};
 
-	/**
+	/*
 	 * Returns a string representation of this constructor
+	 * @member core.component.factory
+	 * @static
 	 * @returns {String}
 	 */
 	function ConstructorToString() {
@@ -169,9 +180,85 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	}
 
 	/**
-	 * Creates components
-	 * @returns {*} New component
+	 * The factory module establishes the fundamental object composing in TroopJS:
+	 *
+	 *  - First-class prototype based **mixin**, that supports deterministic multiple inheritance that:
+	 *  	- Eliminating the frustrating issues from multi-tiered, single-rooted ancestry;
+	 *    - Avoid occasionally unexpected modification from prototype chain, from the prototype-based inheritance;
+	 *    - Reduced the function creation overhead in classical inheritance pattern;
+	 *  - **Advice decorator** for method overriding without the need for super call;
+	 *  - **Declarative** "special" functions preserved for sending messages to object, that never overrides parent ones.
+	 *
+	 * Basically Factory takes objects or constructors as arguments and returns a new constructor, the arguments are
+	 * composed from left to right, later arguments taken precedence (overriding) former arguments,
+	 * and any functions be executed on construction from left to right.
+	 *
+	 *  		// Define the constructor.
+	 *  		var MyClass = Factory(function() {
+	 *  			// initialize the object...
+	 *  			this.baz = "quz";
+	 *  		},
+	 *  		{
+	 *  			foo: "bar",
+	 *  			do: function(){
+	 *  				return "work";
+	 *  			},
+	 *
+	 *  			// a special handler for "signal" type with value "foo".
+	 *  			"signal/foo": function() {}
+	 *
+	 *  		});
+	 *
+	 *  		var MyBehavior =  Factory({
+	 *  			somethingElse: function(){}
+	 *  		});
+	 *
+	 *  		// SubClass extends from MyClass and mixin MyBehavior
+	 *  		var SubClass = MyClass.extend(function() {
+	 *  			// initialize the object...
+	 *  		},
+	 *
+	 *  		MyBehavior,
+	 *  		{
+	 *  			// Overwrite parent.
+	 *  			foo: "baz",
+	 *
+	 *  			// Override parent with after call.
+	 *  			do: Factory.after(function(retval) {
+	 *  				return retval + "," + "play";
+	 *  			}),
+	 *
+	 *  			move: function(){}
+	 *  		});
+	 *
+	 *  		// Instantiate the subClass.
+	 *  		var instance = SubClass.create({
+	 *  			evenMore: function(){}
+	 *  		});
+	 *
+	 *  		// "baz"
+	 *  		instance.foo;
+	 *
+	 *  		// "quz"
+	 *  		instance.baz;
+	 *
+	 *  		// "work play"
+	 *  		instance.do();
+	 *
+	 *  		instance.somethingElse();
+	 *  		instance.evenMore();
+	 *
+	 * @class core.component.factory
+	 */
+
+	/**
+	 * The class composer function.
+	 * @member core.component.factory
+	 * @method Factory
 	 * @constructor
+	 * @param {Function...} constructor(s) One or more function(s) to be called upon.
+	 * @param {Object} spec The object specification that describes properties.
+	 * @returns {Function} The constructor(class).
 	 */
 	function Factory () {
 		var special;
@@ -302,10 +389,9 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 			group[group[LENGTH]] = type[type[LENGTH]] = special;
 		}
 
-		/**
+		/*
 		 * Component constructor
 		 * @returns {Constructor} Constructor
-		 * @constructor
 		 */
 		function Constructor () {
 			// Allow to be created either via 'new' or direct invocation
