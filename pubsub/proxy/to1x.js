@@ -1,9 +1,16 @@
-/**
+/*
  * TroopJS core/pubsub/proxy/to1x
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 define([ "../../component/service", "when", "when/apply", "poly/array", "poly/object" ], function To1xModule(Service, when, apply) {
 	"use strict";
+
+	/**
+	 * Proxies to 1.x hub
+	 * @class core.pubsub.proxy.to1x
+	 * @extends core.component.service
+	 * @param {Object...} setting Setting
+	 */
 
 	var UNDEFINED;
 	var ARRAY_PROTO = Array.prototype;
@@ -22,17 +29,14 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 	var DEFER = "defer";
 	var MEMORY = "memory";
 
-	return Service.extend(
-		/**
-		 * Proxies to 1.x hub
-		 * @param {object..} setting Setting
-		 * @constructor
-		 */
-		function To1xService(setting) {
+	return Service.extend(function To1xService(setting) {
 			this[SETTINGS] = ARRAY_SLICE.call(arguments);
 		}, {
 			"displayName" : "core/pubsub/proxy/to1x",
 
+			/**
+			 * @override
+			 */
 			"sig/initialize" : function () {
 				var me = this;
 
@@ -178,6 +182,9 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 				});
 			},
 
+			/**
+			 * @override
+			 */
 			"sig/finalize" : function () {
 				var me = this;
 
