@@ -155,9 +155,7 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 			promise[STARTED] = new Date();
 			promise[NAME] = name;
 
-			return me.signal("task", promise).then(function () {
-				return promise;
-			});
+			return me.signal("task", promise).yield(promise);
 		},
 
 		/**
