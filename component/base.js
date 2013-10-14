@@ -11,7 +11,6 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var INSTANCE_COUNT = "instanceCount";
 	var CONFIGURATION = "configuration";
 	var CONTEXT = "context";
-	var ID = "id";
 	var NAME = "name";
 	var VALUE = "value";
 	var PHASE = "phase";
@@ -21,7 +20,6 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var STOP = "stop";
 	var SIG = "sig";
 	var INSTANCE_COUNTER = 0;
-	var TASK_COUNTER = 0;
 
 	return Factory(
 	/**
@@ -153,7 +151,6 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 					promise[FINISHED] = new Date();
 				});
 
-			promise[ID] = ++TASK_COUNTER;
 			promise[CONTEXT] = me;
 			promise[STARTED] = new Date();
 			promise[NAME] = name;
