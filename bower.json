@@ -1,8 +1,13 @@
 {
 	"name": "troopjs-core",
-	"version": "2.1.0-1",
+	"version": "2.1.0-2",
 	"ignore": [
 		"**/.*",
 		"node_modules"
-	]
+	],
+	"dependencies": {
+		"troopjs-utils": "~2.1",
+		"poly": "~0.6",
+		"when": "~2.5"
+	}
 }
