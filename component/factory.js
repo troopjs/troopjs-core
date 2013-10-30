@@ -2,7 +2,11 @@
  * TroopJS core/component/factory
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModule(unique) {
+define([
+	"module",
+	"troopjs-utils/unique",
+	"poly/object"
+], function ComponentFactoryModule(module, unique) {
 	"use strict";
 
 	var PROTOTYPE = "prototype";
@@ -31,6 +35,8 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 	var NAME = "name";
 	var RE_SPECIAL = /^(\w+)(?::(.+?))?\/([-_./\d\w\s]+)$/;
 	var NOOP = function noop () {};
+	var PRAGMAS = module.config().pragmas || [];
+	var PRAGMAS_LENGTH = PRAGMAS[LENGTH];
 	var factoryDescriptors = {};
 
 	/**
@@ -183,10 +189,13 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 		var constructors = [];
 		var constructorsLength;
 		var name;
+		var nameRaw;
 		var names;
 		var namesLength;
 		var i;
 		var j;
+		var k;
+		var pragma;
 		var group;
 		var type;
 		var matches;
@@ -232,7 +241,18 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 			// Iterate names
 			for (j = 0, namesLength = names[LENGTH]; j < namesLength; j++) {
 				// Get name
-				name = names[j];
+				name = nameRaw = names[j];
+
+				// Iterate PRAGMAS
+				for (k = 0; k < PRAGMAS_LENGTH; k++) {
+					// Get pragma
+					pragma = PRAGMAS[k];
+
+					// Process name with pragma, break if replacement occurred
+					if ((name = name.replace(pragma.pattern, pragma.replace)) !== nameRaw) {
+						break;
+					}
+				}
 
 				// Check if this matches a SPECIAL signature
 				if ((matches = RE_SPECIAL.exec(name))) {
@@ -244,7 +264,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 					special[FEATURES] = matches[2];
 					special[TYPE] = type = matches[3];
 					special[NAME] = group + "/" + type;
-					special[VALUE] = arg[name];
+					special[VALUE] = arg[nameRaw];
 
 					// Unshift special onto specials
 					ARRAY_UNSHIFT.call(specials, special);
@@ -252,7 +272,7 @@ define([ "troopjs-utils/unique", "poly/object" ], function ComponentFactoryModul
 				// Otherwise just add to prototypeDescriptors
 				else {
 					// Get descriptor for arg
-					descriptor = Object.getOwnPropertyDescriptor(arg, name);
+					descriptor = Object.getOwnPropertyDescriptor(arg, nameRaw);
 
 					// Get value
 					value = descriptor[VALUE];
