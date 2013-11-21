@@ -144,6 +144,37 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 							})
 							.then(done);
 					});
+			},
+
+			"on/emit reject": function (done) {
+				var emitter = Emitter();
+				var context = this;
+
+				emitter
+					.on("test", context, function (pass) {
+						return pass
+							? when.resolve()
+							: when.reject();
+					})
+					.on("test", context, function (pass) {
+						assert.isTrue(pass);
+					})
+					.emit("test", false)
+					.then(function () {
+						assert(false);
+					}, function() {
+						assert(true);
+					})
+					.ensure(function () {
+						emitter
+							.emit("test", true)
+							.then(function () {
+								assert(true);
+							}, function() {
+								assert(false);
+							})
+							.ensure(done);
+					});
 			}
 		});
 	});
