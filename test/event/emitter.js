@@ -36,7 +36,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 							.then(function () {
 								assert.equals(count, 2);
 							})
-							.then(done);
+							.then(done)
 					});
 			},
 
