@@ -12,6 +12,7 @@ define([ "../event/emitter" ], function HubModule(Emitter) {
 		"subscribe" : COMPONENT_PROTOTYPE.on,
 		"unsubscribe" : COMPONENT_PROTOTYPE.off,
 		"publish" : COMPONENT_PROTOTYPE.emit,
-		"republish" : COMPONENT_PROTOTYPE.reemit
+		"republish" : COMPONENT_PROTOTYPE.reemit,
+		"spy" : COMPONENT_PROTOTYPE.peek
 	});
 });

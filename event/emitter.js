@@ -459,6 +459,27 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 
 			// Return resolved promise
 			return when.resolve();
+		},
+
+		/**
+		 * Returns value in handlers MEMORY
+		 * @param {String} event to peek at
+		 * @returns {*} Value in MEMORY
+		 */
+		"peek": function peek(event) {
+			var me = this;
+			var handlers = me[HANDLERS];
+			var result;
+
+			if (event in handlers) {
+				handlers = handlers[event];
+
+				if (MEMORY in handlers) {
+					result  = handlers[MEMORY];
+				}
+			}
+
+			return result;
 		}
 	});
 });
