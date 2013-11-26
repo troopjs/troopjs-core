@@ -1,4 +1,7 @@
+/*globals buster:false*/
 buster.testCase("troopjs-core/event/emitter", function (run) {
+	"use strict";
+
 	var assert = buster.assert;
 
 	require( [ "troopjs-core/event/emitter", "when" ] , function (Emitter, when) {
@@ -9,7 +12,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 
 				Emitter()
-					.on("test", context, function onTest(topic, test) {
+					.on("test", context, function onTest(test) {
 						assert.same(arg, test);
 					})
 					.emit("test", arg);
@@ -23,7 +26,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var count = 0;
 				
 
-				emitter.on("test", context, function(topic, test){
+				emitter.on("test", context, function(){
 					count++;
 				});
 
@@ -41,16 +44,15 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 			"on/emit again with different arg": function() {
 				var emitter = Emitter();
 				var context = this;
-				var count = 0;
 				var last;
 				var dfd = when.defer();
 
-				emitter.on("test", context, function(topic, test) {
+				emitter.on("test", context, function(test) {
 					last = test;
 				});
 
 				dfd.promise.then(function(){
-					assert.same(last, "test2")
+					assert.same(last, "test2");
 				});
 
 				emitter.emit("test", "test");
@@ -64,10 +66,10 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 				var context = this;
 
-				emitter1.on("one", context, function(topic, arg) {
+				emitter1.on("one", context, function(arg) {
 					assert.same(arg, "one");
 				});
-				emitter2.on("two", context, function(topic, arg){
+				emitter2.on("two", context, function(arg){
 					assert.same(arg, 2);
 				});
 
@@ -75,12 +77,43 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				emitter2.emit("two", 2);
 			},
 
+			"on/emit async subscribers": function(done) {
+				var emitter = Emitter();
+				var context = this;
+				var start = new Date().getTime();
+
+				this.timeout = 1000;
+
+				emitter.on("one", context, function (started) {
+					var deferred = when.defer();
+
+					assert.equals(started, start);
+
+					setTimeout(function () {
+						deferred.resolver.resolve([ started, new Date().getTime() ]);
+					}, 500);
+
+					return deferred.promise;
+				});
+
+				emitter.on("one", context, function (started, first) {
+
+					assert.equals(start, started);
+					assert.greater(first, started);
+					assert.near(first - started, 500, 10);
+
+					done(true);
+				});
+
+				emitter.emit("one", start);
+			},
+
 			"off/emit": function() {
 				var emitter = Emitter();
 				var context = this;
 				var last;
 				var dfd = when.defer();
-				var callback = function(topic, arg) {
+				var callback = function(arg) {
 					last = arg;
 				};
 
@@ -101,15 +134,14 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 				var count = 0;
 				
-				emitter.on("test", context, function(topic, message){
+				emitter.on("test", context, function(message){
 					assert.equals(message, "test");
-					last = message;
 					count++;
 				});
 
 				emitter.emit("test", "test");
 
-				emitter.reemit("test", context, function(topic, message) {
+				emitter.reemit("test", context, function(message) {
 					assert.equals(message, "test");
 				});
 			}
