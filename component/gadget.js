@@ -57,6 +57,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 	var ON = EMITTER_PROTO.on;
 	var OFF = EMITTER_PROTO.off;
 	var REEMITT = EMITTER_PROTO.reemit;
+	var PEEK = EMITTER_PROTO.peek;
 
 	return Emitter.extend(function Gadget() {
 		this[SUBSCRIPTIONS] = [];
@@ -244,6 +245,15 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			UNSUBSCRIBE.apply(hub, args);
 
 			return me;
+		},
+
+		/**
+		 * Spies on the current value in MEMORY on the hub
+		 * @param {String} event event to spy on
+		 * @returns {*} Value in MEMORY
+		 */
+		"spy" : function (event) {
+			return PEEK.call(hub, event);
 		}
 	});
 });

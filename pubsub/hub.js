@@ -1,4 +1,4 @@
-/*
+/**
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
@@ -48,6 +48,8 @@ define([ "../event/emitter" ], function HubModule(Emitter) {
 		 * @inheritdoc #reemit
 		 * @method
 		 */
-		"republish" : COMPONENT_PROTOTYPE.reemit
+		"republish" : COMPONENT_PROTOTYPE.reemit,
+
+		"spy" : COMPONENT_PROTOTYPE.peek
 	});
 });
