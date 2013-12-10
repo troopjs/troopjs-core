@@ -1,9 +1,52 @@
-/**
+/*
  * TroopJS core/component/base
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(Factory, when, merge) {
 	"use strict";
+
+	/**
+	 * Imagine component as an object that has predefined life-cycle, with the following phases:
+	 *
+	 *   1. initialize (signal)
+	 *   1. start (signal)
+	 *   1. started
+	 *   1. stop (signal)
+	 *   1. finalize (signal)
+	 *   1. finalized
+	 *
+	 * Calls on {@link #start} or {@link #stop} method of the component will trigger any defined signal
+	 * handlers declared.
+	 *
+	 * 	var app = Component.extend({
+	 * 		"displayName": "my/component/app",
+	 *
+	 * 		// Signal handler for "start" phase
+	 * 		"sig/start": function start() {
+	 * 			// bind resize handler.
+	 * 			$(window).on('resize.app', $.proxy(this.onResize, this));
+	 * 		},
+	 *
+	 * 		// Signal handler for "finalize" phase
+	 * 		"sig/finalize": function finalize() {
+	 * 			// cleanup the handler.
+	 * 			$(window).off('resize.app');
+	 * 		},
+	 *
+	 * 		"onResize": function onResize(argument) {
+	 * 			// window resized.
+	 * 		}
+	 * 	});
+	 *
+	 * 	$.ready(function on_load() {
+	 * 		app.start();
+	 * 	});
+	 *
+	 * 	$(window).unload(function on_unload (argument) {
+	 * 	  app.end();
+	 * 	});
+	 * @class core.component.base
+	 */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
@@ -22,10 +65,6 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var INSTANCE_COUNTER = 0;
 
 	return Factory(
-	/**
-	 * Creates a new component
-	 * @constructor
-	 */
 	function Component() {
 		var me = this;
 
@@ -40,8 +79,39 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		"displayName" : "core/component/base",
 
 		/**
-		 * Configures component
-		 * @returns {Object} Updated configuration
+		 * Add to the component configurations, possibly {@link Object#merge merge} with the existing ones.
+		 *
+		 * 		var List = Component.extend({
+		 * 			"sig/start": function start() {
+		 * 				// configure the List.
+		 * 				this.configure({
+		 * 					"type": "list",
+		 * 					"cls": ["list"]
+		 * 				});
+		 * 			}
+		 * 		});
+		 * 		var Dropdown = List.extend({
+		 * 			"sig/start": function start() {
+		 * 				// configure the Dropdown.
+		 * 				this.configure({
+		 * 					"type": "dropdown",
+		 * 					"cls": ["dropdown"],
+		 * 					"shadow": true
+		 * 				});
+		 * 			}
+		 * 		});
+		 *
+		 * 		var dropdown = new Dropdown();
+		 *
+		 * 		// Overwritten: "dropdown"
+		 * 		print(dropdown.configuration.id);
+		 * 		// Augmented: ["list","dropdown"]
+		 * 		print(dropdown.configuration.cls);
+		 * 		// Added: true
+		 * 		print(dropdown.configuration.shadow);
+		 *
+		 * @param {Object...} [configs] Config(s) to add.
+		 * @returns {Object} The new configuration.
 		 */
 		"configure" : function configure() {
 			return merge.apply(this[CONFIGURATION], arguments);
@@ -50,7 +120,7 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		/**
 		 * Signals the component
 		 * @param _signal {String} Signal
-		 * @return {*}
+		 * @return {Promise}
 		 */
 		"signal" : function onSignal(_signal) {
 			var me = this;
@@ -79,7 +149,7 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		},
 
 		/**
-		 * Start the component
+		 * Start the component life-cycle.
 		 * @return {*}
 		 */
 		"start" : function start() {
@@ -108,7 +178,7 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		},
 
 		/**
-		 * Stops the component
+		 * Stops the component life-cycle.
 		 * @return {*}
 		 */
 		"stop" : function stop() {
@@ -137,8 +207,26 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		},
 
 		/**
-		 * Creates new task
-		 * @param {Function} resolver
+		 * Schedule a new promise that runs on this component, sends a "task" signal once finished.
+		 *
+		 * **Note:** It's recommended to use **this method instead of an ad-hoc promise** to do async lift on this component,
+		 * since in additional to an ordinary promise, it also helps to track the context of any running promise,
+		 * including it's name, completion time and a given ID.
+		 *
+		 * 	var widget = Widget.create({
+		 * 		"sig/task" : function(promise) {
+		 * 			print('task %s started at: %s, finished at: %s', promise.name, promise.started);
+		 * 		}
+		 * 	});
+		 *
+		 * 	widget.task(function(resolve) {
+		 * 		$(this.$element).fadeOut(resolve);
+		 * 	}, 'animate');
+		 *
+		 * @param {Function} resolver The task resolver function.
+		 * @param {Function} resolver.resolve Resolve the task.
+		 * @param {Function} resolver.reject Reject the task.
+		 * @param {Function} resolver.notify Notify the progress of this task.
 		 * @param {String} [name]
 		 * @returns {Promise}
 		 */
@@ -159,7 +247,7 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		},
 
 		/**
-		 * Generates string representation of this object
+		 * Gives string representation of this component instance.
 		 * @returns {string} displayName and instanceCount
 		 */
 		"toString" : function _toString() {

@@ -1,9 +1,45 @@
-/**
+/*
  * TroopJS core/component/gadget
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Emitter, when, hub) {
 	"use strict";
+
+	/**
+	 * Base component that provides events and subscriptions features.
+	 *
+	 * 	var one = Gadget.create({
+	 * 		"hub/kick/start": function(foo) {
+	 * 			// handle kick start
+	 * 		},
+	 *
+	 * 		"hub/piss/off": function() {
+	 * 			// handle piss off
+	 * 		},
+	 *
+	 * 		"sig/task": function() {
+	 * 			// handle "bar" task.
+	 * 		},
+	 *
+	 * 		"hub/task": function() {
+	 * 			// handle both "foo" and "bar".
+	 * 		}
+	 * 	});
+	 *
+	 * 	var other = Gadget.create();
+	 *
+	 * 	other.publish("kick/start","foo");
+	 * 	other.publish("piss/off");
+	 * 	other.task("foo", function() {
+	 * 		// some dirty lift.
+	 * 	});
+	 * 	one.task("bar", function() {
+	 * 		// some dirty lift.
+	 * 	});
+	 *
+	 * @class core.component.gadget
+	 * @extends core.event.emitter
+	 */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
@@ -28,9 +64,6 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 	}, {
 		"displayName" : "core/component/gadget",
 
-		/**
-		 * Signal handler for 'initialize'
-		 */
 		"sig/initialize" : function onInitialize() {
 			var me = this;
 			var subscription;
@@ -60,9 +93,6 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			}
 		},
 
-		/**
-		 * Signal handler for 'start'
-		 */
 		"sig/start" : function onStart() {
 			var me = this;
 			var args = arguments;
@@ -91,9 +121,6 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			return when.all(results).yield(args);
 		},
 
-		/**
-		 * Signal handler for 'finalize'
-		 */
 		"sig/finalize" : function onFinalize() {
 			var me = this;
 			var subscription;
@@ -111,7 +138,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			}
 		},
 
-		/**
+		/*
 		 * Signal handler for 'task'
 		 * @param {Promise} task
 		 * @returns {Promise}
@@ -121,11 +148,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Reemits event with forced context to this
-		 * @param {String} event to publish
-		 * @param {Boolean} senile flag
-		 * @param {...Function} callback to limit reemit to
-		 * @returns {Promise}
+		 * @inheritdoc
+		 * @localdoc Context of the callback will always be **this** object.
 		 */
 		"reemit" : function reemit(event, senile, callback) {
 			var me = this;
@@ -139,12 +163,10 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Adds callback to event with forced context to this
-		 * @param {String} event to publish
-		 * @param {...Function} callback to add
-		 * @returns {Object} instance of this
+		 * @inheritdoc
+		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"on": function on(event, callback) {
+		"on": function on(event) {
 			var me = this;
 			var args = [ event, me ];
 
@@ -156,12 +178,10 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Removes callback from event with forced context to this
-		 * @param {String} event to remove callback from
-		 * @param {...Function} callback to remove
-		 * @returns {Object} instance of this
+		 * @inheritdoc
+		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"off" : function off(event, callback) {
+		"off" : function off(event) {
 			var me = this;
 			var args = [ event, me ];
 
@@ -173,21 +193,14 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Calls hub.publish
-		 * @arg {String} event to publish
-		 * @arg {...*} arg to pass to subscribed callbacks
-		 * @returns {Promise}
+		 * @inheritdoc core.pubsub.hub#publish
 		 */
-		"publish" : function publish(event, arg) {
+		"publish" : function publish() {
 			return PUBLISH.apply(hub, arguments);
 		},
 
 		/**
-		 * Calls hub.republish
-		 * @param {String} event to publish
-		 * @param {Boolean} senile flag
-		 * @param {...Function} callback to limit republish to
-		 * @returns {Promise}
+		 * @inheritdoc core.pubsub.hub#republish
 		 */
 		"republish" : function republish(event, senile, callback) {
 			var me = this;
@@ -201,10 +214,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Calls hub.subscribe
-		 * @param {String} event to subscribe to
-		 * @param {...Function} callback to subscribe
-		 * @returns {Object} instance of this
+		 * @inheritdoc core.pubsub.hub#subscribe
+		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
 		"subscribe" : function subscribe(event, callback) {
 			var me = this;
@@ -220,10 +231,8 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * Calls hub.unsubscribe
-		 * @param {String} event to unsubscribe from
-		 * @param {...Function} callback to unsubscribe
-		 * @returns {Object} instance of this
+		 * @inheritdoc core.pubsub.hub#unsubscribe
+		 * @localdoc Unsubscribe from public events in context of this component.
 		 */
 		"unsubscribe" : function unsubscribe(event, callback) {
 			var me = this;
