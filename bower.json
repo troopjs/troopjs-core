@@ -8,6 +8,6 @@
 	"dependencies": {
 		"troopjs-utils": "develop",
 		"poly": "~0.6",
-		"when": "~2.6"
+		"when": "~2.7"
 	}
 }
