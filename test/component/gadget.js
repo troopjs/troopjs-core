@@ -2,7 +2,8 @@
 buster.testCase("troopjs-core/component/gadget", function (run) {
 	"use strict";
 
-	var assert = buster.assert;
+	var assert = buster.referee.assert;
+
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_CONCAT = ARRAY_PROTO.concat;
 	var TOPIC = "TEST";

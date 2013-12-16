@@ -2,7 +2,7 @@
 buster.testCase("troopjs-core/net/uri", function (run) {
 	"use strict";
 
-	var assert = buster.assert;
+	var assert = buster.referee.assert;
 
 	require( [ "troopjs-core/net/uri" ] , function (URI) {
 		run({

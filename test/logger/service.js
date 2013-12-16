@@ -3,7 +3,7 @@ buster.testCase("troopjs-core/logger/service", function (run) {
 	"use strict";
 
 	var ARRAY_PUSH = Array.prototype.push;
-	var assert = buster.assert;
+	var assert = buster.referee.assert;
 
 	require( [ "troopjs-core/logger/service", "troopjs-core/component/gadget", "troopjs-core/pubsub/hub" ] , function (Service, Gadget, hub) {
 		var Appender = Gadget.extend({

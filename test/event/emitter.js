@@ -2,7 +2,7 @@
 buster.testCase("troopjs-core/event/emitter", function (run) {
 	"use strict";
 
-	var assert = buster.assert;
+	var assert = buster.referee.assert;
 
 	require( [ "troopjs-core/event/emitter", "when" ] , function (Emitter, when) {
 

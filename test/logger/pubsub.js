@@ -2,12 +2,13 @@
 buster.testCase("troopjs-core/logger/pubsub", function (run) {
 	"use strict";
 
+	var assert = buster.referee.assert;
+
 	var LOGGER_LOG = "logger/log";
 	var LOGGER_WARN = "logger/warn";
 	var LOGGER_DEBUG = "logger/debug";
 	var LOGGER_INFO = "logger/info";
 	var LOGGER_ERROR = "logger/error";
-	var assert = buster.assert;
 
 	function done() {
 		assert(true);

@@ -2,7 +2,7 @@
 buster.testCase("troopjs-core/logger/console", function (run) {
 	"use strict";
 
-	var assert = buster.assert;
+	var assert = buster.referee.assert;
 
 	require( [ "troopjs-core/logger/console" ] , function (logger) {
 		run({
