@@ -234,7 +234,7 @@ define([
 	/**
 	 *
 	 * @param {Function} descriptor
-	 * @returns {Mixed}
+	 * @returns {*}
 	 */
 	around[DECORATE] = function (descriptor) {
 		descriptor[VALUE] = this[DECORATED](descriptor[VALUE] || NOOP);
@@ -365,7 +365,7 @@ define([
 					// Get value
 					value = descriptor[VALUE];
 
-					// If value is instanceof Advice, we should re-describe, otherwise just use the original desciptor
+					// If value is instanceof Advice, we should re-describe, otherwise just use the original descriptor
 					prototypeDescriptors[name] = value instanceof Decorator
 						? value[DECORATE](prototypeDescriptors[name] || {
 							"enumerable" : true,
