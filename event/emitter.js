@@ -2,7 +2,7 @@
  * TroopJS core/event/emitter
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../component/base", "when", "poly/array" ], function EventEmitterModule(Component, when) {
+define([ "../object/base", "when", "poly/array" ], function EventEmitterModule(Base, when) {
 	"use strict";
 
 	/**
@@ -33,7 +33,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 	 * after the event emitted that thus missing from the call, {@link #reemit} will compensate the call with memorized data.
 	 *
 	 * @class core.event.emitter
-	 * @extends core.component.base
+	 * @extends core.object.base
 	 */
 
 	var UNDEFINED;
@@ -144,7 +144,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		return next;
 	}
 
-	return Component.extend(function EventEmitter() {
+	return Base.extend(function EventEmitter() {
 		this[HANDLERS] = {};
 	}, {
 		"displayName" : "core/event/emitter",
@@ -153,7 +153,7 @@ define([ "../component/base", "when", "poly/array" ], function EventEmitterModul
 		 * Adds a listener for the specified event.
 		 * @param {String} event The event name to subscribe to.
 		 * @param {Object} [context] The context to scope callbacks to.
-		 * @param {Function} [callback] The event listener function.
+		 * @param {Function...} [callback] The event listener function.
 		 * @returns this
 		 */
 		"on" : function on(event, context, callback) {

@@ -2,11 +2,11 @@
  * TroopJS core/component/gadget
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Emitter, when, hub) {
+define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
 	"use strict";
 
 	/**
-	 * Base component that provides events and subscriptions features.
+	 * Component that provides signal and hub features.
 	 *
 	 * 	var one = Gadget.create({
 	 * 		"hub/kick/start": function(foo) {
@@ -38,28 +38,24 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 	 * 	});
 	 *
 	 * @class core.component.gadget
-	 * @extends core.event.emitter
+	 * @extends core.component.base
 	 */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var PUBLISH = hub.publish;
-	var REPUBLISH = hub.republish;
-	var SUBSCRIBE = hub.subscribe;
-	var UNSUBSCRIBE = hub.unsubscribe;
+	var HUB_PUBLISH = hub.publish;
+	var HUB_REPUBLISH = hub.republish;
+	var HUB_SUBSCRIBE = hub.subscribe;
+	var HUB_UNSUBSCRIBE = hub.unsubscribe;
+	var HUB_SPY = hub.spy;
 	var LENGTH = "length";
 	var FEATURES = "features";
 	var TYPE = "type";
 	var VALUE = "value";
 	var SUBSCRIPTIONS = "subscriptions";
-	var EMITTER_PROTO = Emitter.prototype;
-	var ON = EMITTER_PROTO.on;
-	var OFF = EMITTER_PROTO.off;
-	var REEMITT = EMITTER_PROTO.reemit;
-	var PEEK = EMITTER_PROTO.peek;
 
-	return Emitter.extend(function Gadget() {
+	return Component.extend(function Gadget() {
 		this[SUBSCRIPTIONS] = [];
 	}, {
 		"displayName" : "core/component/gadget",
@@ -89,7 +85,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				subscription[VALUE] = value = special[VALUE];
 
 				// Subscribe
-				SUBSCRIBE.call(hub, type, me, value);
+				HUB_SUBSCRIBE.call(hub, type, me, value);
 			}
 		},
 
@@ -114,7 +110,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				}
 
 				// Republish, store result
-				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], false, me, subscription[VALUE]);
+				results[resultsLength++] = HUB_REPUBLISH.call(hub, subscription[TYPE], false, me, subscription[VALUE]);
 			}
 
 			// Return promise that will be fulfilled when all results are, and yield args
@@ -134,7 +130,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 				subscription = subscriptions[i];
 
 				// Unsubscribe
-				UNSUBSCRIBE.call(hub, subscription[TYPE], me, subscription[VALUE]);
+				HUB_UNSUBSCRIBE.call(hub, subscription[TYPE], me, subscription[VALUE]);
 			}
 		},
 
@@ -148,55 +144,10 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 		},
 
 		/**
-		 * @inheritdoc
-		 * @localdoc Context of the callback will always be **this** object.
-		 */
-		"reemit" : function reemit(event, senile, callback) {
-			var me = this;
-			var args = [ event, senile, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
-
-			// Forward
-			return REEMITT.apply(me, args);
-		},
-
-		/**
-		 * @inheritdoc
-		 * @localdoc Context of the callback will always be **this** object.
-		 */
-		"on": function on(event) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Forward
-			return ON.apply(me, args);
-		},
-
-		/**
-		 * @inheritdoc
-		 * @localdoc Context of the callback will always be **this** object.
-		 */
-		"off" : function off(event) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Forward
-			return OFF.apply(me, args);
-		},
-
-		/**
 		 * @inheritdoc core.pubsub.hub#publish
 		 */
 		"publish" : function publish() {
-			return PUBLISH.apply(hub, arguments);
+			return HUB_PUBLISH.apply(hub, arguments);
 		},
 
 		/**
@@ -210,7 +161,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
 
 			// Republish
-			return REPUBLISH.apply(hub, args);
+			return HUB_REPUBLISH.apply(hub, args);
 		},
 
 		/**
@@ -225,7 +176,7 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Subscribe
-			SUBSCRIBE.apply(hub, args);
+			HUB_SUBSCRIBE.apply(hub, args);
 
 			return me;
 		},
@@ -242,18 +193,16 @@ define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Em
 			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Unsubscribe
-			UNSUBSCRIBE.apply(hub, args);
+			HUB_UNSUBSCRIBE.apply(hub, args);
 
 			return me;
 		},
 
 		/**
-		 * Spies on the current value in MEMORY on the hub
-		 * @param {String} event event to spy on
-		 * @returns {*} Value in MEMORY
+		 * @inheritdoc core.pubsub.hub#spy
 		 */
 		"spy" : function (event) {
-			return PEEK.call(hub, event);
+			return HUB_SPY.call(hub, event);
 		}
 	});
 });

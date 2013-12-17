@@ -4,8 +4,12 @@
  *
  * Parts of code from parseUri 1.2.2 Copyright Steven Levithan <stevenlevithan.com>
  */
-define([ "../component/factory" ], function URIModule(Factory) {
+define([ "../object/base" ], function URIModule(Base) {
 	"use strict";
+
+	/**
+	 * @extends core.object.base
+	 */
 
 	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
@@ -141,7 +145,7 @@ define([ "../component/factory" ], function URIModule(Factory) {
 		return this.join("/");
 	};
 
-	var URI = Factory(function URI(str) {
+	var URI = Base.extend(function URI(str) {
 		var me = this;
 		var value;
 		var matches;

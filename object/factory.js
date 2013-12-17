@@ -1,16 +1,16 @@
 /*
- * TroopJS core/component/factory
+ * TroopJS core/object/factory
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 define([
 	"module",
 	"troopjs-utils/unique",
 	"poly/object"
-], function ComponentFactoryModule(module, unique) {
+], function ObjectFactoryModule(module, unique) {
 	"use strict";
 
 	/**
-	 * The factory module establishes the fundamental object composing in TroopJS:
+	 * The factory module establishes the fundamental object composition in TroopJS:
 	 *
 	 *  - **First-class mixin** based on prototype, that supports deterministic multiple inheritance that:
 	 *  	- Eliminating the frustrating issues from multi-tiered, single-rooted ancestry;
@@ -78,7 +78,7 @@ define([
 	 *  		instance.somethingElse();
 	 *  		instance.evenMore();
 	 *
-	 * @class core.component.factory
+	 * @class core.object.factory
 	 */
 
 	var PROTOTYPE = "prototype";
@@ -112,10 +112,10 @@ define([
 	var factoryDescriptors = {};
 
 	/**
-	 * Sub classing from this component, and to instantiate it immediately.
-	 * @member core.component.factory
+	 * Sub classing from this object, and to instantiate it immediately.
+	 * @member core.object.factory
 	 * @static
-	 * @inheritdoc core.component.factory#Factory
+	 * @inheritdoc core.object.factory#Factory
 	 * @returns {Object} Instance of this class.
 	 */
 	function create() {
@@ -124,10 +124,10 @@ define([
 	}
 
 	/**
-	 * Sub classing from this component.
-	 * @member core.component.factory
+	 * Sub classing from this object.
+	 * @member core.object.factory
 	 * @static
-	 * @inheritdoc core.component.factory#Factory
+	 * @inheritdoc core.object.factory#Factory
 	 * @returns {Function} The extended subclass.
 	 */
 	function extend() {
@@ -140,7 +140,7 @@ define([
 	/**
 	 * Creates new Decorator
 	 * @private
-	 * @class core.component.factory.Decorator
+	 * @class core.object.factory.Decorator
 	 * @param {Function} decorated Original function
 	 * @param {Function} decorate Function to re-write descriptor
 	 */
@@ -165,10 +165,10 @@ define([
 	 * Create a decorator function property to override the original one from prototype, that runs before
 	 * the start of the former.
 	 *
-	 * @member core.component.factory
+	 * @member core.object.factory
 	 * @static
 	 * @param {Function} decorated The decorator function which receives the same arguments as with the original.
-	 * @returns {core.component.factory.Decorator}
+	 * @returns {core.object.factory.Decorator}
 	 */
 	function before(decorated) {
 		return new Decorator(decorated, before[DECORATE]);
@@ -193,10 +193,10 @@ define([
 	 * Create a decorator function property to override the original one from prototype, that runs after
 	 * the completion of the former.
 	 *
-	 * @member core.component.factory
+	 * @member core.object.factory
 	 * @static
 	 * @param {Function} decorated The decorator function which receives the return value from the original.
-	 * @returns {core.component.factory.Decorator}
+	 * @returns {core.object.factory.Decorator}
 	 */
 	function after(decorated) {
 		return new Decorator(decorated, after[DECORATE]);
@@ -222,10 +222,10 @@ define([
 	 * Create a decorator function property to override the original one from prototype, that get passed the original
 	 * function, eventually reach the maximum flexibility on execution flow.
 	 *
-	 * @member core.component.factory
+	 * @member core.object.factory
 	 * @static
 	 * @param {Function} decorated The decorator function which receives the original function as parameter.
-	 * @returns {core.component.factory.Decorator}
+	 * @returns {core.object.factory.Decorator}
 	 */
 	function around(decorated) {
 		return new Decorator(decorated, around[DECORATE]);
@@ -244,7 +244,7 @@ define([
 
 	/*
 	 * Returns a string representation of this constructor
-	 * @member core.component.factory
+	 * @member core.object.factory
 	 * @static
 	 * @returns {String}
 	 */
@@ -260,7 +260,7 @@ define([
 
 	/**
 	 * The class composer function.
-	 * @member core.component.factory
+	 * @member core.object.factory
 	 * @method Factory
 	 * @constructor
 	 * @param {Function...} constructor(s) One or more function(s) to be called upon.

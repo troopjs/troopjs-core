@@ -50,6 +50,11 @@ define([ "../event/emitter" ], function HubModule(Emitter) {
 		 */
 		"republish" : COMPONENT_PROTOTYPE.reemit,
 
+		/**
+		 * Spy on the current value stored for a topic
+		 * @inheritdoc #peek
+		 * @method
+		 */
 		"spy" : COMPONENT_PROTOTYPE.peek
 	});
 });

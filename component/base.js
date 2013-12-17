@@ -2,7 +2,7 @@
  * TroopJS core/component/base
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(Factory, when, merge) {
+define([ "../event/emitter", "when", "troopjs-utils/merge" ], function ComponentModule(Emitter, when, merge) {
 	"use strict";
 
 	/**
@@ -46,12 +46,12 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	 * 	  app.end();
 	 * 	});
 	 * @class core.component.base
+	 * @extends core.event.emitter
 	 */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
-	var INSTANCE_COUNT = "instanceCount";
 	var CONFIGURATION = "configuration";
 	var CONTEXT = "context";
 	var NAME = "name";
@@ -62,20 +62,15 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 	var INITIALIZE = "initialize";
 	var STOP = "stop";
 	var SIG = "sig";
-	var INSTANCE_COUNTER = 0;
+	var EMITTER_PROTO = Emitter.prototype;
+	var EMITTER_ON = EMITTER_PROTO.on;
+	var EMITTER_OFF = EMITTER_PROTO.off;
+	var EMITTER_REEMITT = EMITTER_PROTO.reemit;
 
-	return Factory(
-	function Component() {
-		var me = this;
-
-		// Update instance count
-		me[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
-
+	return Emitter.extend(function Component() {
 		// Set configuration
-		me[CONFIGURATION] = {};
+		this[CONFIGURATION] = {};
 	}, {
-		"instanceCount" : INSTANCE_COUNTER,
-
 		"displayName" : "core/component/base",
 
 		/**
@@ -115,6 +110,51 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 		 */
 		"configure" : function configure() {
 			return merge.apply(this[CONFIGURATION], arguments);
+		},
+
+		/**
+		 * @inheritdoc
+		 * @localdoc Context of the callback will always be **this** object.
+		 */
+		"reemit" : function reemit(event, senile, callback) {
+			var me = this;
+			var args = [ event, senile, me ];
+
+			// Add args
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
+
+			// Forward
+			return EMITTER_REEMITT.apply(me, args);
+		},
+
+		/**
+		 * @inheritdoc
+		 * @localdoc Context of the callback will always be **this** object.
+		 */
+		"on": function on(event) {
+			var me = this;
+			var args = [ event, me ];
+
+			// Add args
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
+
+			// Forward
+			return EMITTER_ON.apply(me, args);
+		},
+
+		/**
+		 * @inheritdoc
+		 * @localdoc Context of the callback will always be **this** object.
+		 */
+		"off" : function off(event) {
+			var me = this;
+			var args = [ event, me ];
+
+			// Add args
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
+
+			// Forward
+			return EMITTER_OFF.apply(me, args);
 		},
 
 		/**
@@ -244,16 +284,6 @@ define([ "./factory", "when", "troopjs-utils/merge" ], function ComponentModule(
 			promise[NAME] = name;
 
 			return me.signal("task", promise).yield(promise);
-		},
-
-		/**
-		 * Gives string representation of this component instance.
-		 * @returns {string} displayName and instanceCount
-		 */
-		"toString" : function _toString() {
-			var me = this;
-
-			return me.displayName + "@" + me[INSTANCE_COUNT];
 		}
 	});
 });
