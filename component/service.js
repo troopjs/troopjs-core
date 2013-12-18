@@ -14,7 +14,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 	return Gadget.extend({
 		"displayName" : "core/component/service",
 
-		"sig/initialize" : function onStart() {
+		"sig/initialize" : function onInitialize() {
 			var me = this;
 
 			return me.publish("registry/add", me);
