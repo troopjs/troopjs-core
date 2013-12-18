@@ -48,7 +48,7 @@ define([ "../object/base", "when", "poly/array" ], function EventEmitterModule(B
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
 	var PHASE = "phase";
-	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
+	var RE_HINT = /^(.+)(?::(pipeline|sequence))/;
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var ARRAY_SLICE = Array.prototype.slice;
 
@@ -87,8 +87,10 @@ define([ "../object/base", "when", "poly/array" ], function EventEmitterModule(B
 			// Iterate until we find a handler in a blocked phase
 			while ((handler = handlers[handlersCount++])	// Has next handler
 				&& (context = handler[CONTEXT])				// Has context
-				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
+				&& (false));
+//				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
 
+			console.info(handler, context && [ context, context[PHASE], RE_PHASE.test(context[PHASE]) ]);
 			// Return promise of next callback, or a promise resolved with result
 			return handler
 				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
