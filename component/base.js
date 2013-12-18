@@ -2,7 +2,12 @@
  * TroopJS core/component/base
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter", "when", "troopjs-utils/merge" ], function ComponentModule(Emitter, when, merge) {
+define([
+	"../event/emitter",
+	"when",
+	"troopjs-utils/merge",
+	"poly/array"
+], function ComponentModule(Emitter, when, merge) {
 	"use strict";
 
 	/**
@@ -42,17 +47,19 @@ define([ "../event/emitter", "when", "troopjs-utils/merge" ], function Component
 	 * 		app.start();
 	 * 	});
 	 *
-	 * 	$(window).unload(function on_unload (argument) {
+	 * 	$(window).unload(function on_unload (argument) {\
 	 * 	  app.end();
 	 * 	});
 	 * @class core.component.base
 	 * @extends core.event.emitter
 	 */
 
+	var UNDEFINED;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var CONFIGURATION = "configuration";
+	var LENGTH = "length";
 	var CONTEXT = "context";
 	var NAME = "name";
 	var VALUE = "value";
@@ -62,14 +69,33 @@ define([ "../event/emitter", "when", "troopjs-utils/merge" ], function Component
 	var INITIALIZE = "initialize";
 	var STOP = "stop";
 	var SIG = "sig";
+	var ON = "on";
 	var EMITTER_PROTO = Emitter.prototype;
 	var EMITTER_ON = EMITTER_PROTO.on;
 	var EMITTER_OFF = EMITTER_PROTO.off;
+	var EMITTER_EMIT = EMITTER_PROTO.emit;
 	var EMITTER_REEMITT = EMITTER_PROTO.reemit;
 
 	return Emitter.extend(function Component() {
+		var me = this;
+
 		// Set configuration
-		this[CONFIGURATION] = {};
+		me[CONFIGURATION] = {};
+
+		var specials = me.constructor.specials;
+		var events = ARRAY_PROTO.concat(specials[SIG], specials[ON]);
+		var event;
+		var i;
+		var iMax;
+
+		for (i = 0, iMax = events[LENGTH]; i < iMax; i++) {
+			if ((event = events[i]) === UNDEFINED) {
+				continue;
+			}
+
+			EMITTER_ON.call(me, event[NAME], me, event[VALUE]);
+		}
+
 	}, {
 		"displayName" : "core/component/base",
 
@@ -162,30 +188,15 @@ define([ "../event/emitter", "when", "troopjs-utils/merge" ], function Component
 		 * @param _signal {String} Signal
 		 * @return {Promise}
 		 */
-		"signal" : function onSignal(_signal) {
-			var me = this;
-			var args = ARRAY_SLICE.call(arguments, 1);
-			var specials = me.constructor.specials;
-			var signals = (SIG in specials && specials[SIG][_signal]) || [];
-			var signal;
-			var index = 0;
-			var result = [];
-			var resultLength = -2;
+		"signal": function (_signal) {
+			// Get arguments
+			var args = ARRAY_SLICE.call(arguments);
 
-			function next(_args) {
-				// Add result if resultLength is within bounds
-				if (++resultLength > -1) {
-					result[resultLength] = _args;
-				}
+			// Modify first argument
+			args[0] = "sig/" + _signal + ":sequence";
 
-				// Return a chained promise of next callback, or a promise resolved with _signal
-				return (signal = signals[index++])
-					? when(signal[VALUE].apply(me, args), next)
-					: when.resolve(result);
-			}
-
-			// Return promise
-			return next(args);
+			// Emit
+			return EMITTER_EMIT.apply(this, args).then(console.log);
 		},
 
 		/**
