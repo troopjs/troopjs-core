@@ -59,21 +59,15 @@ define([
 	var ARRAY_SLICE = Array.prototype.slice;
 
 	return Base.extend(function EventEmitter() {
-		var me = this;
-
-		// Start with no handlers
-		me[HANDLERS] = {};
-
-		// Configure runners
-		var runners = me[RUNNERS] = {
-			"pipeline": pipeline,
-			"sequence": sequence
-		};
-
-		// Set DEFAULT runner
-		runners[DEFAULT] = pipeline;
+		this[HANDLERS] = {};
 	}, {
 		"displayName" : "core/event/emitter",
+
+		"runners" : {
+			"pipeline": pipeline,
+			"sequence": sequence,
+			"default": pipeline
+		},
 
 		/**
 		 * Adds a listener for the specified event.
