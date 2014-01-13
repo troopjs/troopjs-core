@@ -193,7 +193,7 @@ define([
 			var args = ARRAY_SLICE.call(arguments);
 
 			// Modify first argument
-			args[0] = "sig/" + _signal + ":sequence";
+			args[0] = "sig/" + _signal;
 
 			// Emit
 			return EMITTER_EMIT.apply(this, args);
