@@ -4,8 +4,8 @@
  */
 define([
 	"../object/base",
-	"./pipeline",
-	"./sequence",
+	"./runner/pipeline",
+	"./runner/sequence",
 	"when",
 	"poly/array"
 ], function EventEmitterModule(Base, pipeline, sequence, when) {
