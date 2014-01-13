@@ -4,11 +4,10 @@
  */
 define([
 	"../object/base",
-	"./runner/pipeline",
 	"./runner/sequence",
 	"when",
 	"poly/array"
-], function EventEmitterModule(Base, pipeline, sequence, when) {
+], function EventEmitterModule(Base, sequence, when) {
 	"use strict";
 
 	/**
@@ -64,9 +63,8 @@ define([
 		"displayName" : "core/event/emitter",
 
 		"runners" : {
-			"pipeline": pipeline,
 			"sequence": sequence,
-			"default": pipeline
+			"default": sequence
 		},
 
 		/**
