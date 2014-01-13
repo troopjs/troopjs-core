@@ -36,14 +36,9 @@ define([ "when" ], function (when) {
 				result[resultCount] = args;
 			}
 
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++])	// Has next handler
-				&& (context = handler[CONTEXT])				// Has context
-				&& (false));
-
 			// Return promise of next callback, or a promise resolved with result
-			return handler
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
+			return (handler = handlers[handlersCount++])
+				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
 				: when.resolve(result);
 		};
 
