@@ -159,7 +159,7 @@ define([
 		 *
 		 * @param {String} event The event that the listener subscribes to.
 		 * @param {Object} [context] The context that bind to the listener.
-		 * @param {Function...} [listener] One more more callback listeners to remove.
+		 * @param {Function...} [callback] One more more callback listeners to remove.
 		 * @returns this
 		 */
 		"off" : function off(event, context, callback) {
