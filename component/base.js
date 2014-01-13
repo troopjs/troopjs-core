@@ -196,7 +196,7 @@ define([
 			args[0] = "sig/" + _signal + ":sequence";
 
 			// Emit
-			return EMITTER_EMIT.apply(this, args).then(console.log);
+			return EMITTER_EMIT.apply(this, args);
 		},
 
 		/**
