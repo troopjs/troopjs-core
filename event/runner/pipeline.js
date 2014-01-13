@@ -1,7 +1,5 @@
 define([ "when" ], function (when) {
 	var UNDEFINED;
-	var PHASE = "phase";
-	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
@@ -42,7 +40,7 @@ define([ "when" ], function (when) {
 			// Iterate until we find a handler in a blocked phase
 			while ((handler = handlers[handlersCount++])	// Has next handler
 				&& (context = handler[CONTEXT])				// Has context
-				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
+				&& (false));
 
 			// Return promise of next callback,or promise resolved with result
 			return handler
