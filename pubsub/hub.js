@@ -2,7 +2,11 @@
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter" ], function HubModule(Emitter) {
+define([
+	"../event/emitter",
+	"./runner/pipeline",
+	"./runner/sequence"
+], function HubModule(Emitter, pipeline, sequence) {
 	"use strict";
 
 	/**
@@ -21,6 +25,12 @@ define([ "../event/emitter" ], function HubModule(Emitter) {
 
 	return Emitter.create({
 		"displayName": "core/pubsub/hub",
+
+		"runners" : {
+			"pipeline": pipeline,
+			"sequence": sequence,
+			"default": pipeline
+		},
 
 		/**
 		 * Listen to an event that are emitted publicly.
