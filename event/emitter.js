@@ -2,7 +2,13 @@
  * TroopJS core/event/emitter
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../object/base", "when", "poly/array" ], function EventEmitterModule(Base, when) {
+define([
+	"../object/base",
+	"./pipeline",
+	"./sequence",
+	"when",
+	"poly/array"
+], function EventEmitterModule(Base, pipeline, sequence, when) {
 	"use strict";
 
 	/**
@@ -47,104 +53,8 @@ define([ "../object/base", "when", "poly/array" ], function EventEmitterModule(B
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var PHASE = "phase";
 	var RE_HINT = /^(.+)(?::(pipeline|sequence))/;
-	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var ARRAY_SLICE = Array.prototype.slice;
-
-	/*
-	 * Constructs a function that executes handlers in sequence without overlap
-	 * @private
-	 * @param {Array} handlers Array of handlers
-	 * @param {Number} handled Handled counter
-	 * @param {Array} [result=[]] Result array
-	 * @returns {Function}
-	 */
-	function sequence(handlers, handled, result) {
-		// Default value for result
-		result = result || [];
-
-		var handlersCount = 0;
-		var resultLength = result[LENGTH];
-		var resultCount = resultLength - 1;
-
-		/*
-		 * Internal function for sequential execution of handlers handlers
-		 * @private
-		 * @param {Array} [args] result from previous handler callback
-		 * @return {Promise} promise of next handler callback execution
-		 */
-		var next = function (args) {
-			/*jshint curly:false*/
-			var context;
-			var handler;
-
-			// Store result
-			if (resultCount++ >= resultLength) {
-				result[resultCount] = args;
-			}
-
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++])	// Has next handler
-				&& (context = handler[CONTEXT])				// Has context
-				&& (false));
-//				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
-
-			console.info(handler, context && [ context, context[PHASE], RE_PHASE.test(context[PHASE]) ]);
-			// Return promise of next callback, or a promise resolved with result
-			return handler
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
-				: when.resolve(result);
-		};
-
-		return next;
-	}
-
-	/*
-	 * Constructs a function that executes handlers in a pipeline without overlap
-	 * @private
-	 * @param {Array} handlers Array of handlers
-	 * @param {Number} handled Handled counter
-	 * @param {Object} [anchor={}] Object for saving MEMORY on
-	 * @returns {Function}
-	 */
-	function pipeline(handlers, handled, anchor) {
-		// Default value for anchor
-		anchor = anchor || {};
-
-		var handlersCount = 0;
-		var result;
-
-		/*
-		 * Internal function for piped execution of handlers handlers
-		 * @private
-		 * @param {Array} [args] result from previous handler callback
-		 * @return {Promise} promise of next handler callback execution
-		 */
-		var next = function (args) {
-			/*jshint curly:false*/
-			var context;
-			var handler;
-
-			// Check that we have args
-			if (args !== UNDEFINED) {
-				// Update memory and result
-				anchor[MEMORY] = result = args;
-			}
-
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++])	// Has next handler
-				&& (context = handler[CONTEXT])				// Has context
-				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
-
-			// Return promise of next callback,or promise resolved with result
-			return handler
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, result), next)
-				: when.resolve(result);
-		};
-
-		return next;
-	}
 
 	return Base.extend(function EventEmitter() {
 		this[HANDLERS] = {};
