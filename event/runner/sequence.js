@@ -1,6 +1,4 @@
 define([ "when" ], function (when) {
-	var PHASE = "phase";
-	var RE_PHASE = /^(?:initi|fin)alized?$/;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var LENGTH = "length";
@@ -42,9 +40,7 @@ define([ "when" ], function (when) {
 			while ((handler = handlers[handlersCount++])	// Has next handler
 				&& (context = handler[CONTEXT])				// Has context
 				&& (false));
-//				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
 
-			console.info(handler, context && [ context, context[PHASE], RE_PHASE.test(context[PHASE]) ]);
 			// Return promise of next callback, or a promise resolved with result
 			return handler
 				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
