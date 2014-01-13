@@ -44,6 +44,7 @@ define([
 
 	var UNDEFINED;
 	var NULL = null;
+	var DEFAULT = "default";
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
@@ -53,11 +54,24 @@ define([
 	var NEXT = "next";
 	var HANDLED = "handled";
 	var HANDLERS = "handlers";
-	var RE_HINT = /^(.+)(?::(pipeline|sequence))/;
+	var RUNNERS = "runners";
+	var RE_RUNNER = /^(.+)(?::(\w+))/;
 	var ARRAY_SLICE = Array.prototype.slice;
 
 	return Base.extend(function EventEmitter() {
-		this[HANDLERS] = {};
+		var me = this;
+
+		// Start with no handlers
+		me[HANDLERS] = {};
+
+		// Configure runners
+		var runners = me[RUNNERS] = {
+			"pipeline": pipeline,
+			"sequence": sequence
+		};
+
+		// Set DEFAULT runner
+		runners[DEFAULT] = pipeline;
 	}, {
 		"displayName" : "core/event/emitter",
 
@@ -259,15 +273,19 @@ define([
 			var args = ARRAY_SLICE.call(arguments, 1);
 			var handlers = me[HANDLERS];
 			var handler;
+			var runners = me[RUNNERS];
+			var runner = runners[DEFAULT];
 			var candidates;
 			var candidatesCount;
 			var matches;
-			var method;
 
-			// See if we should override event and method
-			if ((matches = RE_HINT.exec(event)) !== NULL) {
+			// See if we should override event and runner
+			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
 				event = matches[1];
-				method = matches[2];
+
+				if ((runner = runners[matches[2]]) === UNDEFINED) {
+					throw new Error("unknown runner " + matches[2]);
+				}
 			}
 
 			// Have event in handlers
@@ -293,9 +311,7 @@ define([
 					while ((handler = handler[NEXT]));
 
 					// Return promise
-					return (method === "sequence")
-						? sequence(candidates, ++handlers[HANDLED])(args)
-						: pipeline(candidates, ++handlers[HANDLED], handlers)(args);
+					return runner(candidates, ++handlers[HANDLED], handlers)(args);
 				}
 			}
 			// No event in handlers
@@ -350,17 +366,21 @@ define([
 			var handlers = me[HANDLERS];
 			var handler;
 			var handled;
+			var runners = me[RUNNERS];
+			var runner = runners[DEFAULT];
 			var candidates;
 			var candidatesCount;
 			var matches;
-			var method;
 			var offset;
 			var found;
 
-			// See if we should override event and method
-			if ((matches = RE_HINT.exec(event)) !== NULL) {
+			// See if we should override event and runner
+			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
 				event = matches[1];
-				method = matches[2];
+
+				if ((runner = runners[matches[2]]) === UNDEFINED) {
+					throw new Error("unknown runner " + matches[2]);
+				}
 			}
 
 			// Have event in handlers
@@ -415,9 +435,7 @@ define([
 					while ((handler = handler[NEXT]));
 
 					// Return promise
-					return (method === "sequence")
-						? sequence(candidates, handled)(handlers[MEMORY])
-						: pipeline(candidates, handled)(handlers[MEMORY]);
+					return runner(candidates, handled)(handlers[MEMORY]);
 				}
 			}
 
