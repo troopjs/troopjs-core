@@ -66,21 +66,24 @@ define([
 	 */
 	function sequence(handlers, handled, args) {
 		var results = [];
-		var resultsCount = -1;
+		var resultsCount = 0;
 		var handlersCount = 0;
 
 		/*
 		 * Internal function for sequential execution of handlers handlers
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
+		 * @param {Boolean} [skip] flag indicating if this result should be skipped
 		 * @return {Promise} promise of next handler callback execution
 		 */
-		var next = function (result) {
+		var next = function (result, skip) {
 			/*jshint curly:false*/
 			var handler;
 
-			// Store result
-			results[resultsCount++] = result;
+			// Store result if no skip
+			if (skip !== true) {
+				results[resultsCount++] = result;
+			}
 
 			// Return promise of next callback, or a promise resolved with result
 			return (handler = handlers[handlersCount++]) !== UNDEFINED
@@ -88,7 +91,7 @@ define([
 				: when.resolve(results);
 		};
 
-		return next(args);
+		return next(args, true);
 	}
 
 	return Base.extend(function EventEmitter() {

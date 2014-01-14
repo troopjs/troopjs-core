@@ -15,22 +15,25 @@ define([ "when" ], function (when) {
 	 */
 	return function (handlers, handled, args) {
 		var results = [];
-		var resultsCount = -1;
+		var resultsCount = 0;
 		var handlersCount = 0;
 
 		/*
 		 * Internal function for sequential execution of handlers handlers
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
+		 * @param {Boolean} [skip] flag indicating if this result should be skipped
 		 * @return {Promise} promise of next handler callback execution
 		 */
-		var next = function (result) {
+		var next = function (result, skip) {
 			/*jshint curly:false*/
 			var handler;
 			var context;
 
-			// Store result
-			results[resultsCount++] = result;
+			// Store result if no skip
+			if (skip !== true) {
+				results[resultsCount++] = result;
+			}
 
 			// TODO Needs cleaner implementation
 			// Iterate handlers while handler has a context and that context is in a blocked phase
@@ -44,6 +47,6 @@ define([ "when" ], function (when) {
 				: when.resolve(results);
 		};
 
-		return next(args);
+		return next(args, true);
 	};
 });
