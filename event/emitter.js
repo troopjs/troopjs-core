@@ -303,7 +303,7 @@ define([
 					while ((handler = handler[NEXT]));
 
 					// Return promise
-					return runner(candidates, ++handlers[HANDLED], handlers)(args);
+					return runner.call(handlers, candidates, ++handlers[HANDLED], args)(args);
 				}
 			}
 			// No event in handlers
@@ -427,7 +427,7 @@ define([
 					while ((handler = handler[NEXT]));
 
 					// Return promise
-					return runner(candidates, handled)(handlers[MEMORY]);
+					return runner.call(handlers, candidates, handled, handlers[MEMORY])(handlers[MEMORY]);
 				}
 			}
 
