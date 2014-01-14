@@ -62,6 +62,7 @@ define([
 	var LENGTH = "length";
 	var CONTEXT = "context";
 	var NAME = "name";
+	var TYPE = "type";
 	var VALUE = "value";
 	var PHASE = "phase";
 	var STARTED = "started";
@@ -93,7 +94,9 @@ define([
 				continue;
 			}
 
-			EMITTER_ON.call(me, event[NAME], me, event[VALUE]);
+			// As an exception, declarative event handler defined with "on/foo" will be translated
+			// to emitter.on("foo", handler).
+			EMITTER_ON.call(me, event.group === ON ? event[TYPE] : event[NAME], me, event[VALUE]);
 		}
 
 	}, {
