@@ -69,7 +69,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					assert.same(arg, "one");
 				});
 
-				emitter2.on("two", context, function(arg){
+				emitter2.on("two", context, function(arg) {
 					assert.same(arg, 2);
 				});
 
@@ -98,26 +98,33 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 			"on/emit async subscribers": function(done) {
 				var emitter = Emitter();
 				var context = this;
-				var start = new Date().getTime();
 
-				this.timeout = 1000;
+				this.timeout = 1500;
 
 				emitter
-					.on("one", context, function (started) {
-						assert.equals(started, start);
-
+					.on("one", context, function () {
+						return new Date().getTime();
+					})
+					.on("one", context, function () {
 						return when.promise(function (resolve) {
 							setTimeout(function () {
-								resolve([ started, new Date().getTime() ]);
+								resolve(new Date().getTime());
 							}, 500);
 						});
 					})
-					.on("one", context, function (started, first) {
-						assert.equals(start, started);
-						assert.greater(first, started);
-						assert.near(first - started, 500, 10);
+					.on("one", context, function () {
+						return when.promise(function (resolve) {
+							setTimeout(function () {
+								resolve(new Date().getTime());
+							}, 500);
+						});
 					})
-					.emit("one", start).then(done);
+					.emit("one")
+					.spread(function (first, second, third) {
+						assert.near(second - first, 500, 10);
+						assert.near(third - second, 500, 10);
+					})
+					.then(done);
 			},
 
 			"off/emit": function(done) {
