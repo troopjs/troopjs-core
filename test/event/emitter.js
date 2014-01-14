@@ -104,8 +104,8 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					})
 					.emit("one")
 					.spread(function (first, second, third) {
-						assert.near(second - first, 500, 10);
-						assert.near(third - second, 500, 10);
+						assert.near(second - first, 500, 15);
+						assert.near(third - second, 500, 15);
 					})
 					.then(done);
 			},
