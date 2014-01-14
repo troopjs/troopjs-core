@@ -100,6 +100,7 @@ define([
 		"displayName" : "core/event/emitter",
 
 		"runners" : {
+			"sequence": sequence,
 			"default": sequence
 		},
 
