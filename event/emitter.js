@@ -4,10 +4,9 @@
  */
 define([
 	"../object/base",
-	"./runner/sequence",
 	"when",
 	"poly/array"
-], function EventEmitterModule(Base, sequence, when) {
+], function EventEmitterModule(Base, when) {
 	"use strict";
 
 	/**
@@ -57,13 +56,47 @@ define([
 	var RE_RUNNER = /^(.+)(?::(\w+))/;
 	var ARRAY_SLICE = Array.prototype.slice;
 
+	/*
+	 * Internal runner that executes handlers in sequence without overlap
+	 * @private
+	 * @param {Array} handlers Array of handlers
+	 * @param {Number} handled Handled counter
+	 * @param {Array} args Initial arguments
+	 * @returns {Function}
+	 */
+	function sequence(handlers, handled, args) {
+		var results = [];
+		var resultsCount = -1;
+		var handlersCount = 0;
+
+		/*
+		 * Internal function for sequential execution of handlers handlers
+		 * @private
+		 * @param {Array} [result] result from previous handler callback
+		 * @return {Promise} promise of next handler callback execution
+		 */
+		var next = function (result) {
+			/*jshint curly:false*/
+			var handler;
+
+			// Store result
+			results[resultsCount++] = result;
+
+			// Return promise of next callback, or a promise resolved with result
+			return (handler = handlers[handlersCount++]) !== UNDEFINED
+				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
+				: when.resolve(results);
+		};
+
+		return next(args);
+	}
+
 	return Base.extend(function EventEmitter() {
 		this[HANDLERS] = {};
 	}, {
 		"displayName" : "core/event/emitter",
 
 		"runners" : {
-			"sequence": sequence,
 			"default": sequence
 		},
 
@@ -303,7 +336,7 @@ define([
 					while ((handler = handler[NEXT]));
 
 					// Return promise
-					return runner.call(handlers, candidates, ++handlers[HANDLED], args)(args);
+					return runner.call(handlers, candidates, ++handlers[HANDLED], args);
 				}
 			}
 			// No event in handlers
@@ -427,7 +460,7 @@ define([
 					while ((handler = handler[NEXT]));
 
 					// Return promise
-					return runner.call(handlers, candidates, handled, handlers[MEMORY])(handlers[MEMORY]);
+					return runner.call(handlers, candidates, handled, handlers[MEMORY]);
 				}
 			}
 
