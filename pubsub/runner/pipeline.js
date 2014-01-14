@@ -47,6 +47,6 @@ define([ "when" ], function (when) {
 				: when.resolve(args);
 		};
 
-		return next;
+		return next(args);
 	}
 });
