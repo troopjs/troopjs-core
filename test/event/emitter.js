@@ -83,29 +83,31 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var context = this;
 
 				this.timeout = 1500;
+				var count = 0;
 
 				emitter
 					.on("one", context, function () {
-						return new Date().getTime();
+						return ++count;
 					})
 					.on("one", context, function () {
 						return when.promise(function (resolve) {
 							setTimeout(function () {
-								resolve(new Date().getTime());
+								resolve(++count);
 							}, 500);
 						});
 					})
 					.on("one", context, function () {
 						return when.promise(function (resolve) {
 							setTimeout(function () {
-								resolve(new Date().getTime());
+								resolve(++count);
 							}, 500);
 						});
 					})
 					.emit("one")
 					.spread(function (first, second, third) {
-						assert.near(second - first, 500, 15);
-						assert.near(third - second, 500, 15);
+						assert.same(first, 1);
+						assert.same(second, 2);
+						assert.same(third, 3);
 					})
 					.then(done);
 			},
