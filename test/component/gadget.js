@@ -225,6 +225,35 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 					g1.emit.apply(g1, APPLY_ARGS);
 					return when(1);
 				}
+			},
+
+			"publish/subscribe - context matches *this* ": function (done) {
+
+				var count = 0;
+				var g1 = Gadget.create({
+					'hub/foo': function () {
+						count++;
+						assert.same(g1, this);
+					}
+				});
+
+				var g2 = Gadget.create({
+					'hub/foo': function () {
+						count++;
+						assert.same(g2, this);
+					}
+				});
+
+				var g3 = Gadget.create({});
+
+				g1.start().then(function () {
+					g2.start().then(function () {
+						g3.publish('foo').then(function () {
+							assert.same(2, count);
+							done();
+						});
+					})
+				});
 			}
 		});
 	});
