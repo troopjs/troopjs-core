@@ -55,6 +55,28 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 					})
 					.publish("foo/bar", foo)
 					.then(done);
+			},
+
+			"subscribe/publish - using explicit sequence runner": function (done) {
+				var context = this;
+				var foo = "FOO", bar = "BAR", count = 0;
+				hub
+					.subscribe("test", context, function (arg) {
+						assert.same(foo, arg);
+						count++;
+						return [foo, bar];
+					})
+					.subscribe("test", context, function (arg1, arg2) {
+						// Arguments received are to be same as the previous one.
+						assert.same(foo, arg1);
+						refute.defined(arg2);
+						count++;
+					})
+					.publish("test:sequence", foo)
+					.then(function () {
+						assert.same(2, count);
+						done();
+					});
 			}
 		});
 	});
