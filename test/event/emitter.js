@@ -78,6 +78,23 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				});
 			},
 
+			"on/emit single handler shares two context": function(done) {
+				var emitter = Emitter();
+				var count = 0;
+				var ctx1 = {}, ctx2 = {}, handler = function() {
+					// Assertion of different context.
+					assert.same(++count === 1? ctx1 : ctx2, this);
+				};
+
+				emitter.on("one", ctx1, handler);
+				emitter.on("one", ctx2, handler);
+
+				emitter.emit("one").then(function () {
+					assert.same(2, count);
+					done();
+				});
+			},
+
 			"on/emit async subscribers": function(done) {
 				var emitter = Emitter();
 				var context = this;
