@@ -176,6 +176,25 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 							})
 							.ensure(done);
 					});
+			},
+
+			"on/emit - event name indicates pipeline runner": function (done) {
+				var emitter = Emitter();
+				var context = this;
+
+				var foo = "FOO", bar = "BAR";
+
+				emitter
+					.on("test", context, function (arg) {
+						assert.same(foo, arg);
+						return [foo, bar];
+					})
+					.on("test", context, function (arg1, arg2) {
+						assert.same(foo, arg1);
+						assert.same(bar, arg2);
+					})
+					.emit("test::pipeline", foo)
+					.then(done);
 			}
 		});
 	});
