@@ -4,7 +4,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 	var assert = buster.referee.assert;
 
-	require( [ "troopjs-core/event/emitter", "when" ] , function (Emitter, when) {
+	require( [ "troopjs-core/event/emitter", "when", "when/delay" ] , function (Emitter, when, delay) {
 
 		run({
 			"on/emit" : function (done) {
@@ -90,18 +90,10 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 						return ++count;
 					})
 					.on("one", context, function () {
-						return when.promise(function (resolve) {
-							setTimeout(function () {
-								resolve(++count);
-							}, 500);
-						});
+						return delay(++count, 500);	// Backwards, but needs to be as both params are numbers
 					})
 					.on("one", context, function () {
-						return when.promise(function (resolve) {
-							setTimeout(function () {
-								resolve(++count);
-							}, 500);
-						});
+						return delay(++count, 500);	// Backwards, but needs to be as both params are numbers
 					})
 					.emit("one")
 					.spread(function (first, second, third) {
