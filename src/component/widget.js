@@ -112,12 +112,14 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 		if ($element === UNDEFINED) {
 			throw new Error("No $element provided");
 		}
-		else if (!($element.jquery)) {
+		else if (!$element.jquery) {
 			// From a plain dom node.
-			if ($element.nodeType)
+			if ($element.nodeType) {
 				$element = $($element);
-			else
+			}
+			else {
 				throw new Error('Unsupported widget element');
+			}
 		}
 		// From another jquery instance.
 		else if ($element.get !== $.fn.get) {
