@@ -105,6 +105,7 @@ define([
 	var FEATURES = "features";
 	var TYPE = "type";
 	var NAME = "name";
+	var KEYS = "keys";
 	var RE_SPECIAL = /^(\w+)(?::(.+?))?\/([-_./\d\w\s]+)$/;
 	var NOOP = function noop () {};
 	var PRAGMAS = module.config().pragmas || [];
@@ -284,7 +285,9 @@ define([
 		var j;
 		var k;
 		var pragma;
+		var groups = specials[KEYS] = [];
 		var group;
+		var types;
 		var type;
 		var matches;
 		var value;
@@ -399,12 +402,17 @@ define([
 			// Get or create group object
 			group = group in specials
 				? specials[group]
-				: specials[group] = [];
+				: specials[groups[groups[LENGTH]] = group] = [];
+
+			// Get or create types object
+			types = KEYS in group
+				? group[KEYS]
+				: group[KEYS] = [];
 
 			// Get or create type object
 			type = type in group
 				? group[type]
-				: group[type] = specials[name] = [];
+				: group[types[types[LENGTH]] = type] = specials[name] = [];
 
 			// Store special in group/type
 			group[group[LENGTH]] = type[type[LENGTH]] = special;
