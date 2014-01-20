@@ -16,6 +16,7 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 	var $ONE = $.fn.one;
 	var $BIND = $.fn.bind;
 	var $UNBIND = $.fn.unbind;
+	var $GET = $.fn.get;
 	var RE = /^dom(?::(\w+))?\/([^\.]+(?:\.(.+))?)/;
 	var REFRESH = "widget/refresh";
 	var $ELEMENT = "$element";
@@ -108,6 +109,26 @@ define([ "./gadget", "jquery", "troopjs-utils/deferred" ], function WidgetModule
 
 	return Gadget.extend(function Widget($element, displayName) {
 		var self = this;
+		var $get;
+
+		// No $element
+		if ($element === UNDEFINED) {
+			throw new Error("No $element provided");
+		}
+		// Is _not_ a jQuery element
+		else if (!$element.jquery) {
+			// From a plain dom node.
+			if ($element.nodeType) {
+				$element = $($element);
+			}
+			else {
+				throw new Error("Unsupported widget element");
+			}
+		}
+		// From a different jQuery instance.
+		else if (($get = $element.get) !== $GET) {
+			$element = $($get.call($element, 0));
+		}
 
 		self[$ELEMENT] = $element;
 
