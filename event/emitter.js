@@ -320,13 +320,11 @@ define([
 		 * @param {String} event The event name to re-emit, dismiss if it's the first time to emit this event.
 		 * @param {Boolean} senile=false Whether to trigger listeners that are already handled in previous emitting.
 		 * @param {Object} [context] The context object to match.
-		 * @param {Function...} [callback] One or more listener functions to match.
-		 * @returns this
+		 * @param {Function} [callback] The listener function to match.
+		 * @returns {Promise}
 		 */
 		"reemit" : function reemit(event, senile, context, callback) {
 			var me = this;
-			var args = arguments;
-			var argsLength = args[LENGTH];
 			var handlers = me[HANDLERS];
 			var handler;
 			var handled;
@@ -335,8 +333,6 @@ define([
 			var candidates = [];
 			var candidatesCount = 0;
 			var matches;
-			var offset;
-			var found;
 
 			// See if we should override event and runner
 			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
@@ -367,17 +363,13 @@ define([
 								break add;
 							}
 
-							// Reset found and offset, iterate args
-							for (found = false, offset = 3; offset < argsLength; offset++) {
-								// If callback matches set found and break
-								if (handler[CALLBACK] === args[offset]) {
-									found = true;
-									break;
-								}
+							// If no callback or callback does not match we should break
+							if (callback && handler[CALLBACK] && handler[CALLBACK] !== callback) {
+								break add;
 							}
 
-							// If we found a callback and are already handled and not senile break add
-							if (found && handler[HANDLED] === handled && !senile) {
+							// If we are already handled and not senile break add
+							if (handler[HANDLED] === handled && !senile) {
 								break add;
 							}
 
