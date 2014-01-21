@@ -23,7 +23,7 @@ define([
 	 * A fired event will memorize the "current" value of each event. Each executor may have it's own interpretation
 	 * of what "current" means.
 	 *
-	 * For listeners that are registered after the event emitted that thus missing from the call, {@link #reemit} will
+	 * For listeners that are registered after the event emitted thus missing from the call, {@link #reemit} will
 	 * compensate the call with memorized data.
 	 *
 	 * @class core.event.emitter
@@ -158,8 +158,8 @@ define([
 		 * remove all listeners of this event.
 		 *
 		 * @param {String} event The event that the listener subscribes to.
-		 * @param {Object} context The context that bind to the listener.
-		 * @param {Function} callback The event listener to remove.
+		 * @param {Object} [context] The context that bind to the listener.
+		 * @param {Function} [callback] The event listener to remove.
 		 * @returns this
 		 */
 		"off" : function off(event, context, callback) {
@@ -169,65 +169,61 @@ define([
 			var head;
 			var tail;
 
-			// Return fast if we don't have subscribers
-			if (!(event in handlers)) {
-				return me;
-			}
+			// Have handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
 
-			// Get handlers
-			handlers = handlers[event];
+				// Have HEAD in handlers
+				if (HEAD in handlers) {
+					// Get first handler
+					handler = handlers[HEAD];
 
-			// Return fast if there's no HEAD
-			if (!(HEAD in handlers)) {
-				return me;
-			}
+					// Iterate handlers
+					do {
+						// Should we remove?
+						remove : {
+							// If no context or context does not match we should break
+							if (context && handler[CONTEXT] !== context) {
+								break remove;
+							}
 
-			// Get first handler
-			handler = handlers[HEAD];
+							// If no callback or callback does not match we should break
+							if (callback && handler[CALLBACK] !== callback) {
+								break remove;
+							}
 
-			// Iterate handlers
-			do {
-				// Should we remove?
-				remove : {
-					// If no context or context does not match we should break
-					if (context && handler[CONTEXT] !== context) {
-						break remove;
+							// Remove this handler, just continue
+							continue;
+						}
+
+						// It there's no head - link head -> tail -> handler
+						if (!head) {
+							head = tail = handler;
+						}
+						// Otherwise just link tail -> tail[NEXT] -> handler
+						else {
+							tail = tail[NEXT] = handler;
+						}
 					}
+						// While there's a next handler
+					while ((handler = handler[NEXT]));
 
-					// If no callback or callback does not match we should break
-					if (callback && handler[CALLBACK] !== callback) {
-						break remove;
+					// If we have both head and tail we should update handlers
+					if (head && tail) {
+						// Set handlers HEAD and TAIL
+						handlers[HEAD] = head;
+						handlers[TAIL] = tail;
+
+						// Make sure to remove NEXT from tail
+						delete tail[NEXT];
 					}
-
-					// Remove this handler, just continue
-					continue;
+					// Otherwise we remove the handlers list
+					else {
+						delete handlers[HEAD];
+						delete handlers[TAIL];
+					}
 				}
-
-				// It there's no head - link head -> tail -> handler
-				if (!head) {
-					head = tail = handler;
-				}
-				// Otherwise just link tail -> tail[NEXT] -> handler
-				else {
-					tail = tail[NEXT] = handler;
-				}
-			}
-			// While there's a next handler
-			while ((handler = handler[NEXT]));
-
-			// If we have both head and tail we should update handlers
-			if (head && tail) {
-				// Set handlers HEAD and TAIL
-				handlers[HEAD] = head;
-				handlers[TAIL] = tail;
-
-				// Make sure to remove NEXT from tail
-				delete tail[NEXT];
-			}
-			// Otherwise we remove the handlers list
-			else {
-				delete handlers[HEAD];
-				delete handlers[TAIL];
 			}
 
 			return me;
@@ -268,7 +264,7 @@ define([
 				// Get handlers
 				handlers = handlers[event];
 
-				// Have head in handlers
+				// Have HEAD in handlers
 				if (HEAD in handlers) {
 					// Get first handler
 					handler = handlers[HEAD];
