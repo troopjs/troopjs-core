@@ -258,8 +258,8 @@ define([
 			var handler;
 			var runners = me[RUNNERS];
 			var runner = runners[DEFAULT];
-			var candidates;
-			var candidatesCount;
+			var candidates = [];
+			var candidatesCount = 0;
 			var matches;
 
 			// See if we should override event and runner
@@ -278,10 +278,6 @@ define([
 
 				// Have head in handlers
 				if (HEAD in handlers) {
-					// Create candidates array and count
-					candidates = [];
-					candidatesCount = 0;
-
 					// Get first handler
 					handler = handlers[HEAD];
 
@@ -292,9 +288,6 @@ define([
 					}
 					// While there is a next handler
 					while ((handler = handler[NEXT]));
-
-					// Return promise
-					return runner.call(handlers, candidates, ++handlers[HANDLED], args);
 				}
 			}
 			// No event in handlers
@@ -306,11 +299,8 @@ define([
 				handlers[HANDLED] = 0;
 			}
 
-			// Remember arg
-			handlers[MEMORY] = args;
-
-			// Return promise resolved with arg
-			return when.resolve(args);
+			// Return promise
+			return runner.call(handlers, candidates, ++handlers[HANDLED], args);
 		},
 
 		/**
