@@ -44,20 +44,24 @@ define([
 	var ARRAY_SLICE = Array.prototype.slice;
 
 	/*
-	 * Internal runner that executes handlers in sequence without overlap
+	 * Internal runner that executes candidates in sequence without overlap
 	 * @private
-	 * @param {Array} handlers Array of handlers
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} candidates Array of candidates
 	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
-	 * @returns {Function}
+	 * @returns {Promise}
 	 */
-	function sequence(handlers, handled, args) {
+	function sequence(handlers, candidates, handled, args) {
 		var results = [];
 		var resultsCount = 0;
-		var handlersCount = 0;
+		var candidatesCount = 0;
+
+		// Store args on MEMORY
+		handlers[MEMORY] = args;
 
 		/*
-		 * Internal function for sequential execution of handlers handlers
+		 * Internal function for sequential execution of candidates
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
 		 * @param {Boolean} [skip] flag indicating if this result should be skipped
@@ -65,7 +69,7 @@ define([
 		 */
 		var next = function (result, skip) {
 			/*jshint curly:false*/
-			var handler;
+			var candidate;
 
 			// Store result if no skip
 			if (skip !== true) {
@@ -73,8 +77,8 @@ define([
 			}
 
 			// Return promise of next callback, or a promise resolved with result
-			return (handler = handlers[handlersCount++]) !== UNDEFINED
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(handler[CONTEXT], args), next)
+			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
+				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
 				: when.resolve(results);
 		};
 
@@ -287,7 +291,7 @@ define([
 			}
 
 			// Return promise
-			return runner.call(handlers, candidates, ++handlers[HANDLED], args);
+			return runner.call(me, handlers, candidates, ++handlers[HANDLED], args);
 		},
 
 		/**

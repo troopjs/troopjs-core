@@ -28,18 +28,23 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 
 	/*
 	 * Constructs a function that executes handlers in sequence without overlap
-	 * @param {Array} handlers Array of handlers
+	 * @private
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} candidates Array of candidates
 	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
-	 * @returns {Function}
+	 * @returns {Promise}
 	 */
-	function sequence(handlers, handled, args) {
+	function sequence(handlers, candidates, handled, args) {
 		var results = [];
 		var resultsCount = 0;
-		var handlersCount = 0;
+		var candidatesCount = 0;
+
+		// Store args on MEMORY
+		handlers[MEMORY] = args;
 
 		/*
-		 * Internal function for sequential execution of handlers handlers
+		 * Internal function for sequential execution of candidates candidates
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
 		 * @param {Boolean} [skip] flag indicating if this result should be skipped
@@ -47,7 +52,7 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 		 */
 		var next = function (result, skip) {
 			/*jshint curly:false*/
-			var handler;
+			var candidate;
 			var context;
 
 			// Store result if no skip
@@ -56,14 +61,14 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 			}
 
 			// TODO Needs cleaner implementation
-			// Iterate handlers while handler has a context and that context is in a blocked phase
-			while ((handler = handlers[handlersCount++]) // Has next handler
-				&& (context = handler[CONTEXT])            // Has context
-				&& RE_PHASE.test(context[PHASE]));         // In blocked phase
+			// Iterate candidates while candidate has a context and that context is in a blocked phase
+			while ((candidate = candidates[candidatesCount++]) // Has next candidate
+				&& (context = candidate[CONTEXT])                // Has context
+				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
 
 			// Return promise of next callback, or a promise resolved with result
-			return handler !== UNDEFINED
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
+			return candidate !== UNDEFINED
+				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
 				: when.resolve(results);
 		};
 
@@ -73,17 +78,17 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 	/*
 	 * Constructs a function that executes handlers in a pipeline without overlap
 	 * @private
-	 * @param {Array} handlers Array of handlers
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} candidates Array of candidates
 	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
-	 * @returns {Function}
+	 * @returns {Promise}
 	 */
-	function pipeline(handlers, handled, args) {
-		var me = this;
-		var handlersCount = 0;
+	function pipeline(handlers, candidates, handled, args) {
+		var candidatesCount = 0;
 
 		/*
-		 * Internal function for piped execution of handlers handlers
+		 * Internal function for piped execution of candidates candidates
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
 		 * @return {Promise} promise of next handler callback execution
@@ -91,23 +96,23 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 		var next = function (result) {
 			/*jshint curly:false*/
 			var context;
-			var handler;
+			var candidate;
 
 			// Check that we have result
 			if (result !== UNDEFINED) {
 				// Update memory and args
-				me[MEMORY] = args = result;
+				handlers[MEMORY] = args = result;
 			}
 
 			// TODO Needs cleaner implementation
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++]) // Has next handler
-				&& (context = handler[CONTEXT])            // Has context
-				&& RE_PHASE.test(context[PHASE]));         // In blocked phase
+			// Iterate until we find a candidate in a blocked phase
+			while ((candidate = candidates[candidatesCount++]) // Has next candidate
+				&& (context = candidate[CONTEXT])                // Has context
+				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
 
 			// Return promise of next callback, or promise resolved with args
-			return handler !== UNDEFINED
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
+			return candidate !== UNDEFINED
+				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
 				: when.resolve(args);
 		};
 
