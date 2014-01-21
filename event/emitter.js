@@ -319,8 +319,8 @@ define([
 		 *
 		 * @param {String} event The event name to re-emit, dismiss if it's the first time to emit this event.
 		 * @param {Boolean} senile=false Whether to trigger listeners that are already handled in previous emitting.
-		 * @param {Object} [context] The context object to scope this re-emitting.
-		 * @param {Function...} [callback] One or more specific listeners that should be affected in the re-emitting.
+		 * @param {Object} [context] The context object to match.
+		 * @param {Function...} [callback] One or more listener functions to match.
 		 * @returns this
 		 */
 		"reemit" : function reemit(event, senile, context, callback) {
@@ -332,8 +332,8 @@ define([
 			var handled;
 			var runners = me[RUNNERS];
 			var runner = runners[DEFAULT];
-			var candidates;
-			var candidatesCount;
+			var candidates = [];
+			var candidatesCount = 0;
 			var matches;
 			var offset;
 			var found;
@@ -352,22 +352,12 @@ define([
 				// Get handlers
 				handlers = handlers[event];
 
-				// Have memory in handlers
-				if (MEMORY in handlers) {
-					// If we have no HEAD we can return a promise resolved with memory
-					if (!(HEAD in handlers)) {
-						return when.resolve(handlers[MEMORY]);
-					}
+				// Get handled
+				handled = handlers[HANDLED];
 
-					// Create candidates array and count
-					candidates = [];
-					candidatesCount = 0;
-
-					// Get first handler
+				if (HEAD in handlers) {
+						// Get first handler
 					handler = handlers[HEAD];
-
-					// Get handled
-					handled = handlers[HANDLED];
 
 					// Iterate handlers
 					do {
@@ -395,16 +385,21 @@ define([
 							candidates[candidatesCount++] = handler;
 						}
 					}
-					// While there's a next handler
+						// While there's a next handler
 					while ((handler = handler[NEXT]));
-
-					// Return promise
-					return runner.call(handlers, candidates, handled, handlers[MEMORY]);
 				}
 			}
+			// No event in handlers
+			else {
+				// Create handlers and store with event
+				handlers[event] = handlers = {};
 
-			// Return resolved promise
-			return when.resolve();
+				// Set handled
+				handlers[HANDLED] = handled = 0;
+			}
+
+			// Return promise
+			return runner.call(me, handlers, candidates, handled, handlers[MEMORY]);
 		},
 
 		/**
