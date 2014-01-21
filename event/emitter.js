@@ -19,19 +19,6 @@ define([
 	 *  upon the completion of this promise.
 	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
 	 *
-	 * ## Mutable event data
-	 * Additional event data can be passed to listeners when calling @{link #emit}, which can be further altered by the
-	 * returning value of the handler, depending on **event type** we're emitting:
-	 *
-	 *  - **foo[:pipleline]** (default) In a piplelined event, handler shall return **an array** of params, that is the input for the next handler.
-	 *  - **foo:sequence**  In a sequential event, handler shall return **a single** param, that is appended to a list of params, that forms
-	 *  the input for the next handler.
-	 *
-	 *  On the caller side, the return value of the {@link #emit} or {@link #reemit} call also depends on the event type described above:
-	 *
-	 *  - **foo[:pipleline]** (default) In a piplelined event, it will be **one value** that is the return value from the last handler.
-	 *  - **foo:sequence**  In a sequential event, it will be **an array** that accumulated the return value from all of the handlers.
-	 *
 	 * ## Memorized emitting
 	 * A fired event will memorize the event data yields from the last handler, for listeners that are registered
 	 * after the event emitted that thus missing from the call, {@link #reemit} will compensate the call with memorized data.
