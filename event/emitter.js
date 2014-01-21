@@ -36,7 +36,6 @@ define([
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var LENGTH = "length";
 	var HEAD = "head";
 	var TAIL = "tail";
 	var NEXT = "next";
@@ -239,12 +238,11 @@ define([
 		 * optionally pass data values to the listeners.
 		 *
 		 * @param {String} event The event name to emit
-		 * @param {Mixed...} [args] Data params that are passed to the listener function.
+		 * @param {...*} [args] Data params that are passed to the listener function.
 		 * @returns {Promise} promise Promise of the return values yield from the listeners at all.
 		 */
-		"emit" : function emit(event) {
+		"emit" : function emit(event, args) {
 			var me = this;
-			var args = ARRAY_SLICE.call(arguments, 1);
 			var handlers = me[HANDLERS];
 			var handler;
 			var runners = me[RUNNERS];
@@ -252,6 +250,9 @@ define([
 			var candidates = [];
 			var candidatesCount = 0;
 			var matches;
+
+			// Slice args
+			args = ARRAY_SLICE.call(arguments, 1);
 
 			// See if we should override event and runner
 			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
