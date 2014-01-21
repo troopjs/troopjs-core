@@ -40,9 +40,6 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 		var resultsCount = 0;
 		var candidatesCount = 0;
 
-		// Store args on MEMORY
-		handlers[MEMORY] = args;
-
 		/*
 		 * Internal function for sequential execution of candidates candidates
 		 * @private
@@ -69,7 +66,7 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 			// Return promise of next callback, or a promise resolved with result
 			return candidate !== UNDEFINED
 				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
-				: when.resolve(results);
+				: (handlers[MEMORY] = args) === args && when.resolve(results);
 		};
 
 		return next(args, true);

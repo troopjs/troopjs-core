@@ -20,8 +20,11 @@ define([
 	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
 	 *
 	 * ## Memorized emitting
-	 * A fired event will memorize the event data yields from the last handler, for listeners that are registered
-	 * after the event emitted that thus missing from the call, {@link #reemit} will compensate the call with memorized data.
+	 * A fired event will memorize the "current" value of each event. Each executor may have it's own interpretation
+	 * of what "current" means.
+	 *
+	 * For listeners that are registered after the event emitted that thus missing from the call, {@link #reemit} will
+	 * compensate the call with memorized data.
 	 *
 	 * @class core.event.emitter
 	 * @extends core.object.base
@@ -57,9 +60,6 @@ define([
 		var resultsCount = 0;
 		var candidatesCount = 0;
 
-		// Store args on MEMORY
-		handlers[MEMORY] = args;
-
 		/*
 		 * Internal function for sequential execution of candidates
 		 * @private
@@ -79,7 +79,7 @@ define([
 			// Return promise of next callback, or a promise resolved with result
 			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
 				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
-				: when.resolve(results);
+				: (handlers[MEMORY] = args) === args && when.resolve(results);
 		};
 
 		return next(args, true);
