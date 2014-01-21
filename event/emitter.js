@@ -107,21 +107,17 @@ define([
 		/**
 		 * Adds a listener for the specified event.
 		 * @param {String} event The event name to subscribe to.
-		 * @param {Object} [context] The context to scope callbacks to.
-		 * @param {Function...} [callback] The event listener function.
+		 * @param {Object} context The context to scope callbacks to.
+		 * @param {Function} callback The event listener function.
 		 * @returns this
 		 */
 		"on" : function on(event, context, callback) {
 			var me = this;
-			var args = arguments;
 			var handlers = me[HANDLERS];
 			var handler;
-			var head;
-			var tail;
-			var offset = 2;
 
 			// Get callback from next arg
-			if ((callback = args[offset++]) === UNDEFINED) {
+			if (callback === UNDEFINED) {
 				throw new Error("no callback provided");
 			}
 
@@ -139,58 +135,29 @@ define([
 				// Set handler context
 				handler[CONTEXT] = context;
 
-				// Get tail handler
-				tail = TAIL in handlers
+				// Set tail handler
+				handlers[TAIL] = TAIL in handlers
 					// Have tail, update handlers[TAIL][NEXT] to point to handler
 					? handlers[TAIL][NEXT] = handler
 					// Have no tail, update handlers[HEAD] to point to handler
 					: handlers[HEAD] = handler;
-
-				// Iterate callbacks
-				while ((callback = args[offset++]) !== UNDEFINED) {
-					// Set tail -> tail[NEXT] -> handler
-					tail = tail[NEXT] = handler = {};
-
-					// Set handler callback
-					handler[CALLBACK] = callback;
-
-					// Set handler context
-					handler[CONTEXT] = context;
-				}
-
-				// Set tail handler
-				handlers[TAIL] = tail;
 			}
 			// No handlers
 			else {
+				// Create event handlers
+				handlers = handlers[event] = {};
+
+				// Set HANDLED
+				handlers[HANDLED] = 0;
+
 				// Create head and tail
-				head = tail = handler = {};
+				handlers[HEAD] = handlers[TAIL] = handler = {};
 
 				// Set handler callback
 				handler[CALLBACK] = callback;
 
 				// Set handler context
 				handler[CONTEXT] = context;
-
-				// Iterate callbacks
-				while ((callback = args[offset++]) !== UNDEFINED) {
-					// Set tail -> tail[NEXT] -> handler
-					tail = tail[NEXT] = handler = {};
-
-					// Set handler callback
-					handler[CALLBACK] = callback;
-
-					// Set handler context
-					handler[CONTEXT] = context;
-				}
-
-				// Create event handlers
-				handlers = handlers[event] = {};
-
-				// Initialize event handlers
-				handlers[HEAD] = head;
-				handlers[TAIL] = tail;
-				handlers[HANDLED] = 0;
 			}
 
 			return me;
