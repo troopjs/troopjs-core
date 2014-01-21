@@ -190,12 +190,12 @@ define([
 				// Should we remove?
 				remove : {
 					// If no context or context does not match we should break
-					if (context && handler[CONTEXT] && handler[CONTEXT] !== context) {
+					if (context && handler[CONTEXT] !== context) {
 						break remove;
 					}
 
 					// If no callback or callback does not match we should break
-					if (callback && handler[CALLBACK] && handler[CALLBACK] !== callback) {
+					if (callback && handler[CALLBACK] !== callback) {
 						break remove;
 					}
 
@@ -360,12 +360,12 @@ define([
 					do {
 						add : {
 							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] && handler[CONTEXT] !== context) {
+							if (context && handler[CONTEXT] !== context) {
 								break add;
 							}
 
 							// If no callback or callback does not match we should break
-							if (callback && handler[CALLBACK] && handler[CALLBACK] !== callback) {
+							if (callback && handler[CALLBACK] !== callback) {
 								break add;
 							}
 
