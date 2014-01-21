@@ -100,8 +100,8 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 
 			// Check that we have result
 			if (result !== UNDEFINED) {
-				// Update memory and args
-				handlers[MEMORY] = args = result;
+				// Update args
+				args = result;
 			}
 
 			// TODO Needs cleaner implementation
@@ -113,7 +113,7 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 			// Return promise of next callback, or promise resolved with args
 			return candidate !== UNDEFINED
 				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
-				: when.resolve(args);
+				: when.resolve(handlers[MEMORY] = args);
 		};
 
 		return next(args);
