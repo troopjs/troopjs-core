@@ -168,20 +168,16 @@ define([
 		 * remove all listeners of this event.
 		 *
 		 * @param {String} event The event that the listener subscribes to.
-		 * @param {Object} [context] The context that bind to the listener.
-		 * @param {Function...} [callback] One more more callback listeners to remove.
+		 * @param {Object} context The context that bind to the listener.
+		 * @param {Function} callback The event listener to remove.
 		 * @returns this
 		 */
 		"off" : function off(event, context, callback) {
 			var me = this;
-			var args = arguments;
-			var argsLength = args[LENGTH];
 			var handlers = me[HANDLERS];
 			var handler;
 			var head;
 			var tail;
-			var offset;
-			var found;
 
 			// Return fast if we don't have subscribers
 			if (!(event in handlers)) {
@@ -208,17 +204,8 @@ define([
 						break remove;
 					}
 
-					// Reset offset, then loop callbacks
-					for (found = false, offset = 2; offset < argsLength; offset++) {
-						// If handler CALLBACK matches update found and break
-						if (handler[CALLBACK] === args[offset]) {
-							found = true;
-							break;
-						}
-					}
-
-					// If nothing is found break
-					if (!found) {
+					// If no callback or callback does not match we should break
+					if (callback && handler[CALLBACK] && handler[CALLBACK] !== callback) {
 						break remove;
 					}
 
