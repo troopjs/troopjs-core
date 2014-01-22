@@ -315,12 +315,12 @@ define([
 		 * 	});
 		 *
 		 * @param {String} event The event name to re-emit, dismiss if it's the first time to emit this event.
-		 * @param {Boolean} senile=false Whether to trigger listeners that are already handled in previous emitting.
 		 * @param {Object} [context] The context object to match.
 		 * @param {Function} [callback] The listener function to match.
+		 * @param {Boolean} [senile=false] Whether to trigger listeners that are already handled in previous emitting.
 		 * @returns {Promise}
 		 */
-		"reemit" : function reemit(event, senile, context, callback) {
+		"reemit" : function reemit(event, context, callback, senile) {
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
