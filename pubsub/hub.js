@@ -2,7 +2,7 @@
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter", "../event/config", "when" ], function HubModule(Emitter, config, when) {
+define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ], function HubModule(Emitter, config, merge, when) {
 	"use strict";
 
 	/**
@@ -133,12 +133,6 @@ define([ "../event/emitter", "../event/config", "when" ], function HubModule(Emi
 	return Emitter.create({
 		"displayName": "core/pubsub/hub",
 
-		"runners" : {
-			"pipeline": pipeline,
-			"sequence": sequence,
-			"default": pipeline
-		},
-
 		/**
 		 * Listen to an event that are emitted publicly.
 		 * @inheritdoc #on
@@ -261,5 +255,15 @@ define([ "../event/emitter", "../event/config", "when" ], function HubModule(Emi
 
 			return result;
 		}
-	});
+	}, (function(runners) {
+		var result = {};
+
+		result[RUNNERS] = merge.call({}, runners, {
+			"pipeline": pipeline,
+			"sequence": sequence,
+			"default": pipeline
+		});
+
+		return result;
+	})(COMPONENT_PROTOTYPE[RUNNERS]));
 });
