@@ -36,6 +36,7 @@ define([
 	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
+	var DATA = "data";
 	var HEAD = "head";
 	var TAIL = "tail";
 	var NEXT = "next";
@@ -99,9 +100,10 @@ define([
 		 * @param {String} event The event name to subscribe to.
 		 * @param {Object} context The context to scope callbacks to.
 		 * @param {Function} callback The event listener function.
+		 * @param {*} [data] Handler data
 		 * @returns this
 		 */
-		"on" : function on(event, context, callback) {
+		"on" : function on(event, context, callback, data) {
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
@@ -119,11 +121,10 @@ define([
 				// Create new handler
 				handler = {};
 
-				// Set handler callback
+				// Prepare handler
 				handler[CALLBACK] = callback;
-
-				// Set handler context
 				handler[CONTEXT] = context;
+				handler[DATA] = data;
 
 				// Set tail handler
 				handlers[TAIL] = TAIL in handlers
@@ -143,11 +144,10 @@ define([
 				// Create head and tail
 				handlers[HEAD] = handlers[TAIL] = handler = {};
 
-				// Set handler callback
+				// Prepare handler
 				handler[CALLBACK] = callback;
-
-				// Set handler context
 				handler[CONTEXT] = context;
+				handler[DATA] = data;
 			}
 
 			return me;
