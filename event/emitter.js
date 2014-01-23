@@ -82,6 +82,12 @@ define([
 	}, {
 		"displayName" : "core/event/emitter",
 
+		/**
+		 * List of event handler runners that execute the event handlers when calling the {@link #emit} method.
+		 *
+		 * - sequence (default)
+		 * @property runners
+		 */
 		"runners" : {
 			"sequence": sequence,
 			"default": sequence
@@ -90,7 +96,7 @@ define([
 		/**
 		 * Adds a listener for the specified event.
 		 * @param {String} event The event name to subscribe to.
-		 * @param {Object} context The context to scope callbacks to.
+		 * @param {Object} context The context to scope the {@param callback} to.
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
 		 * @returns this
@@ -150,8 +156,8 @@ define([
 		 * remove all listeners of this event.
 		 *
 		 * @param {String} event The event that the listener subscribes to.
-		 * @param {Object} [context] The context that bind to the listener.
-		 * @param {Function} [callback] The event listener to remove.
+		 * @param {Object} context The context to scope the {@param callback} to remove.
+		 * @param {Function} callback The event listener function to remove.
 		 * @returns this
 		 */
 		"off" : function off(event, context, callback) {
@@ -224,6 +230,14 @@ define([
 		/**
 		 * Trigger an event which notifies each of the listeners in sequence of their subscribing,
 		 * optionally pass data values to the listeners.
+		 *
+		 * ## Emit runners
+		 * {@link core.event.emitter#runners} defines runners that determinate how the handler functions are to be executed,
+		 * which can be overridden by sub classes which could define it's own preference for handlers execution.
+		 *
+		 *  A sequential runner, is the default runner for this module, in which all handlers are running
+		 *  with the same argument data specified by the {@link #emit} function.
+		 *  Each handler will wait for the completion for the previous one if it returns a promise.
 		 *
 		 * @param {String} event The event name to emit
 		 * @param {...*} [args] Data params that are passed to the listener function.

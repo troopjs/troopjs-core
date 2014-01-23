@@ -134,6 +134,19 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 		"displayName": "core/pubsub/hub",
 
 		/**
+		 * List of event handler runners that execute the subscribers when calling the {@link #publish} method.
+		 *
+		 * - pipeline (default)
+		 * - sequence
+		 * @property runners
+		 */
+		"runners" : {
+			"pipeline": pipeline,
+			"sequence": sequence,
+			"default": pipeline
+		},
+
+		/**
 		 * Listen to an event that are emitted publicly.
 		 * @inheritdoc #on
 		 * @method
@@ -149,6 +162,15 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 
 		/**
 		 * Emit a public event that can be subscribed by other components.
+		 *
+		 * The hub implements two runners for its handlers execution, the **sequential** is basically inherited from the
+		 * emitter parent. Additionally it's using a pipelined runner by default, in which each handler will receive muted
+		 * data params depending on the return value of the previous handler:
+		 *
+		 *   - The original data params from {@link #publish} if this's the first handler, or the previous handler returns `undefined`.
+		 *   - One value as the single argument if the previous handler return a non-array.
+		 *   - Each argument value deconstructed from the returning array of the previous handler.
+		 *
 		 * @inheritdoc #emit
 		 * @method
 		 */
@@ -159,7 +181,7 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 		 * from the previous event publishing procedure.
 		 *
 		 * @param {String} event The event name to re-publish, dismiss if it's the first time to publish this event.
-		 * @param {Object} [context] The context object to match.
+		 * @param {Object} [context] The context to scope the {@param callback} to match.
 		 * @param {Function} [callback] The listener function to match.
 		 * @param {Boolean} [senile=false] Whether to trigger listeners that are already handled in previous publishing.
 		 * @returns {Promise}
