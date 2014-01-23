@@ -2,7 +2,7 @@
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
+define([ "../event/emitter", "../event/config", "when" ], function HubModule(Emitter, config, when) {
 	"use strict";
 
 	/**
@@ -27,18 +27,18 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 	var UNDEFINED;
 	var NULL = null;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
-	var DEFAULT = "default";
-	var HEAD = "head";
-	var NEXT = "next";
-	var HANDLERS = "handlers";
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
-	var HANDLED = "handled";
 	var MEMORY = "memory";
 	var PHASE = "phase";
-	var RUNNERS = "runners";
+	var HEAD = config["head"];
+	var NEXT = config["next"];
+	var CONTEXT = config["context"];
+	var CALLBACK = config["callback"];
+	var HANDLED = config["handled"];
+	var HANDLERS = config["handlers"];
+	var RUNNERS = config["runners"];
+	var DEFAULT = config["default"];
+	var RE_RUNNER = config["re_runner"];
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
-	var RE_RUNNER = /^(.+)(?::(\w+))/;
 
 	/*
 	 * Internal runner that executes candidates in sequence without overlap

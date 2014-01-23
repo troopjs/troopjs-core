@@ -4,9 +4,10 @@
  */
 define([
 	"../object/base",
+	"./config",
 	"when",
 	"poly/array"
-], function EventEmitterModule(Base, when) {
+], function EventEmitterModule(Base, config, when) {
 	"use strict";
 
 	/**
@@ -25,18 +26,18 @@ define([
 
 	var UNDEFINED;
 	var NULL = null;
-	var DEFAULT = "default";
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
-	var DATA = "data";
-	var HEAD = "head";
-	var TAIL = "tail";
-	var NEXT = "next";
-	var HANDLED = "handled";
-	var HANDLERS = "handlers";
-	var RUNNERS = "runners";
-	var RE_RUNNER = /^(.+)(?::(\w+))/;
 	var ARRAY_SLICE = Array.prototype.slice;
+	var HANDLERS = config["handlers"];
+	var RUNNERS = config["runners"];
+	var RE_RUNNER = config["re_runner"];
+	var CONTEXT = config["context"];
+	var CALLBACK = config["callback"];
+	var DATA = config["data"];
+	var HEAD = config["head"];
+	var TAIL = config["tail"];
+	var NEXT = config["next"];
+	var HANDLED = config["handled"];
+	var DEFAULT = config["default"];
 
 	/*
 	 * Internal runner that executes candidates in sequence without overlap
