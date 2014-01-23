@@ -5,8 +5,7 @@
 define([
 	"../object/base",
 	"./config",
-	"when",
-	"poly/array"
+	"when"
 ], function EventEmitterModule(Base, config, when) {
 	"use strict";
 
