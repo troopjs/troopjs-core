@@ -103,7 +103,7 @@ define([
 		"displayName" : "core/component/base",
 
 		/**
-		 * Add to the component configurations, possibly {@link Object#merge merge} with the existing ones.
+		 * Add to the component configurations, possibly {@link utils.merge merge} with the existing ones.
 		 *
 		 * 		var List = Component.extend({
 		 * 			"sig/start": function start() {

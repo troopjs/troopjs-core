@@ -6,6 +6,10 @@ define([ "./factory" ], function ObjectBase(Factory) {
 	var INSTANCE_COUNTER = 0;
 	var INSTANCE_COUNT = "instanceCount";
 
+	/**
+	 * Base object with instance count.
+	 * @class core.object.base
+	 */
 	return Factory(function ObjectBase() {
 		// Update instance count
 		this[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
