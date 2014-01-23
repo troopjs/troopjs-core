@@ -48,7 +48,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var HUB_REPUBLISH = hub.republish;
 	var HUB_SUBSCRIBE = hub.subscribe;
 	var HUB_UNSUBSCRIBE = hub.unsubscribe;
-	var HUB_SPY = hub.spy;
+	var HUB_PEEK = hub.peek;
 	var LENGTH = "length";
 	var FEATURES = "features";
 	var TYPE = "type";
@@ -199,10 +199,10 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		},
 
 		/**
-		 * @inheritdoc core.pubsub.hub#spy
+		 * @inheritdoc core.pubsub.hub#peek
 		 */
-		"spy" : function (event) {
-			return HUB_SPY.call(hub, event);
+		"peek" : function (event) {
+			return HUB_PEEK.peek(hub, event);
 		}
 	});
 });
