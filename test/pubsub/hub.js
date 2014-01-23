@@ -77,6 +77,25 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						assert.same(2, count);
 						done();
 					});
+			},
+
+			"republish": function(done) {
+				var context = this;
+				var count = 0;
+
+				hub
+					.subscribe("republish", context, function(message){
+						assert.equals(message, "republish");
+						count++;
+					})
+					.publish("republish", "republish")
+					.then(function () {
+						hub
+							.republish("republish", context, function(message) {
+								assert.equals(message, "republish");
+							})
+							.then(done);
+					});
 			}
 		});
 	});

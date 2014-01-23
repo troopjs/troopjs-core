@@ -213,26 +213,6 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					});
 			},
 
-			"on/reemit": function(done) {
-				var emitter = Emitter();
-				var context = this;
-				var count = 0;
-				
-				emitter
-					.on("test", context, function(message){
-						assert.equals(message, "test");
-						count++;
-					})
-					.emit("test", "test")
-					.then(function () {
-						emitter
-							.reemit("test", context, function(message) {
-								assert.equals(message, "test");
-							})
-							.then(done);
-					});
-			},
-
 			"on/emit reject": function (done) {
 				var emitter = Emitter();
 				var context = this;

@@ -19,13 +19,6 @@ define([
 	 *  upon the completion of this promise.
 	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
 	 *
-	 * ## Memorized emitting
-	 * A fired event will memorize the "current" value of each event. Each executor may have it's own interpretation
-	 * of what "current" means.
-	 *
-	 * For listeners that are registered after the event emitted thus missing from the call, {@link #reemit} will
-	 * compensate the call with memorized data.
-	 *
 	 * @class core.event.emitter
 	 * @extends core.object.base
 	 */
@@ -33,7 +26,6 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var DEFAULT = "default";
-	var MEMORY = "memory";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var DATA = "data";
@@ -79,7 +71,7 @@ define([
 			// Return promise of next callback, or a promise resolved with result
 			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
 				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
-				: (handlers[MEMORY] = args) === args && when.resolve(results);
+				: when.resolve(results);
 		};
 
 		return next(args, true);
@@ -289,127 +281,6 @@ define([
 
 			// Return promise
 			return runner.call(me, handlers, candidates, ++handlers[HANDLED], args);
-		},
-
-		/**
-		 * Re-emit any event that are **previously triggered**, any (new) listeners will be called with the memorized data
-		 * from the previous event emitting procedure.
-		 *
-		 * 	// start widget1 upon the app loaded.
-		 * 	app.on('load', function(url) {
-		 * 		widget1.start(url);
-		 * 	});
-		 *
-		 * 	// Emits the load event on app.
-		 * 	app.emit('load', window.location.hash);
-		 *
-		 * 	// start of widget2 comes too late for the app start.
-		 * 	app.on('load', function(url) {
-		 * 		// Widget should have with the same URL as with widget1.
-		 * 		widget2.start(url);
-		 * 	});
-		 *
-		 * 	$.ready(function() {
-		 * 		// Compensate the "load" event listeners that are missed.
-		 * 		app.reemit();
-		 * 	});
-		 *
-		 * @param {String} event The event name to re-emit, dismiss if it's the first time to emit this event.
-		 * @param {Object} [context] The context object to match.
-		 * @param {Function} [callback] The listener function to match.
-		 * @param {Boolean} [senile=false] Whether to trigger listeners that are already handled in previous emitting.
-		 * @returns {Promise}
-		 */
-		"reemit" : function reemit(event, context, callback, senile) {
-			var me = this;
-			var handlers = me[HANDLERS];
-			var handler;
-			var handled;
-			var runners = me[RUNNERS];
-			var runner = runners[DEFAULT];
-			var candidates = [];
-			var candidatesCount = 0;
-			var matches;
-
-			// See if we should override event and runner
-			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
-				event = matches[1];
-
-				if ((runner = runners[matches[2]]) === UNDEFINED) {
-					throw new Error("unknown runner " + matches[2]);
-				}
-			}
-
-			// Have event in handlers
-			if (event in handlers) {
-				// Get handlers
-				handlers = handlers[event];
-
-				// Get handled
-				handled = handlers[HANDLED];
-
-				if (HEAD in handlers) {
-						// Get first handler
-					handler = handlers[HEAD];
-
-					// Iterate handlers
-					do {
-						add : {
-							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] !== context) {
-								break add;
-							}
-
-							// If no callback or callback does not match we should break
-							if (callback && handler[CALLBACK] !== callback) {
-								break add;
-							}
-
-							// If we are already handled and not senile break add
-							if (handler[HANDLED] === handled && !senile) {
-								break add;
-							}
-
-							// Push handler on candidates
-							candidates[candidatesCount++] = handler;
-						}
-					}
-						// While there's a next handler
-					while ((handler = handler[NEXT]));
-				}
-			}
-			// No event in handlers
-			else {
-				// Create handlers and store with event
-				handlers[event] = handlers = {};
-
-				// Set handled
-				handlers[HANDLED] = handled = 0;
-			}
-
-			// Return promise
-			return runner.call(me, handlers, candidates, handled, handlers[MEMORY]);
-		},
-
-		/**
-		 * Returns value in handlers MEMORY
-		 * @param {String} event to peek at
-		 * @returns {*} Value in MEMORY
-		 */
-		"peek": function peek(event) {
-			var me = this;
-			var handlers = me[HANDLERS];
-			var result;
-
-			if (event in handlers) {
-				handlers = handlers[event];
-
-				if (MEMORY in handlers) {
-					result  = handlers[MEMORY];
-				}
-			}
-
-			return result;
 		}
 	});
 });
