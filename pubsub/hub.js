@@ -27,7 +27,7 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	/*
-	 * Constructs a function that executes handlers in sequence without overlap
+	 * Internal runner that executes candidates in sequence without overlap
 	 * @private
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} candidates Array of candidates
@@ -73,7 +73,7 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 	}
 
 	/*
-	 * Constructs a function that executes handlers in a pipeline without overlap
+	 * Internal runner that executes candidates in pipeline without overlap
 	 * @private
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} candidates Array of candidates
