@@ -36,7 +36,7 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 	var HANDLED = config["handled"];
 	var HANDLERS = config["handlers"];
 	var RUNNERS = config["runners"];
-	var DEFAULT = config["default"];
+	var DEFAULT = config["default"] || "pipeline";
 	var RE_RUNNER = config["re_runner"];
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
@@ -140,11 +140,6 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 		 * - sequence
 		 * @property runners
 		 */
-		"runners" : {
-			"pipeline": pipeline,
-			"sequence": sequence,
-			"default": pipeline
-		},
 
 		/**
 		 * Listen to an event that are emitted publicly.
