@@ -156,8 +156,8 @@ define([
 		 * remove all listeners of this event.
 		 *
 		 * @param {String} event The event that the listener subscribes to.
-		 * @param {Object} context The context to scope the {@param callback} to remove.
-		 * @param {Function} callback The event listener function to remove.
+		 * @param {Object} [context] The context to scope the {@param callback} to remove.
+		 * @param {Function} [callback] The event listener function to remove.
 		 * @returns this
 		 */
 		"off" : function off(event, context, callback) {

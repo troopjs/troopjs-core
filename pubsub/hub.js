@@ -180,7 +180,7 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 		 * Re-publish any event that are **previously triggered**, any (new) listeners will be called with the memorized data
 		 * from the previous event publishing procedure.
 		 *
-		 * @param {String} event The event name to re-publish, dismiss if it's the first time to publish this event.
+		 * @param {String} event The event name to re-publish, dismiss if it's not yet published.
 		 * @param {Object} [context] The context to scope the {@param callback} to match.
 		 * @param {Function} [callback] The listener function to match.
 		 * @param {Boolean} [senile=false] Whether to trigger listeners that are already handled in previous publishing.
