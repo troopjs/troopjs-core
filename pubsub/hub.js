@@ -212,8 +212,9 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 				handlers = handlers[event];
 
 				// Short out to return a resolved promise if there's no memory yet.
-				if(!(MEMORY in handlers))
+				if(!(MEMORY in handlers)) {
 					return when.resolve();
+				}
 
 				// Get handled
 				handled = handlers[HANDLED];
