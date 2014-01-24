@@ -42,8 +42,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	 */
 
 	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var HUB_PUBLISH = hub.publish;
 	var HUB_REPUBLISH = hub.republish;
 	var HUB_SUBSCRIBE = hub.subscribe;
@@ -110,7 +108,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				}
 
 				// Republish, store result
-				results[resultsLength++] = HUB_REPUBLISH.call(hub, subscription[TYPE], me, subscription[VALUE], false);
+				results[resultsLength++] = me.republish(subscription[TYPE], subscription[VALUE], false);
 			}
 
 			// Return promise that will be fulfilled when all results are, and yield args
@@ -154,29 +152,18 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 * @inheritdoc core.pubsub.hub#republish
 		 */
 		"republish" : function republish(event, callback, senile) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Republish
-			return HUB_REPUBLISH.apply(hub, args);
+			return HUB_REPUBLISH.call(hub, event, this, callback, senile);
 		},
 
 		/**
 		 * @inheritdoc core.pubsub.hub#subscribe
 		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
-		"subscribe" : function subscribe(event, callback) {
+		"subscribe" : function subscribe(event, callback, data) {
 			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Subscribe
-			HUB_SUBSCRIBE.apply(hub, args);
+			HUB_SUBSCRIBE.call(hub, event, me, callback, data);
 
 			return me;
 		},
@@ -187,13 +174,9 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 */
 		"unsubscribe" : function unsubscribe(event, callback) {
 			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Unsubscribe
-			HUB_UNSUBSCRIBE.apply(hub, args);
+			HUB_UNSUBSCRIBE.call(hub, event, me, callback);
 
 			return me;
 		},
