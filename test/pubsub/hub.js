@@ -8,6 +8,10 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	require( [ "troopjs-core/pubsub/hub", "when", "when/delay" ] , function (hub, when, delay) {
 
 		run({
+			"setUp" : function () {
+				this.timeout = 1000;
+			},
+
 			"subscribe/publish sync subscribers" : function () {
 				var foo = "FOO", bar = "BAR";
 				return hub
@@ -31,7 +35,6 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 
 			"subscribe/publish async subscribers": function() {
 				var foo = "FOO", bar = "BAR";
-				this.timeout = 1000;
 				return hub.subscribe("foo/bar", this, function (arg) {
 						assert.same(foo, arg);
 						return when.resolve([arg, bar]);
