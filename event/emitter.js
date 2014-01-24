@@ -4,9 +4,11 @@
  */
 define([
 	"../object/base",
+	"./constants",
 	"./config",
+	"troopjs-utils/merge",
 	"when"
-], function EventEmitterModule(Base, config, when) {
+], function EventEmitterModule(Base, CONSTANTS, CONFIG, merge, when) {
 	"use strict";
 
 	/**
@@ -26,17 +28,17 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var ARRAY_SLICE = Array.prototype.slice;
-	var HANDLERS = config["handlers"];
-	var RUNNERS = config["runners"];
-	var RE_RUNNER = config["re_runner"];
-	var CONTEXT = config["context"];
-	var CALLBACK = config["callback"];
-	var DATA = config["data"];
-	var HEAD = config["head"];
-	var TAIL = config["tail"];
-	var NEXT = config["next"];
-	var HANDLED = config["handled"];
-	var DEFAULT = config["default"];
+	var HANDLERS = CONSTANTS["handlers"];
+	var RUNNER = CONSTANTS["runner"];
+	var RUNNERS = CONSTANTS["runners"];
+	var CONTEXT = CONSTANTS["context"];
+	var CALLBACK = CONSTANTS["callback"];
+	var DATA = CONSTANTS["data"];
+	var HEAD = CONSTANTS["head"];
+	var TAIL = CONSTANTS["tail"];
+	var NEXT = CONSTANTS["next"];
+	var HANDLED = CONSTANTS["handled"];
+	var PATTERN = CONSTANTS["pattern"];
 
 	/*
 	 * Internal runner that executes candidates in sequence without overlap
@@ -81,17 +83,6 @@ define([
 		this[HANDLERS] = {};
 	}, {
 		"displayName" : "core/event/emitter",
-
-		/**
-		 * List of event handler runners that execute the event handlers when calling the {@link #emit} method.
-		 *
-		 * - sequence (default)
-		 * @property runners
-		 */
-		"runners" : {
-			"sequence": sequence,
-			"default": sequence
-		},
 
 		/**
 		 * Adds a listener for the specified event.
@@ -228,7 +219,7 @@ define([
 		},
 
 		/**
-		 * Trigger an event which notifies each of the listeners in sequence of their subscribing,
+		 * Trigger an event which notifies each of the listeners of their subscribing,
 		 * optionally pass data values to the listeners.
 		 *
 		 * ## Emit runners
@@ -248,21 +239,24 @@ define([
 			var handlers = me[HANDLERS];
 			var handler;
 			var runners = me[RUNNERS];
-			var runner = runners[DEFAULT];
+			var runner = me[RUNNER];
 			var candidates = [];
 			var candidatesCount = 0;
 			var matches;
 
-			// Slice args
-			args = ARRAY_SLICE.call(arguments, 1);
-
 			// See if we should override event and runner
-			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
+			if ((matches = PATTERN.exec(event)) !== NULL) {
 				event = matches[1];
+				runner = matches[2];
+			}
 
-				if ((runner = runners[matches[2]]) === UNDEFINED) {
-					throw new Error("unknown runner " + matches[2]);
-				}
+			// Have runner in runners
+			if (runner in runners) {
+				runner = runners[runner];
+			}
+			// Unknown runner
+			else {
+				throw new Error("Unknown runner '" + runner + "'");
 			}
 
 			// Have event in handlers
@@ -294,7 +288,19 @@ define([
 			}
 
 			// Return promise
-			return runner.call(me, handlers, candidates, ++handlers[HANDLED], args);
+			return runner.call(me, handlers, candidates, ++handlers[HANDLED], ARRAY_SLICE.call(arguments, 1));
 		}
-	});
+	}, (function () {
+		var result = {};
+
+		// Set default runner
+		result[RUNNER] = CONFIG[RUNNER];
+
+		// Set available runners
+		result[RUNNERS] = merge.call({}, {
+			"sequence": sequence
+		}, CONFIG[RUNNERS]);
+
+		return result;
+	})());
 });

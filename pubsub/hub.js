@@ -2,7 +2,13 @@
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ], function HubModule(Emitter, config, merge, when) {
+define([
+	"../event/emitter",
+	"../event/constants",
+	"./config",
+	"troopjs-utils/merge",
+	"when"
+], function HubModule(Emitter, CONSTANTS, CONFIG, merge, when) {
 	"use strict";
 
 	/**
@@ -29,15 +35,15 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
 	var MEMORY = "memory";
 	var PHASE = "phase";
-	var HEAD = config["head"];
-	var NEXT = config["next"];
-	var CONTEXT = config["context"];
-	var CALLBACK = config["callback"];
-	var HANDLED = config["handled"];
-	var HANDLERS = config["handlers"];
-	var RUNNERS = config["runners"];
-	var DEFAULT = config["default"] || "pipeline";
-	var RE_RUNNER = config["re_runner"];
+	var HEAD = CONSTANTS["head"];
+	var NEXT = CONSTANTS["next"];
+	var CONTEXT = CONSTANTS["context"];
+	var CALLBACK = CONSTANTS["callback"];
+	var HANDLED = CONSTANTS["handled"];
+	var HANDLERS = CONSTANTS["handlers"];
+	var RUNNER = CONSTANTS["runner"];
+	var RUNNERS = CONSTANTS["runners"];
+	var RE_PATTERN = CONSTANTS["pattern"];
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	/*
@@ -187,18 +193,24 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 			var handler;
 			var handled;
 			var runners = me[RUNNERS];
-			var runner = runners[DEFAULT];
+			var runner = me[RUNNER];
 			var candidates = [];
 			var candidatesCount = 0;
 			var matches;
 
 			// See if we should override event and runner
-			if ((matches = RE_RUNNER.exec(event)) !== NULL) {
+			if ((matches = RE_PATTERN.exec(event)) !== NULL) {
 				event = matches[1];
+				runner = matches[2];
+			}
 
-				if ((runner = runners[matches[2]]) === UNDEFINED) {
-					throw new Error("unknown runner " + matches[2]);
-				}
+			// Have runner in runners
+			if (runner in runners) {
+				runner = runners[runner];
+			}
+			// Unknown runner
+			else {
+				throw new Error("Unknown runner '" + runner + "'");
 			}
 
 			// Have event in handlers
@@ -280,11 +292,12 @@ define([ "../event/emitter", "../event/config", "troopjs-utils/merge", "when" ],
 	}, (function(runners) {
 		var result = {};
 
+		result[RUNNER] = CONFIG[RUNNER];
+
 		result[RUNNERS] = merge.call({}, runners, {
 			"pipeline": pipeline,
-			"sequence": sequence,
-			"default": pipeline
-		});
+			"sequence": sequence
+		}, CONFIG[RUNNERS]);
 
 		return result;
 	})(COMPONENT_PROTOTYPE[RUNNERS]));

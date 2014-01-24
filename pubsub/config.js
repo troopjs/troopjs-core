@@ -1,12 +1,12 @@
 /**
- * TroopJS core/event/config
+ * TroopJS core/pubsub/config
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "module", "troopjs-utils/merge" ], function EventConfigModule(module, merge) {
+define([ "module", "troopjs-utils/merge" ], function PubSubConfigModule(module, merge) {
 	"use strict";
 
 	/**
-	 * @class core.event.config
+	 * @class core.pubsub.config
 	 * @singleton
 	 */
 	return merge.call({
@@ -14,7 +14,7 @@ define([ "module", "troopjs-utils/merge" ], function EventConfigModule(module, m
 		/**
 		 * @cfg {String} runner Name of default runner.
 		 */
-		"runner": "sequence",
+		"runner": "pipeline",
 
 		/**
 		 * @cfg {Object} runners Custom runners.
