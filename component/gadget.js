@@ -153,12 +153,12 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		/**
 		 * @inheritdoc core.pubsub.hub#republish
 		 */
-		"republish" : function republish(event, senile, callback) {
+		"republish" : function republish(event, callback, senile) {
 			var me = this;
-			var args = [ event, senile, me ];
+			var args = [ event, me ];
 
 			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
+			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Republish
 			return HUB_REPUBLISH.apply(hub, args);
