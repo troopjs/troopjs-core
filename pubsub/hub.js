@@ -289,16 +289,18 @@ define([
 
 			return result;
 		}
-	}, (function(runners) {
+	}, (function(runner, runners) {
 		var result = {};
 
-		result[RUNNER] = CONFIG[RUNNER];
+		// Update default runner from either config or prototype
+		result[RUNNER] = CONFIG[RUNNER] || runner;
 
+		// Merge runners from self, prototype and config
 		result[RUNNERS] = merge.call({}, runners, {
 			"pipeline": pipeline,
 			"sequence": sequence
 		}, CONFIG[RUNNERS]);
 
 		return result;
-	})(COMPONENT_PROTOTYPE[RUNNERS]));
+	})(COMPONENT_PROTOTYPE[RUNNER], COMPONENT_PROTOTYPE[RUNNERS]));
 });
