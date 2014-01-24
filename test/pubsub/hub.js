@@ -8,9 +8,9 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	require( [ "troopjs-core/pubsub/hub", "when", "when/delay" ] , function (hub, when, delay) {
 
 		run({
-			"subscribe/publish sync subscribers" : function (done) {
+			"subscribe/publish sync subscribers" : function () {
 				var foo = "FOO", bar = "BAR";
-				hub
+				return hub
 					.subscribe("foo/bar", this, function (arg) {
 						assert.same(foo, arg);
 						// Return the arguments.
@@ -26,15 +26,13 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						assert.same(foo, arg1);
 						assert.same(bar, arg2);
 					})
-					.publish("foo/bar", foo)
-					.then(done);
+					.publish("foo/bar", foo);
 			},
 
-			"subscribe/publish async subscribers": function(done) {
+			"subscribe/publish async subscribers": function() {
 				var foo = "FOO", bar = "BAR";
 				this.timeout = 1000;
-				hub
-					.subscribe("foo/bar", this, function (arg) {
+				return hub.subscribe("foo/bar", this, function (arg) {
 						assert.same(foo, arg);
 						return when.resolve([arg, bar]);
 					})
@@ -53,15 +51,13 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						assert.same(bar, arg1);
 						refute.defined(arg2);
 					})
-					.publish("foo/bar", foo)
-					.then(done);
+					.publish("foo/bar", foo);
 			},
 
-			"subscribe/publish - using explicit sequence runner": function (done) {
+			"subscribe/publish - using explicit sequence runner": function () {
 				var context = this;
 				var foo = "FOO", bar = "BAR", count = 0;
-				hub
-					.subscribe("test", context, function (arg) {
+				return hub.subscribe("test", context, function (arg) {
 						assert.same(foo, arg);
 						count++;
 						return [foo, bar];
@@ -75,26 +71,22 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 					.publish("test:sequence", foo)
 					.then(function () {
 						assert.same(2, count);
-						done();
 					});
 			},
 
-			"republish": function(done) {
+			"republish": function() {
 				var context = this;
 				var count = 0;
 
-				hub
-					.subscribe("republish", context, function(message){
+				return hub.subscribe("republish", context, function(message){
 						assert.equals(message, "republish");
 						count++;
 					})
 					.publish("republish", "republish")
 					.then(function () {
-						hub
-							.republish("republish", context, function(message) {
+						return hub.republish("republish", context, function(message) {
 								assert.equals(message, "republish");
 							})
-							.then(done);
 					});
 			}
 		});
