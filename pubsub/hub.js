@@ -2,11 +2,24 @@
  * TroopJS core/pubsub/hub
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
+define([
+	"../event/emitter",
+	"../event/constants",
+	"./config",
+	"troopjs-utils/merge",
+	"when"
+], function HubModule(Emitter, CONSTANTS, CONFIG, merge, when) {
 	"use strict";
 
 	/**
 	 * The centric "bus" that handlers publishing and subscription.
+	 *
+	 * ## Memorized emitting
+	 * A fired event will memorize the "current" value of each event. Each executor may have it's own interpretation
+	 * of what "current" means.
+	 *
+	 * For listeners that are registered after the event emitted thus missing from the call, {@link #republish} will
+	 * compensate the call with memorized data.
 	 *
 	 * **Note:** It's NOT necessarily to pub/sub on this module, prefer to
 	 * use methods like {@link core.component.gadget#publish} and {@link core.component.gadget#subscribe}
@@ -18,28 +31,37 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 	 */
 
 	var UNDEFINED;
+	var NULL = null;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
-	var HANDLED = "handled";
 	var MEMORY = "memory";
 	var PHASE = "phase";
+	var HEAD = CONSTANTS["head"];
+	var NEXT = CONSTANTS["next"];
+	var CONTEXT = CONSTANTS["context"];
+	var CALLBACK = CONSTANTS["callback"];
+	var HANDLED = CONSTANTS["handled"];
+	var HANDLERS = CONSTANTS["handlers"];
+	var RUNNER = CONSTANTS["runner"];
+	var RUNNERS = CONSTANTS["runners"];
+	var RE_PATTERN = CONSTANTS["pattern"];
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	/*
-	 * Constructs a function that executes handlers in sequence without overlap
-	 * @param {Array} handlers Array of handlers
+	 * Internal runner that executes candidates in sequence without overlap
+	 * @private
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} candidates Array of candidates
 	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
-	 * @returns {Function}
+	 * @returns {Promise}
 	 */
-	function sequence(handlers, handled, args) {
+	function sequence(handlers, candidates, handled, args) {
 		var results = [];
 		var resultsCount = 0;
-		var handlersCount = 0;
+		var candidatesCount = 0;
 
 		/*
-		 * Internal function for sequential execution of handlers handlers
+		 * Internal function for sequential execution of candidates candidates
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
 		 * @param {Boolean} [skip] flag indicating if this result should be skipped
@@ -47,7 +69,7 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 		 */
 		var next = function (result, skip) {
 			/*jshint curly:false*/
-			var handler;
+			var candidate;
 			var context;
 
 			// Store result if no skip
@@ -56,34 +78,34 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 			}
 
 			// TODO Needs cleaner implementation
-			// Iterate handlers while handler has a context and that context is in a blocked phase
-			while ((handler = handlers[handlersCount++]) // Has next handler
-				&& (context = handler[CONTEXT])            // Has context
-				&& RE_PHASE.test(context[PHASE]));         // In blocked phase
+			// Iterate candidates while candidate has a context and that context is in a blocked phase
+			while ((candidate = candidates[candidatesCount++]) // Has next candidate
+				&& (context = candidate[CONTEXT])                // Has context
+				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
 
 			// Return promise of next callback, or a promise resolved with result
-			return handler !== UNDEFINED
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
-				: when.resolve(results);
+			return candidate !== UNDEFINED
+				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
+				: (handlers[MEMORY] = args) === args && when.resolve(results);
 		};
 
 		return next(args, true);
 	}
 
 	/*
-	 * Constructs a function that executes handlers in a pipeline without overlap
+	 * Internal runner that executes candidates in pipeline without overlap
 	 * @private
-	 * @param {Array} handlers Array of handlers
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} candidates Array of candidates
 	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
-	 * @returns {Function}
+	 * @returns {Promise}
 	 */
-	function pipeline(handlers, handled, args) {
-		var me = this;
-		var handlersCount = 0;
+	function pipeline(handlers, candidates, handled, args) {
+		var candidatesCount = 0;
 
 		/*
-		 * Internal function for piped execution of handlers handlers
+		 * Internal function for piped execution of candidates candidates
 		 * @private
 		 * @param {Array} [result] result from previous handler callback
 		 * @return {Promise} promise of next handler callback execution
@@ -91,24 +113,24 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 		var next = function (result) {
 			/*jshint curly:false*/
 			var context;
-			var handler;
+			var candidate;
 
 			// Check that we have result
 			if (result !== UNDEFINED) {
-				// Update memory and args
-				me[MEMORY] = args = result;
+				// Update args
+				args = result;
 			}
 
 			// TODO Needs cleaner implementation
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++]) // Has next handler
-				&& (context = handler[CONTEXT])            // Has context
-				&& RE_PHASE.test(context[PHASE]));         // In blocked phase
+			// Iterate until we find a candidate in a blocked phase
+			while ((candidate = candidates[candidatesCount++]) // Has next candidate
+				&& (context = candidate[CONTEXT])                // Has context
+				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
 
 			// Return promise of next callback, or promise resolved with args
-			return handler !== UNDEFINED
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
-				: when.resolve(args);
+			return candidate !== UNDEFINED
+				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
+				: when.resolve(handlers[MEMORY] = args);
 		};
 
 		return next(args);
@@ -117,11 +139,13 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 	return Emitter.create({
 		"displayName": "core/pubsub/hub",
 
-		"runners" : {
-			"pipeline": pipeline,
-			"sequence": sequence,
-			"default": pipeline
-		},
+		/**
+		 * List of event handler runners that execute the subscribers when calling the {@link #publish} method.
+		 *
+		 * - pipeline (default)
+		 * - sequence
+		 * @property runners
+		 */
 
 		/**
 		 * Listen to an event that are emitted publicly.
@@ -139,23 +163,144 @@ define([ "../event/emitter", "when" ], function HubModule(Emitter, when) {
 
 		/**
 		 * Emit a public event that can be subscribed by other components.
+		 *
+		 * The hub implements two runners for its handlers execution, the **sequential** is basically inherited from the
+		 * emitter parent. Additionally it's using a pipelined runner by default, in which each handler will receive muted
+		 * data params depending on the return value of the previous handler:
+		 *
+		 *   - The original data params from {@link #publish} if this's the first handler, or the previous handler returns `undefined`.
+		 *   - One value as the single argument if the previous handler return a non-array.
+		 *   - Each argument value deconstructed from the returning array of the previous handler.
+		 *
 		 * @inheritdoc #emit
 		 * @method
 		 */
 		"publish" : COMPONENT_PROTOTYPE.emit,
 
 		/**
-		 * Re-emit a public event.
-		 * @inheritdoc #reemit
-		 * @method
+		 * Re-publish any event that are **previously triggered**, any (new) listeners will be called with the memorized data
+		 * from the previous event publishing procedure.
+		 *
+		 * @param {String} event The event name to re-publish, dismiss if it's not yet published.
+		 * @param {Object} [context] The context to scope the {@param callback} to match.
+		 * @param {Function} [callback] The listener function to match.
+		 * @param {Boolean} [senile=false] Whether to trigger listeners that are already handled in previous publishing.
+		 * @returns {Promise}
 		 */
-		"republish" : COMPONENT_PROTOTYPE.reemit,
+		"republish" : function republish(event, context, callback, senile) {
+			var me = this;
+			var handlers = me[HANDLERS];
+			var handler;
+			var handled;
+			var runners = me[RUNNERS];
+			var runner = me[RUNNER];
+			var candidates = [];
+			var candidatesCount = 0;
+			var matches;
+
+			// See if we should override event and runner
+			if ((matches = RE_PATTERN.exec(event)) !== NULL) {
+				event = matches[1];
+				runner = matches[2];
+			}
+
+			// Have runner in runners
+			if (runner in runners) {
+				runner = runners[runner];
+			}
+			// Unknown runner
+			else {
+				throw new Error("Unknown runner '" + runner + "'");
+			}
+
+			// Have event in handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
+
+				// Short out to return a resolved promise if there's no memory yet.
+				if(!(MEMORY in handlers)) {
+					return when.resolve();
+				}
+
+				// Get handled
+				handled = handlers[HANDLED];
+
+				if (HEAD in handlers) {
+					// Get first handler
+					handler = handlers[HEAD];
+
+					// Iterate handlers
+					do {
+						add : {
+							// If no context or context does not match we should break
+							if (context && handler[CONTEXT] !== context) {
+								break add;
+							}
+
+							// If no callback or callback does not match we should break
+							if (callback && handler[CALLBACK] !== callback) {
+								break add;
+							}
+
+							// If we are already handled and not senile break add
+							if (handler[HANDLED] === handled && !senile) {
+								break add;
+							}
+
+							// Push handler on candidates
+							candidates[candidatesCount++] = handler;
+						}
+					}
+						// While there's a next handler
+					while ((handler = handler[NEXT]));
+				}
+			}
+			// No event in handlers
+			else {
+				// Create handlers and store with event
+				handlers[event] = handlers = {};
+
+				// Set handled
+				handlers[HANDLED] = handled = 0;
+			}
+
+			// Return promise
+			return runner.call(me, handlers, candidates, handled, handlers[MEMORY]);
+		},
 
 		/**
-		 * Spy on the current value stored for a topic
-		 * @inheritdoc #peek
-		 * @method
+		 * Returns value in handlers MEMORY
+		 * @param {String} event to peek at
+		 * @returns {*} Value in MEMORY
 		 */
-		"spy" : COMPONENT_PROTOTYPE.peek
-	});
+		"peek": function peek(event) {
+			var me = this;
+			var handlers = me[HANDLERS];
+			var result;
+
+			if (event in handlers) {
+				handlers = handlers[event];
+
+				if (MEMORY in handlers) {
+					result  = handlers[MEMORY];
+				}
+			}
+
+			return result;
+		}
+	}, (function(runner, runners) {
+		var result = {};
+
+		// Update default runner from either config or prototype
+		result[RUNNER] = CONFIG[RUNNER] || runner;
+
+		// Merge runners from self, prototype and config
+		result[RUNNERS] = merge.call({}, runners, {
+			"pipeline": pipeline,
+			"sequence": sequence
+		}, CONFIG[RUNNERS]);
+
+		return result;
+	})(COMPONENT_PROTOTYPE[RUNNER], COMPONENT_PROTOTYPE[RUNNERS]));
 });

@@ -121,44 +121,93 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					.then(done);
 			},
 
-			"off/emit": function(done) {
+			"off/emit with context and callback": function(done) {
 				var emitter = Emitter();
 				var context = this;
 				var last;
 
-				var callback = function(arg) {
-					last = arg;
+				var one = function() {
+					last = "one";
+				};
+
+				var two = function() {
+					last = "two";
 				};
 
 				emitter
-					.on("test", context, callback)
-					.emit("test", "test")
+					.on("test", context, one)
+					.on("test", context, two)
+					.emit("test")
 					.then(function () {
+						assert.equals(last, "two");
+
 						emitter
-							.off("test", context, callback)
-							.emit("test", "test2")
+							.off("test", context, two)
+							.emit("test")
 							.then(function () {
-								assert.equals(last, "test");
+								assert.equals(last, "one");
 							})
 							.then(done);
 					});
 			},
 
-			"on/reemit": function(done) {
+			"off/emit with context": function(done) {
 				var emitter = Emitter();
 				var context = this;
-				var count = 0;
-				
+				var last;
+
+				var one = function() {
+					last = "one";
+				};
+
+				var two = function() {
+					last = "two";
+				};
+
 				emitter
-					.on("test", context, function(message){
-						assert.equals(message, "test");
-						count++;
-					})
-					.emit("test", "test")
+					.on("test", {}, one)
+					.on("test", context, two)
+					.emit("test")
 					.then(function () {
+						assert.equals(last, "two");
+
 						emitter
-							.reemit("test", context, function(message) {
-								assert.equals(message, "test");
+							.off("test", context)
+							.emit("test")
+							.then(function () {
+								assert.equals(last, "one");
+							})
+							.then(done);
+					});
+			},
+
+			"off/emit": function(done) {
+				var emitter = Emitter();
+				var context = this;
+				var last;
+
+				var one = function() {
+					last = "one";
+				};
+
+				var two = function() {
+					last = "two";
+				};
+
+				emitter
+					.on("test", context, one)
+					.on("test", context, two)
+					.emit("test")
+					.then(function () {
+						assert.equals(last, "two");
+
+						last = "three";
+
+						emitter
+							.off("test")
+							.emit("test")
+							.then(function () {
+								assert.equals(last, "three");
 							})
 							.then(done);
 					});
