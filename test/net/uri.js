@@ -858,6 +858,26 @@ buster.testCase("troopjs-core/net/uri", function (run) {
 				});
 
 				assert.same(uri.toString(), source);
+			},
+
+			"populate query with URI.Query": function () {
+				var uri = URI("http://host.com");
+
+				// Construct query from hash.
+				uri.query = URI.Query({
+					"foo": "bar",
+					"baz": ""
+				});
+				var expected = "http://host.com?baz&foo=bar";
+				assert.same(expected, uri.toString());
+
+				// Construct query from string.
+				uri.query = URI.Query("baz&foo=bar");
+				assert.same(expected, uri.toString());
+				assert.match(uri.query, {
+					"foo": "bar",
+					"baz": ""
+				});
 			}
 		});
 	});
