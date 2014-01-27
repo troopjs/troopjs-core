@@ -34,9 +34,9 @@ define({
 	"next" : "next",
 
 	/**
-	 * @const {String} handled Property of the handlers where the **handled** resides.
+	 * @const {String} modified Property of the handlers where the **modified** resides.
 	 */
-	"handled" : "handled",
+	"modified" : "modified",
 
 	/**
 	 * @const {String} handlers Property of the component where the **handlers** resides.

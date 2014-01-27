@@ -37,7 +37,7 @@ define([
 	var HEAD = CONSTANTS["head"];
 	var TAIL = CONSTANTS["tail"];
 	var NEXT = CONSTANTS["next"];
-	var HANDLED = CONSTANTS["handled"];
+	var MODIFIED = CONSTANTS["modified"];
 	var PATTERN = CONSTANTS["pattern"];
 
 	/*
@@ -45,11 +45,10 @@ define([
 	 * @private
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} candidates Array of candidates
-	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
 	 * @returns {Promise}
 	 */
-	function sequence(handlers, candidates, handled, args) {
+	function sequence(handlers, candidates, args) {
 		var results = [];
 		var resultsCount = 0;
 		var candidatesCount = 0;
@@ -72,7 +71,7 @@ define([
 
 			// Return promise of next callback, or a promise resolved with result
 			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
-				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
+				? when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
 				: when.resolve(results);
 		};
 
@@ -127,9 +126,6 @@ define([
 				// Create event handlers
 				handlers = handlers[event] = {};
 
-				// Set HANDLED
-				handlers[HANDLED] = 0;
-
 				// Create head and tail
 				handlers[HEAD] = handlers[TAIL] = handler = {};
 
@@ -138,6 +134,9 @@ define([
 				handler[CONTEXT] = context;
 				handler[DATA] = data;
 			}
+
+			// Set MODIFIED
+			handlers[MODIFIED] = new Date().getTime();
 
 			return me;
 		},
@@ -213,6 +212,9 @@ define([
 						delete handlers[TAIL];
 					}
 				}
+
+				// Set MODIFIED
+				handlers[MODIFIED] = new Date().getTime();
 			}
 
 			return me;
@@ -282,13 +284,10 @@ define([
 			else {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
-
-				// Set handled
-				handlers[HANDLED] = 0;
 			}
 
 			// Return promise
-			return runner.call(me, handlers, candidates, ++handlers[HANDLED], ARRAY_SLICE.call(arguments, 1));
+			return runner.call(me, handlers, candidates, ARRAY_SLICE.call(arguments, 1));
 		}
 	}, (function () {
 		var result = {};

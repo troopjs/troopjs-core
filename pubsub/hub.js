@@ -39,7 +39,6 @@ define([
 	var NEXT = CONSTANTS["next"];
 	var CONTEXT = CONSTANTS["context"];
 	var CALLBACK = CONSTANTS["callback"];
-	var HANDLED = CONSTANTS["handled"];
 	var HANDLERS = CONSTANTS["handlers"];
 	var RUNNER = CONSTANTS["runner"];
 	var RUNNERS = CONSTANTS["runners"];
@@ -51,11 +50,10 @@ define([
 	 * @private
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} candidates Array of candidates
-	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
 	 * @returns {Promise}
 	 */
-	function sequence(handlers, candidates, handled, args) {
+	function sequence(handlers, candidates, args) {
 		var results = [];
 		var resultsCount = 0;
 		var candidatesCount = 0;
@@ -85,7 +83,7 @@ define([
 
 			// Return promise of next callback, or a promise resolved with result
 			return candidate !== UNDEFINED
-				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
+				? when(candidate[CALLBACK].apply(context, args), next)
 				: (handlers[MEMORY] = args) === args && when.resolve(results);
 		};
 
@@ -97,11 +95,10 @@ define([
 	 * @private
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} candidates Array of candidates
-	 * @param {Number} handled Handled counter
 	 * @param {Array} args Initial arguments
 	 * @returns {Promise}
 	 */
-	function pipeline(handlers, candidates, handled, args) {
+	function pipeline(handlers, candidates, args) {
 		var candidatesCount = 0;
 
 		/*
@@ -129,7 +126,7 @@ define([
 
 			// Return promise of next callback, or promise resolved with args
 			return candidate !== UNDEFINED
-				? (candidate[HANDLED] = handled) === handled && when(candidate[CALLBACK].apply(context, args), next)
+				? when(candidate[CALLBACK].apply(context, args), next)
 				: when.resolve(handlers[MEMORY] = args);
 		};
 
@@ -184,14 +181,12 @@ define([
 		 * @param {String} event The event name to re-publish, dismiss if it's not yet published.
 		 * @param {Object} [context] The context to scope the {@param callback} to match.
 		 * @param {Function} [callback] The listener function to match.
-		 * @param {Boolean} [senile=false] Whether to trigger listeners that are already handled in previous publishing.
 		 * @returns {Promise}
 		 */
-		"republish" : function republish(event, context, callback, senile) {
+		"republish" : function republish(event, context, callback) {
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
-			var handled;
 			var runners = me[RUNNERS];
 			var runner = me[RUNNER];
 			var candidates = [];
@@ -223,9 +218,6 @@ define([
 					return when.resolve();
 				}
 
-				// Get handled
-				handled = handlers[HANDLED];
-
 				if (HEAD in handlers) {
 					// Get first handler
 					handler = handlers[HEAD];
@@ -243,11 +235,6 @@ define([
 								break add;
 							}
 
-							// If we are already handled and not senile break add
-							if (handler[HANDLED] === handled && !senile) {
-								break add;
-							}
-
 							// Push handler on candidates
 							candidates[candidatesCount++] = handler;
 						}
@@ -260,13 +247,10 @@ define([
 			else {
 				// Create handlers and store with event
 				handlers[event] = handlers = {};
-
-				// Set handled
-				handlers[HANDLED] = handled = 0;
 			}
 
 			// Return promise
-			return runner.call(me, handlers, candidates, handled, handlers[MEMORY]);
+			return runner.call(me, handlers, candidates, handlers[MEMORY]);
 		},
 
 		/**

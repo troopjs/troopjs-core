@@ -108,7 +108,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 				}
 
 				// Republish, store result
-				results[resultsLength++] = me.republish(subscription[TYPE], subscription[VALUE], false);
+				results[resultsLength++] = me.republish(subscription[TYPE], subscription[VALUE]);
 			}
 
 			// Return promise that will be fulfilled when all results are, and yield args
@@ -151,8 +151,8 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		/**
 		 * @inheritdoc core.pubsub.hub#republish
 		 */
-		"republish" : function republish(event, callback, senile) {
-			return HUB_REPUBLISH.call(hub, event, this, callback, senile);
+		"republish" : function republish(event, callback) {
+			return HUB_REPUBLISH.call(hub, event, this, callback);
 		},
 
 		/**
