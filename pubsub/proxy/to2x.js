@@ -154,7 +154,7 @@ define([ "../../component/service", "when", "poly/array", "poly/object" ], funct
 						// Check if we should republish
 						if (callback[REPUBLISH] === true) {
 							// Push result from republish on results
-							results.push(hub.republish(source, me, callback, false));
+							results.push(hub.republish(source, me, callback));
 						}
 					});
 				});
