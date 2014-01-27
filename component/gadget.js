@@ -41,94 +41,79 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	 * @extends core.component.base
 	 */
 
-	var ARRAY_PROTO = Array.prototype;
-	var HUB_PUBLISH = hub.publish;
-	var HUB_REPUBLISH = hub.republish;
-	var HUB_SUBSCRIBE = hub.subscribe;
-	var HUB_UNSUBSCRIBE = hub.unsubscribe;
-	var HUB_PEEK = hub.peek;
+	var UNDEFINED;
 	var LENGTH = "length";
 	var FEATURES = "features";
 	var TYPE = "type";
 	var VALUE = "value";
-	var SUBSCRIPTIONS = "subscriptions";
+	var HUB = "hub";
+	var HUB_PUBLISH = hub.publish;
 
-	return Component.extend(function Gadget() {
-		this[SUBSCRIPTIONS] = [];
-	}, {
+	return Component.extend({
 		"displayName" : "core/component/gadget",
 
 		"sig/initialize" : function onInitialize() {
 			var me = this;
-			var subscription;
-			var subscriptions = me[SUBSCRIPTIONS];
+			var specials;
 			var special;
-			var specials = me.constructor.specials.hub;
 			var i;
 			var iMax;
-			var type;
-			var value;
 
-			// Iterate specials
-			for (i = 0, iMax = specials ? specials[LENGTH] : 0; i < iMax; i++) {
-				// Get special
-				special = specials[i];
+			// Make sure we have HUB specials
+			if ((specials = me.constructor.specials[HUB]) !== UNDEFINED) {
+				// Iterate specials
+				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
+					special = specials[i];
 
-				// Create subscription
-				subscription = subscriptions[i] = {};
-
-				// Set subscription properties
-				subscription[TYPE] = type = special[TYPE];
-				subscription[FEATURES] = special[FEATURES];
-				subscription[VALUE] = value = special[VALUE];
-
-				// Subscribe
-				HUB_SUBSCRIBE.call(hub, type, me, value);
+					// Subscribe
+					me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
+				}
 			}
 		},
 
 		"sig/start" : function onStart() {
 			var me = this;
-			var args = arguments;
-			var subscription;
-			var subscriptions = me[SUBSCRIPTIONS];
+			var specials;
+			var special;
 			var results = [];
 			var resultsLength = 0;
 			var i;
 			var iMax;
 
-			// Iterate subscriptions
-			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
-				// Get subscription
-				subscription = subscriptions[i];
+			// Make sure we have HUB specials
+			if ((specials = me.constructor.specials[HUB]) !== UNDEFINED) {
+				// Iterate specials
+				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
+					special = specials[i];
 
-				// If this is not a "memory" subscription - continue
-				if (subscription[FEATURES] !== "memory") {
-					continue;
+					// Check if we need to republish
+					if (special[FEATURES] === "memory") {
+						// Republish, store result
+						results[resultsLength++] = me.republish(special[TYPE], special[VALUE]);
+					}
 				}
-
-				// Republish, store result
-				results[resultsLength++] = me.republish(subscription[TYPE], subscription[VALUE]);
 			}
 
-			// Return promise that will be fulfilled when all results are, and yield args
-			return when.all(results).yield(args);
+			// Return promise that will be fulfilled when all results are
+			return when.all(results);
 		},
 
 		"sig/finalize" : function onFinalize() {
 			var me = this;
-			var subscription;
-			var subscriptions = me[SUBSCRIPTIONS];
+			var specials;
+			var special;
 			var i;
 			var iMax;
 
-			// Iterate subscriptions
-			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
-				// Get subscription
-				subscription = subscriptions[i];
+			// Make sure we have HUB specials
+			if ((specials = me.constructor.specials[HUB]) !== UNDEFINED) {
+				// Iterate specials
+				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
+					special = specials[i];
 
-				// Unsubscribe
-				HUB_UNSUBSCRIBE.call(hub, subscription[TYPE], me, subscription[VALUE]);
+					// Unsubscribe
+					me.unsubscribe(special[TYPE], special[VALUE]);
+				}
 			}
 		},
 
@@ -151,8 +136,8 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		/**
 		 * @inheritdoc core.pubsub.hub#republish
 		 */
-		"republish" : function republish(event, callback) {
-			return HUB_REPUBLISH.call(hub, event, this, callback);
+		"republish" : function republish(event, callback, senile) {
+			return hub.republish(event, this, callback, senile);
 		},
 
 		/**
@@ -163,7 +148,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			var me = this;
 
 			// Subscribe
-			HUB_SUBSCRIBE.call(hub, event, me, callback, data);
+			hub.subscribe(event, me, callback, data);
 
 			return me;
 		},
@@ -176,7 +161,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			var me = this;
 
 			// Unsubscribe
-			HUB_UNSUBSCRIBE.call(hub, event, me, callback);
+			hub.unsubscribe(event, me, callback);
 
 			return me;
 		},
@@ -184,8 +169,8 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		/**
 		 * @inheritdoc core.pubsub.hub#peek
 		 */
-		"peek" : function (event) {
-			return HUB_PEEK.peek(hub, event);
+		"peek" : function peek(event) {
+			return hub.peek(event);
 		}
 	});
 });

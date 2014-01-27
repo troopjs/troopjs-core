@@ -58,6 +58,9 @@ define([
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
+	var EMITTER_PROTO = Emitter.prototype;
+	var EMITTER_ON = EMITTER_PROTO.on;
+	var EMITTER_OFF = EMITTER_PROTO.off;
 	var CONFIGURATION = "configuration";
 	var LENGTH = "length";
 	var CONTEXT = "context";
@@ -70,38 +73,68 @@ define([
 	var STARTED = "started";
 	var FINALIZED = "finalized";
 	var FINISHED = "finished";
+	var INITIALIZE = "initialize";
+	var STOP = "stop";
 	var SIG = "sig";
 	var ON = "on";
-	var EMITTER_PROTO = Emitter.prototype;
-	var EMITTER_ON = EMITTER_PROTO.on;
-	var EMITTER_OFF = EMITTER_PROTO.off;
-	var EMITTER_EMIT = EMITTER_PROTO.emit;
-	var EMITTER_REEMITT = EMITTER_PROTO.reemit;
 
 	return Emitter.extend(function Component() {
 		var me = this;
-
-		// Set configuration
-		me[CONFIGURATION] = {};
-
-		var specials = me.constructor.specials;
-		var events = ARRAY_PROTO.concat(specials[SIG], specials[ON]);
-		var event;
+		var specials;
+		var special;
 		var i;
 		var iMax;
 
-		for (i = 0, iMax = events[LENGTH]; i < iMax; i++) {
-			if ((event = events[i]) === UNDEFINED) {
-				continue;
-			}
+		// Make sure we have SIG specials
+		if ((specials = me.constructor.specials[SIG]) !== UNDEFINED) {
+			// Iterate specials
+			for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
+				special = specials[i];
 
-			// As an exception, declarative event handler defined with "on/foo" will be translated
-			// to emitter.on("foo", handler).
-			EMITTER_ON.call(me, event.group === ON ? event[TYPE] : event[NAME], me, event[VALUE]);
+				me.on(special[NAME], special[VALUE]);
+			}
 		}
 
+		// Set configuration
+		me[CONFIGURATION] = {};
 	}, {
 		"displayName" : "core/component/base",
+
+		"sig/initialize" : function onInitialize() {
+			var me = this;
+			var specials;
+			var special;
+			var i;
+			var iMax;
+
+			// Make sure we have ON specials
+			if ((specials = me.constructor.specials[ON]) !== UNDEFINED) {
+				// Iterate specials
+				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
+					special = specials[i];
+
+					me.on(special[TYPE], special[VALUE]);
+				}
+			}
+		},
+
+		"sig/finalize" : function onFinalize() {
+			var me = this;
+			var specials;
+			var special;
+			var i;
+			var iMax;
+
+			// Make sure we have ON specials
+			if ((specials = me.constructor.specials[ON]) !== UNDEFINED) {
+				// Iterate specials
+				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
+					special = specials[i];
+
+					me.off(special[TYPE], special[VALUE]);
+				}
+			}
+		},
 
 		/**
 		 * Add to the component configurations, possibly {@link utils.merge merge} with the existing ones.
@@ -135,10 +168,10 @@ define([
 		 * 		// Added: true
 		 * 		print(dropdown.configuration.shadow);
 		 *
-		 * @param {Object...} [configs] Config(s) to add.
+		 * @param {...Object} [config] Config(s) to add.
 		 * @returns {Object} The new configuration.
 		 */
-		"configure" : function configure() {
+		"configure" : function configure(config) {
 			return merge.apply(this[CONFIGURATION], arguments);
 		},
 
@@ -146,61 +179,41 @@ define([
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"reemit" : function reemit(event, senile, callback) {
+		"on": function on(event, callback, data) {
 			var me = this;
-			var args = [ event, senile, me ];
 
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
-
-			// Forward
-			return EMITTER_REEMITT.apply(me, args);
+			return EMITTER_ON.call(me, event, me, callback, data);
 		},
 
 		/**
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"on": function on(event) {
+		"off" : function off(event, callback) {
 			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
 
 			// Forward
-			return EMITTER_ON.apply(me, args);
-		},
-
-		/**
-		 * @inheritdoc
-		 * @localdoc Context of the callback will always be **this** object.
-		 */
-		"off" : function off(event) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Forward
-			return EMITTER_OFF.apply(me, args);
+			return EMITTER_OFF.call(me, event, me, callback);
 		},
 
 		/**
 		 * Signals the component
-		 * @param _signal {String} Signal
+		 * @param {String} _signal Signal
+		 * @param {...*} [args] signal arguments
 		 * @return {Promise}
 		 */
-		"signal": function (_signal) {
-			// Get arguments
-			var args = ARRAY_SLICE.call(arguments);
+		"signal": function signal(_signal, args) {
+			var me = this;
+			var args = [ event, me ];
+
+			// Slice arguments
+			args = ARRAY_SLICE.call(arguments);
 
 			// Modify first argument
 			args[0] = "sig/" + _signal;
 
 			// Emit
-			return EMITTER_EMIT.apply(this, args);
+			return me.emit.apply(me, args);
 		},
 
 		/**

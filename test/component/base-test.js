@@ -14,8 +14,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 			"FINALIZED": "finalized"
 		};
 
-		run({
-			"signal sync": function (done) {
+			"signal sync": function () {
 				var count = 0;
 				function onSignal(arg1, arg2) {
 					count++;
@@ -31,14 +30,12 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"sig/foo": onSignal
 				});
 
-				Bar().signal("foo", 123, "abc").then(function () {
+				return Bar().signal("foo", 123, "abc").then(function () {
 					assert.same(2, count);
-					done();
 				});
 			},
 
-			"signal async": function (done) {
-				this.timeout = 500;
+			"signal async": function () {
 				var count = 0;
 
 				function onSignal(arg1, arg2) {
@@ -56,14 +53,12 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"sig/foo": onSignal
 				});
 
-				Bar().signal("foo", 123, "abc").then(function () {
+				return Bar().signal("foo", 123, "abc").then(function () {
 					assert.same(2, count);
-					done();
 				});
 			},
 
-			"declarative event async": function (done) {
-				this.timeout = 500;
+			"declarative event async": function () {
 				var count = 0;
 
 				function onEvent(arg1, arg2) {
@@ -81,9 +76,12 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"on/foo": onEvent
 				});
 
-				Bar().emit("foo", 123, "abc").then(function () {
-					assert.same(2, count);
-					done();
+				var bar = Bar();
+
+				return bar.start().then(function () {
+					return bar.emit("foo", 123, "abc").then(function () {
+						assert.same(2, count);
+					});
 				});
 			},
 
