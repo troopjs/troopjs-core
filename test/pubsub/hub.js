@@ -77,7 +77,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 					});
 			},
 
-			"republish": function() {
+			"republish": function () {
 				var context = this;
 				var count = 0;
 
@@ -91,6 +91,12 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 								assert.equals(message, "republish");
 							})
 					});
+			},
+
+			"tearDown": function () {
+				hub.unsubscribe("test");
+				hub.unsubscribe("foo/bar");
+				hub.unsubscribe("foo/bar");
 			}
 		});
 	});
