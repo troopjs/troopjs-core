@@ -35,26 +35,26 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 
 			"subscribe/publish async subscribers": function() {
 				var foo = "FOO", bar = "BAR";
-				return hub.subscribe("foo/bar", this, function (arg) {
+				return hub.subscribe("fooz/bar", this, function (arg) {
 						assert.same(foo, arg);
 						return when.resolve([arg, bar]);
 					})
-					.subscribe("foo/bar", this, function (arg1, arg2) {
+					.subscribe("fooz/bar", this, function (arg1, arg2) {
 						assert.same(foo, arg1);
 						assert.same(bar, arg2);
 						return delay(200, [bar]);
 					})
-					.subscribe("foo/bar", this, function (arg1) {
+					.subscribe("fooz/bar", this, function (arg1) {
 						assert.same(bar, arg1);
 						// Return a promise that resolves to no value.
 						return delay(200, undefined);
 					})
-					.subscribe("foo/bar", this, function (arg1, arg2) {
+					.subscribe("fooz/bar", this, function (arg1, arg2) {
 						// Arguments received are to be same as the previous one.
 						assert.same(bar, arg1);
 						refute.defined(arg2);
 					})
-					.publish("foo/bar", foo);
+					.publish("fooz/bar", foo);
 			},
 
 			"subscribe/publish - using explicit sequence runner": function () {
