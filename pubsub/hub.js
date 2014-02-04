@@ -57,7 +57,7 @@ define([
 	 * @param {Array} args Initial arguments
 	 * @returns {Promise}
 	 */
-	function sequence(handlers, candidates, args) {
+	function hub_sequence(handlers, candidates, args) {
 		var results = [];
 		var resultsCount = 0;
 		var candidatesCount = 0;
@@ -102,7 +102,7 @@ define([
 	 * @param {Array} args Initial arguments
 	 * @returns {Promise}
 	 */
-	function pipeline(handlers, candidates, args) {
+	function hub_pipeline(handlers, candidates, args) {
 		var candidatesCount = 0;
 
 		/*
@@ -148,8 +148,8 @@ define([
 		/**
 		 * List of event handler runners that execute the subscribers when calling the {@link #publish} method.
 		 *
-		 * - pipeline (default)
-		 * - sequence
+		 * - hub_pipeline (default)
+		 * - hub_sequence
 		 * @property runners
 		 */
 
@@ -290,8 +290,8 @@ define([
 
 		// Merge runners from self, prototype and config
 		result[RUNNERS] = merge.call({}, runners, {
-			"pipeline": pipeline,
-			"sequence": sequence
+			"hub_pipeline": hub_pipeline,
+			"hub_sequence": hub_sequence
 		}, CONFIG[RUNNERS]);
 
 		return result;

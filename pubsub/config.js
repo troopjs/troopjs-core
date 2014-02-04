@@ -14,7 +14,7 @@ define([ "module", "../event/constants", "troopjs-utils/merge" ], function PubSu
 		/**
 		 * @cfg {String} runner Name of default runner.
 		 */
-	config[CONSTANTS["runner"]] = "pipeline";
+	config[CONSTANTS["runner"]] = "hub_pipeline";
 
 		/**
 		 * @cfg {Object} runners Custom runners.
