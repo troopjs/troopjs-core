@@ -65,10 +65,11 @@ define([
 	var TYPE = "type";
 	var VALUE = "value";
 	var PHASE = "phase";
-	var STARTED = "started";
-	var FINISHED = "finished";
-	var INITIALIZE = "initialize";
 	var STOP = "stop";
+	var INITIALIZE = "initialize";
+	var STARTED = "started";
+	var FINALIZED = "finalized";
+	var FINISHED = "finished";
 	var SIG = "sig";
 	var ON = "on";
 	var EMITTER_PROTO = Emitter.prototype;
@@ -204,15 +205,21 @@ define([
 
 		/**
 		 * Start the component life-cycle.
-		 * @return {*}
+		 * @param {...*} [args] arguments
+		 * @return {Promise}
 		 */
-		"start" : function start() {
+		"start" : function start(args) {
 			var me = this;
 			var signal = me.signal;
-			var args = [ INITIALIZE ];
+			var phase;
 
-			// Set phase
-			me[PHASE] = INITIALIZE;
+			// Check PHASE
+			if ((phase = me[PHASE]) !== UNDEFINED && phase !== FINALIZED) {
+				throw new Error("Can't transition phase from '" + phase + "' to '" + INITIALIZE + "'");
+			}
+
+			// Modify args to change signal (and store in PHASE)
+			args = [ me[PHASE] = INITIALIZE ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
@@ -223,7 +230,7 @@ define([
 
 				return signal.apply(me, args).then(function started(_started) {
 					// Update phase
-					me[PHASE] = "started";
+					me[PHASE] = STARTED;
 
 					// Return concatenated result
 					return ARRAY_PROTO.concat(_initialized, _started);
@@ -233,15 +240,21 @@ define([
 
 		/**
 		 * Stops the component life-cycle.
-		 * @return {*}
+		 * @param {...*} [args] arguments
+		 * @return {Promise}
 		 */
-		"stop" : function stop() {
+		"stop" : function stop(args) {
 			var me = this;
 			var signal = me.signal;
-			var args = [ STOP ];
+			var phase;
 
-			// Set phase
-			me[PHASE] = STOP;
+			// Check PHASE
+			if ((phase = me[PHASE]) !== STARTED) {
+				throw new Error("Can't transition phase from '" + phase + "' to '" + STOP + "'");
+			}
+
+			// Modify args to change signal (and store in PHASE)
+			args = [ me[PHASE] = STOP ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
@@ -252,7 +265,7 @@ define([
 
 				return signal.apply(me, args).then(function finalized(_finalized) {
 					// Update phase
-					me[PHASE] = "finalized";
+					me[PHASE] = FINALIZED;
 
 					// Return concatenated result
 					return ARRAY_PROTO.concat(_stopped, _finalized);

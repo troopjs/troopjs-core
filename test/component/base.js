@@ -6,7 +6,15 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 	require( [ "troopjs-core/component/base", "when/delay" ] , function (Component, delay) {
 
-	run({
+		var PHASES = {
+			"INITIAL": undefined,
+			"INITIALIZE": "initialize",
+			"STARTED": "started",
+			"STOP": "stop",
+			"FINALIZED": "finalized"
+		};
+
+		run({
 			"signal sync": function (done) {
 				var count = 0;
 				function onSignal(arg1, arg2) {
@@ -76,6 +84,47 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				Bar().emit("foo", 123, "abc").then(function () {
 					assert.same(2, count);
 					done();
+				});
+			},
+
+			"phase - match": function () {
+				this.timeout = 500;
+				var foo = Component.create({
+					"sig/start": function() {
+						delay(200);
+					},
+					"sig/finalize": function() {
+						delay(200);
+					}
+				});
+				assert.same(PHASES.INITIAL, foo.phase);
+				var started = foo.start().then(function() {
+					assert.same(PHASES.STARTED, foo.phase);
+					var stopped = foo.stop().then(function() {
+						assert.same(PHASES.FINALIZED, foo.phase);
+					});
+					assert.same(PHASES.STOP, foo.phase);
+					return stopped;
+				});
+				assert.same(PHASES.INITIALIZE, foo.phase);
+				return started;
+			},
+
+			"phase - guardian": function () {
+				var foo = Component.create({});
+				// Invalid call to stop before component started.
+				assert.exception(function() {
+					foo.stop();
+				});
+
+				return foo.start().then(function() {
+					// Invalid call to start after started.
+					assert.exception(function() { foo.start(); });
+
+					return foo.stop().then(function() {
+						// Invalid call to stop after stopped.
+						assert.exception(function() { foo.stop(); });
+					});
 				});
 			}
 		});
