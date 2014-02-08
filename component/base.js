@@ -70,8 +70,6 @@ define([
 	var STARTED = "started";
 	var FINALIZED = "finalized";
 	var FINISHED = "finished";
-	var INITIALIZE = "initialize";
-	var STOP = "stop";
 	var SIG = "sig";
 	var ON = "on";
 	var EMITTER_PROTO = Emitter.prototype;
