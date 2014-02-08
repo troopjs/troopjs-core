@@ -33,6 +33,10 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
+	var OBJECT_TOSTRING = Object.prototype.toString;
+	var TOSTRING_ARGUMENTS = "[object Arguments]";
+	var TOSTRING_ARRAY = "[object Array]";
+	var LENGTH = "length";
 	var MEMORY = "memory";
 	var PHASE = "phase";
 	var HEAD = CONSTANTS["head"];
@@ -111,11 +115,16 @@ define([
 			/*jshint curly:false*/
 			var context;
 			var candidate;
+			var type;
+			var length;
 
-			// Check that we have result
-			if (result !== UNDEFINED) {
-				// Update args
-				args = result;
+			// Check that result is not UNDEFINED and not equals to args
+			if (result !== UNDEFINED && result !== args) {
+				// Update args to either result or result wrapped in a new array
+				args = (type = OBJECT_TOSTRING.call(result)) === TOSTRING_ARRAY  // if type is TOSTRING_ARRAY
+					|| type === TOSTRING_ARGUMENTS                                 // or type is TOSTRING_ARGUMENTS
+					? result                                                       // then result is array-like enough to be passed to .apply
+					: [ result ];                                                  // otherwise we should just wrap it in a new array
 			}
 
 			// TODO Needs cleaner implementation
