@@ -171,7 +171,7 @@ define([ "../object/base" ], function URIModule(Base) {
 			me[PATH] = Path(me[PATH]);
 		}
 	}, {
-		"displayName" : "browser/route/uri",
+		"displayName" : "core/net/uri",
 
 		"toString" : function URIToString() {
 			var me = this;
