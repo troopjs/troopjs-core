@@ -21,7 +21,7 @@ define([ "../component/base", "poly/function" ], function ConsoleLogger(Componen
 	var spec = {};
 	["info","log","debug","warn","error"].reduce(function(memo, feature) {
 			memo[feature] =
-				typeof CONSOLE != 'undefined' && CONSOLE[feature] ? CONSOLE[feature] : noop;
+				typeof CONSOLE != 'undefined' && CONSOLE[feature] ? CONSOLE[feature].bind(CONSOLE) : noop;
 			return memo;
 	}, spec);
 
