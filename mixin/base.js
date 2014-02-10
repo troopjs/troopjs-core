@@ -1,8 +1,8 @@
 /*
- * TroopJS core/object/base
+ * TroopJS core/mixin/base
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "./factory" ], function ObjectBase(Factory) {
+define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) {
 	var INSTANCE_COUNTER = 0;
 	var INSTANCE_COUNT = "instanceCount";
 
@@ -16,7 +16,7 @@ define([ "./factory" ], function ObjectBase(Factory) {
 	}, {
 		"instanceCount" : INSTANCE_COUNTER,
 
-		"displayName" : "core/object/base",
+		"displayName" : "core/mixin/base",
 
 		/**
 		 * Gives string representation of this component instance.

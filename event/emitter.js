@@ -3,7 +3,7 @@
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
 define([
-	"../object/base",
+	"../mixin/base",
 	"./constants",
 	"./config",
 	"troopjs-utils/merge",

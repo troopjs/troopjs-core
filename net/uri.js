@@ -4,11 +4,11 @@
  *
  * Parts of code from parseUri 1.2.2 Copyright Steven Levithan <stevenlevithan.com>
  */
-define([ "../object/base" ], function URIModule(Base) {
+define([ "../mixin/base" ], function URIModule(Base) {
 	"use strict";
 
 	/**
-	 * @extends core.object.base
+	 * @extends core.mixin.base
 	 */
 
 	var NULL = null;
