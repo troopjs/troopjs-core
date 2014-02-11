@@ -11,9 +11,9 @@ define([ "module", "../event/constants", "troopjs-utils/merge" ], function PubSu
 	 */
 	var config = {};
 
-		/**
-		 * @cfg {Object} runners Custom runners.
-		 */
+	/**
+	 * @cfg {Object} runners Custom runners.
+	 */
 	config[EVENT_CONST["runners"]] = {};
 
 	// Return merged config
