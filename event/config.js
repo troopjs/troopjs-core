@@ -11,14 +11,14 @@ define([ "module", "./constants", "troopjs-utils/merge" ], function EventConfigM
 	 */
 	var config = {};
 
-		/**
-		 * @cfg {String} runner Name of default runner.
-		 */
+	/**
+	 * @cfg {String} runner Name of default runner.
+	 */
 	config[CONSTANTS["runner"]] = "sequence";
 
-		/**
-		 * @cfg {Object} runners Custom runners.
-		 */
+	/**
+	 * @cfg {Object} runners Custom runners.
+	 */
 	config[CONSTANTS["runners"]] = {};
 
 	// Return merged config

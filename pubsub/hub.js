@@ -5,10 +5,9 @@
 define([
 	"../event/emitter",
 	"../event/constants",
-	"./config",
 	"troopjs-utils/merge",
 	"when"
-], function HubModule(Emitter, CONSTANTS, CONFIG, merge, when) {
+], function HubModule(Emitter, CONSTANTS, merge, when) {
 	"use strict";
 
 	/**
@@ -31,12 +30,11 @@ define([
 	 */
 
 	var UNDEFINED;
-	var NULL = null;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
-	var LENGTH = "length";
 	var MEMORY = "memory";
 	var PHASE = "phase";
 	var HEAD = CONSTANTS["head"];
@@ -46,7 +44,6 @@ define([
 	var HANDLERS = CONSTANTS["handlers"];
 	var RUNNER = CONSTANTS["runner"];
 	var RUNNERS = CONSTANTS["runners"];
-	var RE_PATTERN = CONSTANTS["pattern"];
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	/*
@@ -116,7 +113,6 @@ define([
 			var context;
 			var candidate;
 			var type;
-			var length;
 
 			// Check that result is not UNDEFINED and not equals to args
 			if (result !== UNDEFINED && result !== args) {
@@ -170,8 +166,7 @@ define([
 		/**
 		 * Emit a public event that can be subscribed by other components.
 		 *
-		 * The hub implements two runners for its handlers execution, the **sequential** is basically inherited from the
-		 * emitter parent. Additionally it's using a pipelined runner by default, in which each handler will receive muted
+		 * Publish uses a pipelined runner by default, in which each handler will receive muted
 		 * data params depending on the return value of the previous handler:
 		 *
 		 *   - The original data params from {@link #publish} if this's the first handler, or the previous handler returns `undefined`.
@@ -181,14 +176,48 @@ define([
 		 * @inheritdoc #emit
 		 * @method
 		 */
-		"publish" : COMPONENT_PROTOTYPE.emit,
+		"publish" : function publish(event, args) {
+			var me = this;
+			var handlers = me[HANDLERS];
+			var handler;
+			var candidates = [];
+			var candidatesCount = 0;
+
+			// Have event in handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
+
+				// Have HEAD in handlers
+				if (HEAD in handlers) {
+					// Get first handler
+					handler = handlers[HEAD];
+
+					// Step handlers
+					do {
+						// Push handler on candidates
+						candidates[candidatesCount++] = handler;
+					}
+						// While there is a next handler
+					while ((handler = handler[NEXT]));
+				}
+			}
+			// No event in handlers
+			else {
+				// Create handlers and store with event
+				handlers[event] = handlers = {};
+			}
+
+			// Return promise
+			return hub_pipeline.call(me, handlers, candidates, ARRAY_SLICE.call(arguments, 1));
+		},
 
 		/**
 		 * Re-publish any event that are **previously triggered**, any (new) listeners will be called with the memorized data
 		 * from the previous event publishing procedure.
 		 *
 		 * @param {String} event The event name to re-publish, dismiss if it's not yet published.
-		 * @param {Object} [context] The context to scope the {@param callback} to match.
+		 * @param {Object} [context] The context to scope the callback to match.
 		 * @param {Function} [callback] The listener function to match.
 		 * @returns {Promise}
 		 */
@@ -196,26 +225,8 @@ define([
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
-			var runners = me[RUNNERS];
-			var runner = me[RUNNER];
 			var candidates = [];
 			var candidatesCount = 0;
-			var matches;
-
-			// See if we should override event and runner
-			if ((matches = RE_PATTERN.exec(event)) !== NULL) {
-				event = matches[1];
-				runner = matches[2];
-			}
-
-			// Have runner in runners
-			if (runner in runners) {
-				runner = runners[runner];
-			}
-			// Unknown runner
-			else {
-				throw new Error("Unknown runner '" + runner + "'");
-			}
 
 			// Have event in handlers
 			if (event in handlers) {
@@ -224,7 +235,7 @@ define([
 
 				// Short out to return a resolved promise if there's no memory yet.
 				if(!(MEMORY in handlers)) {
-					return when.resolve();
+					return when.resolve(UNDEFINED);
 				}
 
 				if (HEAD in handlers) {
@@ -233,20 +244,18 @@ define([
 
 					// Iterate handlers
 					do {
-						add : {
-							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] !== context) {
-								break add;
-							}
-
-							// If no callback or callback does not match we should break
-							if (callback && handler[CALLBACK] !== callback) {
-								break add;
-							}
-
-							// Push handler on candidates
-							candidates[candidatesCount++] = handler;
+						// If no context or context does not match we should continue
+						if (context && handler[CONTEXT] !== context) {
+							continue;
 						}
+
+						// If no callback or callback does not match we should continue
+						if (callback && handler[CALLBACK] !== callback) {
+							continue;
+						}
+
+						// Push handler on candidates
+						candidates[candidatesCount++] = handler;
 					}
 						// While there's a next handler
 					while ((handler = handler[NEXT]));
@@ -259,7 +268,7 @@ define([
 			}
 
 			// Return promise
-			return runner.call(me, handlers, candidates, handlers[MEMORY]);
+			return hub_pipeline.call(me, handlers, candidates, handlers[MEMORY]);
 		},
 
 		/**
@@ -276,7 +285,7 @@ define([
 				handlers = handlers[event];
 
 				if (MEMORY in handlers) {
-					result  = handlers[MEMORY];
+					result = handlers[MEMORY];
 				}
 			}
 
@@ -285,14 +294,11 @@ define([
 	}, (function(runner, runners) {
 		var result = {};
 
-		// Update default runner from either config or prototype
-		result[RUNNER] = CONFIG[RUNNER] || runner;
-
 		// Merge runners from self, prototype and config
 		result[RUNNERS] = merge.call({}, runners, {
 			"hub_pipeline": hub_pipeline,
 			"hub_sequence": hub_sequence
-		}, CONFIG[RUNNERS]);
+		});
 
 		return result;
 	})(COMPONENT_PROTOTYPE[RUNNER], COMPONENT_PROTOTYPE[RUNNERS]));

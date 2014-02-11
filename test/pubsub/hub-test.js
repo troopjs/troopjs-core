@@ -116,7 +116,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						refute.defined(arg2);
 						count++;
 					})
-					.publish("foo/bar:hub_sequence", foo)
+					.emit("foo/bar:hub_sequence", foo)
 					.then(function () {
 						assert.same(2, count);
 					});
