@@ -5,10 +5,9 @@
 define([
 	"../event/emitter",
 	"../event/constants",
-	"./config",
 	"troopjs-utils/merge",
 	"when"
-], function HubModule(Emitter, CONSTANTS, CONFIG, merge, when) {
+], function HubModule(Emitter, CONSTANTS, merge, when) {
 	"use strict";
 
 	/**
@@ -299,7 +298,7 @@ define([
 		result[RUNNERS] = merge.call({}, runners, {
 			"hub_pipeline": hub_pipeline,
 			"hub_sequence": hub_sequence
-		}, CONFIG[RUNNERS]);
+		});
 
 		return result;
 	})(COMPONENT_PROTOTYPE[RUNNER], COMPONENT_PROTOTYPE[RUNNERS]));
