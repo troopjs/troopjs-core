@@ -2,10 +2,10 @@
 buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	"use strict";
 
-	var assert = buster.referee.assert,
-		refute = buster.referee.refute;
+	var assert = buster.referee.assert;
+	var refute = buster.referee.refute;
 
-	require( [ "troopjs-core/pubsub/hub", "when", "when/delay", "jquery" ] , function (hub, when, delay, $) {
+	require( [ "troopjs-core/pubsub/hub", "jquery", "when", "when/delay" ] , function (hub, $, when, delay) {
 
 		run({
 			"setUp" : function () {
@@ -58,8 +58,11 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 			},
 
 			"subscribe/publish async subscribers": function() {
-				var foo = "FOO", bar = "BAR";
-				return hub.subscribe("foo/bar", this, function (arg) {
+				var foo = "FOO";
+				var bar = "BAR";
+
+				return hub
+					.subscribe("foo/bar", this, function (arg) {
 						assert.same(foo, arg);
 						return when.resolve([arg, bar]);
 					})
@@ -96,20 +99,24 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 			},
 
 			"subscribe/publish - using explicit sequence runner": function () {
+				var foo = "FOO";
+				var bar = "BAR";
 				var context = this;
-				var foo = "FOO", bar = "BAR", count = 0;
-				return hub.subscribe("test", context, function (arg) {
+				var count = 0;
+
+				return hub
+					.subscribe("foo/bar", context, function (arg) {
 						assert.same(foo, arg);
 						count++;
 						return [foo, bar];
 					})
-					.subscribe("test", context, function (arg1, arg2) {
+					.subscribe("foo/bar", context, function (arg1, arg2) {
 						// Arguments received are to be same as the previous one.
 						assert.same(foo, arg1);
 						refute.defined(arg2);
 						count++;
 					})
-					.publish("test:sequence", foo)
+					.publish("foo/bar:hub_sequence", foo)
 					.then(function () {
 						assert.same(2, count);
 					});
@@ -119,21 +126,20 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 				var context = this;
 				var count = 0;
 
-				return hub.subscribe("republish", context, function(message){
+				return hub
+					.subscribe("foo/bar", context, function(message){
 						assert.equals(message, "republish");
 						count++;
 					})
-					.publish("republish", "republish")
+					.publish("foo/bar", "republish")
 					.then(function () {
-						return hub.republish("republish", context, function(message) {
+						return hub.republish("foo/bar", context, function(message) {
 								assert.equals(message, "republish");
 							})
 					});
 			},
 
 			"tearDown": function () {
-				hub.unsubscribe("test");
-				hub.unsubscribe("foo/bar");
 				hub.unsubscribe("foo/bar");
 			}
 		});
