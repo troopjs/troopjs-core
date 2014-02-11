@@ -33,10 +33,10 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
-	var LENGTH = "length";
 	var MEMORY = "memory";
 	var PHASE = "phase";
 	var HEAD = CONSTANTS["head"];
@@ -116,7 +116,6 @@ define([
 			var context;
 			var candidate;
 			var type;
-			var length;
 
 			// Check that result is not UNDEFINED and not equals to args
 			if (result !== UNDEFINED && result !== args) {
@@ -170,8 +169,7 @@ define([
 		/**
 		 * Emit a public event that can be subscribed by other components.
 		 *
-		 * The hub implements two runners for its handlers execution, the **sequential** is basically inherited from the
-		 * emitter parent. Additionally it's using a pipelined runner by default, in which each handler will receive muted
+		 * Publish uses a pipelined runner by default, in which each handler will receive muted
 		 * data params depending on the return value of the previous handler:
 		 *
 		 *   - The original data params from {@link #publish} if this's the first handler, or the previous handler returns `undefined`.
@@ -181,14 +179,25 @@ define([
 		 * @inheritdoc #emit
 		 * @method
 		 */
-		"publish" : COMPONENT_PROTOTYPE.emit,
+		"publish" : function publish(event, args) {
+			var me = this;
+
+			// Slice arguments
+			args = ARRAY_SLICE.call(arguments);
+
+			// Modify first argument
+			args[0] = event + ":hub_pipeline";
+
+			// Emit
+			return me.emit.apply(me, args);
+		},
 
 		/**
 		 * Re-publish any event that are **previously triggered**, any (new) listeners will be called with the memorized data
 		 * from the previous event publishing procedure.
 		 *
 		 * @param {String} event The event name to re-publish, dismiss if it's not yet published.
-		 * @param {Object} [context] The context to scope the {@param callback} to match.
+		 * @param {Object} [context] The context to scope the callback to match.
 		 * @param {Function} [callback] The listener function to match.
 		 * @returns {Promise}
 		 */
@@ -224,7 +233,7 @@ define([
 
 				// Short out to return a resolved promise if there's no memory yet.
 				if(!(MEMORY in handlers)) {
-					return when.resolve();
+					return when.resolve(UNDEFINED);
 				}
 
 				if (HEAD in handlers) {
@@ -284,9 +293,6 @@ define([
 		}
 	}, (function(runner, runners) {
 		var result = {};
-
-		// Update default runner from either config or prototype
-		result[RUNNER] = CONFIG[RUNNER] || runner;
 
 		// Merge runners from self, prototype and config
 		result[RUNNERS] = merge.call({}, runners, {
