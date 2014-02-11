@@ -6,8 +6,8 @@
 		"node_modules"
 	],
 	"dependencies": {
-		"troopjs-composer": "develop",
-		"troopjs-utils": "develop",
+		"troopjs-composer": "*",
+		"troopjs-utils": ">=2.1.0",
 		"poly": "~0.6",
 		"when": "~2.7"
 	}
