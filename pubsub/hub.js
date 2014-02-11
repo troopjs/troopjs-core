@@ -31,7 +31,6 @@ define([
 	 */
 
 	var UNDEFINED;
-	var NULL = null;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
 	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
@@ -46,7 +45,6 @@ define([
 	var HANDLERS = CONSTANTS["handlers"];
 	var RUNNER = CONSTANTS["runner"];
 	var RUNNERS = CONSTANTS["runners"];
-	var RE_PATTERN = CONSTANTS["pattern"];
 	var RE_PHASE = /^(?:initi|fin)alized?$/;
 
 	/*
@@ -181,15 +179,38 @@ define([
 		 */
 		"publish" : function publish(event, args) {
 			var me = this;
+			var handlers = me[HANDLERS];
+			var handler;
+			var candidates = [];
+			var candidatesCount = 0;
 
-			// Slice arguments
-			args = ARRAY_SLICE.call(arguments);
+			// Have event in handlers
+			if (event in handlers) {
+				// Get handlers
+				handlers = handlers[event];
 
-			// Modify first argument
-			args[0] = event + ":hub_pipeline";
+				// Have HEAD in handlers
+				if (HEAD in handlers) {
+					// Get first handler
+					handler = handlers[HEAD];
 
-			// Emit
-			return me.emit.apply(me, args);
+					// Step handlers
+					do {
+						// Push handler on candidates
+						candidates[candidatesCount++] = handler;
+					}
+						// While there is a next handler
+					while ((handler = handler[NEXT]));
+				}
+			}
+			// No event in handlers
+			else {
+				// Create handlers and store with event
+				handlers[event] = handlers = {};
+			}
+
+			// Return promise
+			return hub_pipeline.call(me, handlers, candidates, ARRAY_SLICE.call(arguments, 1));
 		},
 
 		/**
@@ -205,26 +226,8 @@ define([
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
-			var runners = me[RUNNERS];
-			var runner = me[RUNNER];
 			var candidates = [];
 			var candidatesCount = 0;
-			var matches;
-
-			// See if we should override event and runner
-			if ((matches = RE_PATTERN.exec(event)) !== NULL) {
-				event = matches[1];
-				runner = matches[2];
-			}
-
-			// Have runner in runners
-			if (runner in runners) {
-				runner = runners[runner];
-			}
-			// Unknown runner
-			else {
-				throw new Error("Unknown runner '" + runner + "'");
-			}
 
 			// Have event in handlers
 			if (event in handlers) {
@@ -268,7 +271,7 @@ define([
 			}
 
 			// Return promise
-			return runner.call(me, handlers, candidates, handlers[MEMORY]);
+			return hub_pipeline.call(me, handlers, candidates, handlers[MEMORY]);
 		},
 
 		/**
