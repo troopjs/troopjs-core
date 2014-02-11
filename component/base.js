@@ -73,8 +73,6 @@ define([
 	var STARTED = "started";
 	var FINALIZED = "finalized";
 	var FINISHED = "finished";
-	var INITIALIZE = "initialize";
-	var STOP = "stop";
 	var SIG = "sig";
 	var ON = "on";
 
@@ -204,7 +202,6 @@ define([
 		 */
 		"signal": function signal(_signal, args) {
 			var me = this;
-			var args = [ event, me ];
 
 			// Slice arguments
 			args = ARRAY_SLICE.call(arguments);

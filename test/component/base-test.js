@@ -14,12 +14,18 @@ buster.testCase("troopjs-core/component/base", function (run) {
 			"FINALIZED": "finalized"
 		};
 
+		run({
+			"setUp": function () {
+				this.timeout = 500;
+			},
+
 			"signal sync": function () {
 				var count = 0;
+
 				function onSignal(arg1, arg2) {
 					count++;
-					assert.same(123, arg1);
-					assert.same("abc", arg2);
+					assert.equals(arg1, 123);
+					assert.equals(arg2, "abc");
 				}
 
 				var Foo = Component.extend({
@@ -30,8 +36,8 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"sig/foo": onSignal
 				});
 
-				return Bar().signal("foo", 123, "abc").then(function () {
-					assert.same(2, count);
+				return Bar().signal("foo", 123, "abc").done(function () {
+					assert.equals(count, 2);
 				});
 			},
 
@@ -40,8 +46,8 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 				function onSignal(arg1, arg2) {
 					count++;
-					assert.same(123, arg1);
-					assert.same("abc", arg2);
+					assert.equals(arg1, 123);
+					assert.equals(arg2, "abc");
 					return delay(200);
 				}
 
@@ -53,8 +59,8 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"sig/foo": onSignal
 				});
 
-				return Bar().signal("foo", 123, "abc").then(function () {
-					assert.same(2, count);
+				return Bar().signal("foo", 123, "abc").done(function () {
+					assert.equals(count, 2);
 				});
 			},
 
@@ -63,8 +69,8 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 				function onEvent(arg1, arg2) {
 					count++;
-					assert.same(123, arg1);
-					assert.same("abc", arg2);
+					assert.equals(arg1, 123);
+					assert.equals(arg2, "abc");
 					return delay(200);
 				}
 
@@ -78,9 +84,9 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 				var bar = Bar();
 
-				return bar.start().then(function () {
-					return bar.emit("foo", 123, "abc").then(function () {
-						assert.same(2, count);
+				return bar.start().done(function () {
+					return bar.emit("foo", 123, "abc").done(function () {
+						assert.equals(count, 2);
 					});
 				});
 			},
@@ -89,22 +95,24 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				this.timeout = 500;
 				var foo = Component.create({
 					"sig/start": function() {
-						delay(200);
+						return delay(200);
 					},
 					"sig/finalize": function() {
-						delay(200);
+						return delay(200);
 					}
 				});
-				assert.same(PHASES.INITIAL, foo.phase);
-				var started = foo.start().then(function() {
-					assert.same(PHASES.STARTED, foo.phase);
-					var stopped = foo.stop().then(function() {
-						assert.same(PHASES.FINALIZED, foo.phase);
+
+				assert.equals(foo.phase, PHASES.INITIAL);
+
+				var started = foo.start().done(function() {
+					assert.equals(foo.phase, PHASES.STARTED);
+					var stopped = foo.stop().done(function() {
+						assert.equals(foo.phase, PHASES.FINALIZED);
 					});
-					assert.same(PHASES.STOP, foo.phase);
+					assert.equals(foo.phase, PHASES.STOP);
 					return stopped;
 				});
-				assert.same(PHASES.INITIALIZE, foo.phase);
+				assert.equals(foo.phase, PHASES.INITIALIZE);
 				return started;
 			},
 
@@ -115,11 +123,11 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					foo.stop();
 				});
 
-				return foo.start().then(function() {
+				return foo.start().done(function() {
 					// Invalid call to start after started.
 					assert.exception(function() { foo.start(); });
 
-					return foo.stop().then(function() {
+					return foo.stop().done(function() {
 						// Invalid call to stop after stopped.
 						assert.exception(function() { foo.stop(); });
 					});
