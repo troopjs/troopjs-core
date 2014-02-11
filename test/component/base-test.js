@@ -36,7 +36,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"sig/foo": onSignal
 				});
 
-				return Bar().signal("foo", 123, "abc").done(function () {
+				return Bar().signal("foo", 123, "abc").then(function () {
 					assert.equals(count, 2);
 				});
 			},
@@ -59,7 +59,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					"sig/foo": onSignal
 				});
 
-				return Bar().signal("foo", 123, "abc").done(function () {
+				return Bar().signal("foo", 123, "abc").then(function () {
 					assert.equals(count, 2);
 				});
 			},
@@ -84,8 +84,8 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 				var bar = Bar();
 
-				return bar.start().done(function () {
-					return bar.emit("foo", 123, "abc").done(function () {
+				return bar.start().then(function () {
+					return bar.emit("foo", 123, "abc").then(function () {
 						assert.equals(count, 2);
 					});
 				});
@@ -104,9 +104,9 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 				assert.equals(foo.phase, PHASES.INITIAL);
 
-				var started = foo.start().done(function() {
+				var started = foo.start().then(function() {
 					assert.equals(foo.phase, PHASES.STARTED);
-					var stopped = foo.stop().done(function() {
+					var stopped = foo.stop().then(function() {
 						assert.equals(foo.phase, PHASES.FINALIZED);
 					});
 					assert.equals(foo.phase, PHASES.STOP);
@@ -123,11 +123,11 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					foo.stop();
 				});
 
-				return foo.start().done(function() {
+				return foo.start().then(function() {
 					// Invalid call to start after started.
 					assert.exception(function() { foo.start(); });
 
-					return foo.stop().done(function() {
+					return foo.stop().then(function() {
 						// Invalid call to stop after stopped.
 						assert.exception(function() { foo.stop(); });
 					});
