@@ -245,20 +245,18 @@ define([
 
 					// Iterate handlers
 					do {
-						add : {
-							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] !== context) {
-								break add;
-							}
-
-							// If no callback or callback does not match we should break
-							if (callback && handler[CALLBACK] !== callback) {
-								break add;
-							}
-
-							// Push handler on candidates
-							candidates[candidatesCount++] = handler;
+						// If no context or context does not match we should continue
+						if (context && handler[CONTEXT] !== context) {
+							continue;
 						}
+
+						// If no callback or callback does not match we should continue
+						if (callback && handler[CALLBACK] !== callback) {
+							continue;
+						}
+
+						// Push handler on candidates
+						candidates[candidatesCount++] = handler;
 					}
 						// While there's a next handler
 					while ((handler = handler[NEXT]));
@@ -288,7 +286,7 @@ define([
 				handlers = handlers[event];
 
 				if (MEMORY in handlers) {
-					result  = handlers[MEMORY];
+					result = handlers[MEMORY];
 				}
 			}
 
