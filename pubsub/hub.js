@@ -4,8 +4,9 @@
  */
 define([
 	"../event/emitter",
-	"./runner/pipeline"
-], function HubModule(Emitter, pipeline) {
+	"./runner/pipeline",
+	"when"
+], function HubModule(Emitter, pipeline, when) {
 	"use strict";
 
 	/**
@@ -27,7 +28,9 @@ define([
 	 * @extends core.event.emitter
 	 */
 
+	var UNDEFINED;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
+	var ARRAY_PUSH = Array.prototype.push;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var MEMORY = "memory";
@@ -75,6 +78,7 @@ define([
 
 			// Modify first argument
 			arguments[0] = event;
+
 			// Delegate the actual emitting to event emitter.
 			return me.emit.apply(me, arguments);
 		},
@@ -90,6 +94,12 @@ define([
 		 */
 		"republish": function republish(type, context, callback) {
 			var me = this;
+			var handlers;
+
+			// Return fast if we don't have handlers for type, or those handlers have no MEMORY
+			if ((handlers = me[HANDLERS][type]) === UNDEFINED || !(MEMORY in handlers)) {
+				return when.resolve(UNDEFINED);
+			}
 
 			var event = {};
 			event[TYPE] = type;
@@ -97,10 +107,12 @@ define([
 			event[CONTEXT] = context;
 			event[CALLBACK] = callback;
 
-			// Modify first argument
-			arguments[0] = event;
+			var args = [ event ];
+
+			ARRAY_PUSH.call(event, handlers[MEMORY]);
+
 			// Delegate the actual emitting to event emitter.
-			return me.emit.apply(me, arguments);
+			return me.emit.apply(me, args);
 		},
 
 		/**
@@ -109,19 +121,9 @@ define([
 		 * @returns {*} Value in MEMORY
 		 */
 		"peek": function peek(type) {
-			var me = this;
-			var handlers = me[HANDLERS];
-			var result;
+			var handlers;
 
-			if (type in handlers) {
-				handlers = handlers[type];
-
-				if (MEMORY in handlers) {
-					result = handlers[MEMORY];
-				}
-			}
-
-			return result;
+			return ((handlers = this[HANDLERS][type]) !== UNDEFINED) && handlers[MEMORY];
 		}
 	});
 });

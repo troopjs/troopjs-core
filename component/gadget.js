@@ -82,20 +82,17 @@ define([
 			var resultsLength = 0;
 			var i;
 			var iMax;
-			var type;
-			var memory;
 
 			// Make sure we have HUB specials
 			if ((specials = me.constructor.specials[HUB]) !== UNDEFINED) {
 				// Iterate specials
 				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
 					special = specials[i];
-					type = specials[TYPE];
 
 					// Check if we need to republish
-					if (special[FEATURES] === "memory" && (memory = hub.peek(type) !== UNDEFINED)) {
+					if (special[FEATURES] === "memory") {
 						// Republish, store result
-						results[resultsLength++] = hub.republish(type, me, special[VALUE], memory);
+						results[resultsLength++] = hub.republish(special[TYPE], me, special[VALUE]);
 					}
 				}
 			}
