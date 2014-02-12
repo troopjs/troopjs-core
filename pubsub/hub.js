@@ -108,10 +108,8 @@ define([
 			event[CALLBACK] = callback;
 
 			var args = [ event ];
-
-			ARRAY_PUSH.call(event, handlers[MEMORY]);
-
-			// Delegate the actual emitting to event emitter.
+			args = args.concat(handlers[MEMORY]);
+			// Delegate the actual emitting to event emitter, with memorized list of values.
 			return me.emit.apply(me, args);
 		},
 
