@@ -7,59 +7,56 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 	require( [ "troopjs-core/event/emitter", "when", "when/delay" ] , function (Emitter, when, delay) {
 
 		run({
-			"on/emit" : function (done) {
+			"on/emit" : function () {
 				var arg = "TEST";
 				var context = this;
 
-				Emitter()
+				return Emitter()
 					.on("test", context, function onTest(test) {
 						assert.same(arg, test);
 					})
-					.emit("test", arg)
-					.then(done);
+					.emit("test", arg);
 			},
 
-			"on/emit again": function(done) {
+			"on/emit again": function() {
 				var arg = "TEST";
 				var context = this;
 
 				var emitter = Emitter();
 				var count = 0;
 
-				emitter
+				return emitter
 					.on("test", context, function() {
 						count++;
 					})
 					.emit("test", arg)
 					.then(function () {
-						emitter.emit("test", arg)
+						return emitter.emit("test", arg)
 							.then(function () {
 								assert.equals(count, 2);
-							})
-							.then(done)
+							});
 					});
 			},
 
-			"on/emit again with different arg": function(done) {
+			"on/emit again with different arg": function() {
 				var emitter = Emitter();
 				var context = this;
 				var last;
 
-				emitter
+				return emitter
 					.on("test", context, function(test) {
 						last = test;
 					})
 					.emit("test", "test")
 					.then(function () {
-						emitter.emit("test", "test2")
+						return emitter.emit("test", "test2")
 							.then(function () {
 								assert.equals(last, "test2");
-							})
-							.then(done);
+							});
 					});
 			},
 
-			"on/emit 2 emitters": function(done) {
+			"on/emit 2 emitters": function() {
 				var emitter1 = Emitter();
 				var emitter2 = Emitter();
 
@@ -73,12 +70,12 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					assert.same(arg, 2);
 				});
 
-				emitter1.emit("one", "one").then(function () {
-					emitter2.emit("two", 2).then(done);
+				return emitter1.emit("one", "one").then(function () {
+					return emitter2.emit("two", 2);
 				});
 			},
 
-			"on/emit single handler shares two context": function(done) {
+			"on/emit single handler shares two context": function() {
 				var emitter = Emitter();
 				var count = 0;
 				var ctx1 = {}, ctx2 = {}, handler = function() {
@@ -89,20 +86,19 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				emitter.on("one", ctx1, handler);
 				emitter.on("one", ctx2, handler);
 
-				emitter.emit("one").then(function () {
+				return emitter.emit("one").then(function () {
 					assert.same(2, count);
-					done();
 				});
 			},
 
-			"on/emit async subscribers": function(done) {
+			"on/emit async subscribers": function() {
 				var emitter = Emitter();
 				var context = this;
 
 				this.timeout = 1500;
 				var count = 0;
 
-				emitter
+				return emitter
 					.on("one", context, function () {
 						return ++count;
 					})
@@ -117,11 +113,10 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 						assert.same(first, 1);
 						assert.same(second, 2);
 						assert.same(third, 3);
-					})
-					.then(done);
+					});
 			},
 
-			"off/emit with context and callback": function(done) {
+			"off/emit with context and callback": function() {
 				var emitter = Emitter();
 				var context = this;
 				var last;
@@ -134,24 +129,23 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					last = "two";
 				};
 
-				emitter
+				return emitter
 					.on("test", context, one)
 					.on("test", context, two)
 					.emit("test")
 					.then(function () {
 						assert.equals(last, "two");
 
-						emitter
+						return emitter
 							.off("test", context, two)
 							.emit("test")
 							.then(function () {
 								assert.equals(last, "one");
-							})
-							.then(done);
+							});
 					});
 			},
 
-			"off/emit with context": function(done) {
+			"off/emit with context": function() {
 				var emitter = Emitter();
 				var context = this;
 				var last;
@@ -164,24 +158,23 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					last = "two";
 				};
 
-				emitter
+				return emitter
 					.on("test", {}, one)
 					.on("test", context, two)
 					.emit("test")
 					.then(function () {
 						assert.equals(last, "two");
 
-						emitter
+						return emitter
 							.off("test", context)
 							.emit("test")
 							.then(function () {
 								assert.equals(last, "one");
-							})
-							.then(done);
+							});
 					});
 			},
 
-			"off/emit": function(done) {
+			"off/emit": function() {
 				var emitter = Emitter();
 				var context = this;
 				var last;
@@ -194,7 +187,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					last = "two";
 				};
 
-				emitter
+				return emitter
 					.on("test", context, one)
 					.on("test", context, two)
 					.emit("test")
@@ -203,21 +196,20 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 						last = "three";
 
-						emitter
+						return emitter
 							.off("test")
 							.emit("test")
 							.then(function () {
 								assert.equals(last, "three");
-							})
-							.then(done);
+							});
 					});
 			},
 
-			"on/emit reject": function (done) {
+			"on/emit reject": function () {
 				var emitter = Emitter();
 				var context = this;
 
-				emitter
+				return emitter
 					.on("test", context, function (pass) {
 						return pass
 							? when.resolve()
@@ -233,14 +225,13 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 						assert(true);
 					})
 					.ensure(function () {
-						emitter
+						return emitter
 							.emit("test", true)
 							.then(function () {
 								assert(true);
 							}, function() {
 								assert(false);
-							})
-							.ensure(done);
+							});
 					});
 			}
 		});

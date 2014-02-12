@@ -5,7 +5,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
 
-	require( [ "troopjs-core/pubsub/hub", "jquery", "when", "when/delay" ] , function (hub, $, when, delay) {
+	require( [ "troopjs-core/pubsub/hub", "troopjs-core/pubsub/runner/sequence", "jquery", "when", "when/delay" ] , function (hub, sequence, $, when, delay) {
 
 		run({
 			"setUp" : function () {
@@ -116,26 +116,12 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						refute.defined(arg2);
 						count++;
 					})
-					.emit("foo/bar:hub_sequence", foo)
+					.emit({
+						"type" : "foo/bar",
+						"runner" : sequence
+					}, foo)
 					.then(function () {
 						assert.same(2, count);
-					});
-			},
-
-			"republish": function () {
-				var context = this;
-				var count = 0;
-
-				return hub
-					.subscribe("foo/bar", context, function(message){
-						assert.equals(message, "republish");
-						count++;
-					})
-					.publish("foo/bar", "republish")
-					.then(function () {
-						return hub.republish("foo/bar", context, function(message) {
-								assert.equals(message, "republish");
-							})
 					});
 			},
 

@@ -57,7 +57,6 @@ define([
 	var UNDEFINED;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var EMITTER_PROTO = Emitter.prototype;
 	var EMITTER_ON = EMITTER_PROTO.on;
 	var EMITTER_OFF = EMITTER_PROTO.off;
@@ -203,14 +202,11 @@ define([
 		"signal": function signal(_signal, args) {
 			var me = this;
 
-			// Slice arguments
-			args = ARRAY_SLICE.call(arguments);
-
 			// Modify first argument
-			args[0] = "sig/" + _signal;
+			arguments[0] = "sig/" + _signal;
 
 			// Emit
-			return me.emit.apply(me, args);
+			return me.emit.apply(me, arguments);
 		},
 
 		/**

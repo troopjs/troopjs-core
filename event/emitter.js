@@ -4,11 +4,8 @@
  */
 define([
 	"../mixin/base",
-	"./constants",
-	"./config",
-	"troopjs-utils/merge",
-	"when"
-], function EventEmitterModule(Base, CONSTANTS, CONFIG, merge, when) {
+	"./runner/sequence"
+], function EventEmitterModule(Base, sequence) {
 	"use strict";
 
 	/**
@@ -22,61 +19,23 @@ define([
 	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
 	 *
 	 * @class core.event.emitter
-	 * @extends core.object.base
+	 * @extends core.mixin.base
 	 */
 
 	var UNDEFINED;
-	var NULL = null;
 	var ARRAY_SLICE = Array.prototype.slice;
-	var HANDLERS = CONSTANTS["handlers"];
-	var RUNNER = CONSTANTS["runner"];
-	var RUNNERS = CONSTANTS["runners"];
-	var CONTEXT = CONSTANTS["context"];
-	var CALLBACK = CONSTANTS["callback"];
-	var DATA = CONSTANTS["data"];
-	var HEAD = CONSTANTS["head"];
-	var TAIL = CONSTANTS["tail"];
-	var NEXT = CONSTANTS["next"];
-	var MODIFIED = CONSTANTS["modified"];
-	var PATTERN = CONSTANTS["pattern"];
-
-	/*
-	 * Internal runner that executes candidates in sequence without overlap
-	 * @private
-	 * @param {Object} handlers List of handlers
-	 * @param {Array} candidates Array of candidates
-	 * @param {Array} args Initial arguments
-	 * @returns {Promise}
-	 */
-	function sequence(handlers, candidates, args) {
-		var results = [];
-		var resultsCount = 0;
-		var candidatesCount = 0;
-
-		/*
-		 * Internal function for sequential execution of candidates
-		 * @private
-		 * @param {Array} [result] result from previous handler callback
-		 * @param {Boolean} [skip] flag indicating if this result should be skipped
-		 * @return {Promise} promise of next handler callback execution
-		 */
-		var next = function (result, skip) {
-			/*jshint curly:false*/
-			var candidate;
-
-			// Store result if no skip
-			if (skip !== true) {
-				results[resultsCount++] = result;
-			}
-
-			// Return promise of next callback, or a promise resolved with result
-			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
-				? when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
-				: when.resolve(results);
-		};
-
-		return next(args, true);
-	}
+	var OBJECT_TOSTRING = Object.prototype.toString;
+	var TOSTRING_STRING = "[object String]";
+	var HANDLERS = "handlers";
+	var TYPE = "type";
+	var RUNNER = "runner";
+	var CONTEXT = "context";
+	var CALLBACK = "callback";
+	var DATA = "data";
+	var HEAD = "head";
+	var TAIL = "tail";
+	var NEXT = "next";
+	var MODIFIED = "modified";
 
 	return Base.extend(function EventEmitter() {
 		this[HANDLERS] = {};
@@ -84,14 +43,14 @@ define([
 		"displayName" : "core/event/emitter",
 
 		/**
-		 * Adds a listener for the specified event.
-		 * @param {String} event The event name to subscribe to.
-		 * @param {Object} context The context to scope the {@param callback} to.
+		 * Adds a listener for the specified event type.
+		 * @param {String} type The event type to subscribe to.
+		 * @param {Object} context The context to scope the callback to.
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
 		 * @returns this
 		 */
-		"on" : function on(event, context, callback, data) {
+		"on" : function on(type, context, callback, data) {
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
@@ -102,9 +61,9 @@ define([
 			}
 
 			// Have handlers
-			if (event in handlers) {
+			if (type in handlers) {
 				// Get handlers
-				handlers = handlers[event];
+				handlers = handlers[type];
 
 				// Create new handler
 				handler = {};
@@ -123,8 +82,8 @@ define([
 			}
 			// No handlers
 			else {
-				// Create event handlers
-				handlers = handlers[event] = {};
+				// Create type handlers
+				handlers = handlers[type] = {};
 
 				// Create head and tail
 				handlers[HEAD] = handlers[TAIL] = handler = {};
@@ -142,15 +101,15 @@ define([
 		},
 
 		/**
-		 * Remove listener(s) from a subscribed event, if no listener is specified,
-		 * remove all listeners of this event.
+		 * Remove callback(s) from a subscribed event type, if no callback is specified,
+		 * remove all callbacks of this type.
 		 *
-		 * @param {String} event The event that the listener subscribes to.
-		 * @param {Object} [context] The context to scope the {@param callback} to remove.
-		 * @param {Function} [callback] The event listener function to remove.
+		 * @param {String} type The event type subscribed to
+		 * @param {Object} [context] The context to scope the callback to remove
+		 * @param {Function} [callback] The event listener function to remove
 		 * @returns this
 		 */
-		"off" : function off(event, context, callback) {
+		"off" : function off(type, context, callback) {
 			var me = this;
 			var handlers = me[HANDLERS];
 			var handler;
@@ -158,17 +117,14 @@ define([
 			var tail;
 
 			// Have handlers
-			if (event in handlers) {
+			if (type in handlers) {
 				// Get handlers
-				handlers = handlers[event];
+				handlers = handlers[type];
 
 				// Have HEAD in handlers
 				if (HEAD in handlers) {
-					// Get first handler
-					handler = handlers[HEAD];
-
 					// Iterate handlers
-					do {
+					for (handler = handlers[HEAD]; handler !== UNDEFINED; handler = handler[NEXT]) {
 						// Should we remove?
 						remove : {
 							// If no context or context does not match we should break
@@ -194,8 +150,6 @@ define([
 							tail = tail[NEXT] = handler;
 						}
 					}
-						// While there's a next handler
-					while ((handler = handler[NEXT]));
 
 					// If we have both head and tail we should update handlers
 					if (head && tail) {
@@ -232,74 +186,39 @@ define([
 		 *  with the same argument data specified by the {@link #emit} function.
 		 *  Each handler will wait for the completion for the previous one if it returns a promise.
 		 *
-		 * @param {String} event The event name to emit
+		 * @param {String|Object} event The event type to emit, or an event object
 		 * @param {...*} [args] Data params that are passed to the listener function.
-		 * @returns {Promise} promise Promise of the return values yield from the listeners at all.
+		 * @returns {*} Result returned from runner.
 		 */
 		"emit" : function emit(event, args) {
 			var me = this;
+			var type = event;
 			var handlers = me[HANDLERS];
-			var handler;
-			var runners = me[RUNNERS];
-			var runner = me[RUNNER];
-			var candidates = [];
-			var candidatesCount = 0;
-			var matches;
+			var runner = sequence;
 
-			// See if we should override event and runner
-			if ((matches = PATTERN.exec(event)) !== NULL) {
-				event = matches[1];
-				runner = matches[2];
+			// If event is a plain string, convert to object with props
+			if (OBJECT_TOSTRING.call(event) === TOSTRING_STRING) {
+				event = {};
+				event[RUNNER] = runner;
+				event[TYPE] = type;
 			}
-
-			// Have runner in runners
-			if (runner in runners) {
-				runner = runners[runner];
+			// If event duck-types an event object we just override or use defaults
+			else if (TYPE in event) {
+				event[RUNNER] = runner = event[RUNNER] || runner;
+				type = event[TYPE];
 			}
-			// Unknown runner
+			// Otherwise something is wrong
 			else {
-				throw new Error("Unknown runner '" + runner + "'");
+				throw Error("first argument has to be of type 'String' or have a '" + TYPE + "' property");
 			}
 
-			// Have event in handlers
-			if (event in handlers) {
-				// Get handlers
-				handlers = handlers[event];
+			// Get or create handlers[type] as handlers
+			handlers = type in handlers
+				? handlers[type]
+				: handlers[type] = {};
 
-				// Have HEAD in handlers
-				if (HEAD in handlers) {
-					// Get first handler
-					handler = handlers[HEAD];
-
-					// Step handlers
-					do {
-						// Push handler on candidates
-						candidates[candidatesCount++] = handler;
-					}
-					// While there is a next handler
-					while ((handler = handler[NEXT]));
-				}
-			}
-			// No event in handlers
-			else {
-				// Create handlers and store with event
-				handlers[event] = handlers = {};
-			}
-
-			// Return promise
-			return runner.call(me, handlers, candidates, ARRAY_SLICE.call(arguments, 1));
+			// Return result from runner
+			return runner.call(me, event, handlers, ARRAY_SLICE.call(arguments, 1));
 		}
-	}, (function () {
-		var result = {};
-
-		// Set default runner
-		result[RUNNER] = CONFIG[RUNNER];
-
-		// Set available runners
-		result[RUNNERS] = merge.call({}, {
-			"sequence": sequence
-		}, CONFIG[RUNNERS]);
-
-		return result;
-	})());
+	});
 });

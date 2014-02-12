@@ -2,7 +2,11 @@
  * TroopJS core/component/gadget
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
+define([
+	"./base",
+	"when",
+	"../pubsub/hub"
+],function GadgetModule(Component, when, hub) {
 	"use strict";
 
 	/**
@@ -47,7 +51,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var TYPE = "type";
 	var VALUE = "value";
 	var HUB = "hub";
-	var HUB_PUBLISH = hub.publish;
 
 	return Component.extend({
 		"displayName" : "core/component/gadget",
@@ -66,7 +69,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 					special = specials[i];
 
 					// Subscribe
-					me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
+					hub.subscribe(special[TYPE], me, special[VALUE], special[FEATURES]);
 				}
 			}
 		},
@@ -79,17 +82,24 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 			var resultsLength = 0;
 			var i;
 			var iMax;
+			var type;
+			var memory;
 
 			// Make sure we have HUB specials
 			if ((specials = me.constructor.specials[HUB]) !== UNDEFINED) {
 				// Iterate specials
 				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
 					special = specials[i];
+					type = specials[TYPE];
 
 					// Check if we need to republish
-					if (special[FEATURES] === "memory") {
+					if (special[FEATURES] === "memory" && (memory = hub.peek(type) !== UNDEFINED)) {
 						// Republish, store result
-						results[resultsLength++] = me.republish(special[TYPE], special[VALUE]);
+						results[resultsLength++] = hub.publish.apply(hub, {
+							"type" : type,
+							"context": me,
+							"callback": special[VALUE]
+						}, memory);
 					}
 				}
 			}
@@ -130,14 +140,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 * @inheritdoc core.pubsub.hub#publish
 		 */
 		"publish" : function publish() {
-			return HUB_PUBLISH.apply(hub, arguments);
-		},
-
-		/**
-		 * @inheritdoc core.pubsub.hub#republish
-		 */
-		"republish" : function republish(event, callback, senile) {
-			return hub.republish(event, this, callback, senile);
+			return hub.publish.apply(hub, arguments);
 		},
 
 		/**
