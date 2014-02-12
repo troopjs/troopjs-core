@@ -137,6 +137,13 @@ define([
 		},
 
 		/**
+		 * @inheritdoc core.pubsub.hub#republish
+		 */
+		"republish" : function republish() {
+			return hub.republish.apply(hub, arguments);
+		},
+
+		/**
 		 * @inheritdoc core.pubsub.hub#subscribe
 		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
