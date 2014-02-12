@@ -254,6 +254,22 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						});
 					})
 				});
+			},
+
+			"publish/subscribe - memory" : function() {
+				var spy = this.spy();
+				var g1 = Gadget.create({
+					"hub:memory/foo/bar": function() {
+						spy.apply(spy,arguments);
+					}
+				});
+
+				return g1.publish("foo/bar", "foo", "bar").then(function() {
+					return g1.start().then(function() {
+						assert.calledOnce(spy);
+						assert.calledWithExactly(spy, "foo", "bar");
+					});
+				});
 			}
 		});
 	});

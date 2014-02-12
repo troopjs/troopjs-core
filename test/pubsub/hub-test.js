@@ -125,6 +125,20 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 					});
 			},
 
+			"republish with context": function() {
+				var context = {"foo": "bar"};
+				return hub.publish("foo/bar", "republish").then(function() {
+
+					hub.subscribe("foo/bar", null, function() {
+						assert.fail();
+					});
+					hub.subscribe("foo/bar", context, function(message) {
+						assert.equals(message, "republish");
+					});
+					return hub.republish("foo/bar", context);
+				});
+			},
+
 			"tearDown": function () {
 				hub.unsubscribe("foo/bar");
 			}
