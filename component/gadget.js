@@ -95,11 +95,7 @@ define([
 					// Check if we need to republish
 					if (special[FEATURES] === "memory" && (memory = hub.peek(type) !== UNDEFINED)) {
 						// Republish, store result
-						results[resultsLength++] = hub.publish.apply(hub, {
-							"type" : type,
-							"context": me,
-							"callback": special[VALUE]
-						}, memory);
+						results[resultsLength++] = hub.republish(type, me, special[VALUE], memory);
 					}
 				}
 			}

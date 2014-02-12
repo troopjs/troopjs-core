@@ -28,8 +28,8 @@ define([
 	 */
 
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
-	var OBJECT_TOSTRING = Object.prototype.toString;
-	var STRING_TOSTRING = "[object String]";
+	var CONTEXT = "context";
+	var CALLBACK = "callback";
 	var MEMORY = "memory";
 	var HANDLERS = "handlers";
 	var RUNNER = "runner";
@@ -55,35 +55,51 @@ define([
 		/**
 		 * Emit a public event that can be subscribed by other components.
 		 *
-		 * Publish uses a pipelined runner by default, in which each handler will receive muted
+		 * Handlers are run in a pipeline, in which each handler will receive muted
 		 * data params depending on the return value of the previous handler:
 		 *
 		 *   - The original data params from {@link #publish} if this's the first handler, or the previous handler returns `undefined`.
 		 *   - One value as the single argument if the previous handler return a non-array.
 		 *   - Each argument value deconstructed from the returning array of the previous handler.
 		 *
-		 * @inheritdoc #emit
+		 * @param {String} type The topic to publish.
+		 * @param {...*} [args] Additional params that are passed to the handler function.
 		 * @method
 		 */
-		"publish" : function publish(event, args) {
+		"publish" : function publish(type, args) {
 			var me = this;
-			var type = event;
 
-			// If event is a plain string, convert to object with props
-			if (OBJECT_TOSTRING.call(event) === STRING_TOSTRING) {
-				event = {};
-				event[TYPE] = type;
-				event[RUNNER] = pipeline;
-			}
-			// If event duck-types an event object we just override or use defaults
-			else if (TYPE in event) {
-				event[RUNNER] = event[RUNNER] || pipeline;
-			}
+			var event = {};
+			event[TYPE] = type;
+			event[RUNNER] = pipeline;
 
 			// Modify first argument
 			arguments[0] = event;
+			// Delegate the actual emitting to event emitter.
+			return me.emit.apply(me, arguments);
+		},
 
-			// Emit
+		/**
+		 * Re-publish any event that are **previously published**, any (new) listeners will be called with the memorized data
+		 * from the previous event publishing procedure.
+		 *
+		 * @param {String} type The topic to re-publish, dismiss if it's not yet published.
+		 * @param {Object} [context] The context to scope the handler to match with.
+		 * @param {Function} [callback] The handler function to match with.
+		 * @returns {Promise}
+		 */
+		"republish": function republish(type, context, callback) {
+			var me = this;
+
+			var event = {};
+			event[TYPE] = type;
+			event[RUNNER] = pipeline;
+			event[CONTEXT] = context;
+			event[CALLBACK] = callback;
+
+			// Modify first argument
+			arguments[0] = event;
+			// Delegate the actual emitting to event emitter.
 			return me.emit.apply(me, arguments);
 		},
 
