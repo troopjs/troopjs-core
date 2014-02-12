@@ -178,15 +178,14 @@ define([
 		 * Trigger an event which notifies each of the listeners of their subscribing,
 		 * optionally pass data values to the listeners.
 		 *
-		 * ## Emit runners
-		 * {@link core.event.emitter#runners} defines runners that determinate how the handler functions are to be executed,
-		 * which can be overridden by sub classes which could define it's own preference for handlers execution.
-		 *
 		 *  A sequential runner, is the default runner for this module, in which all handlers are running
 		 *  with the same argument data specified by the {@link #emit} function.
 		 *  Each handler will wait for the completion for the previous one if it returns a promise.
 		 *
 		 * @param {String|Object} event The event type to emit, or an event object
+		 * @param {String} [event.type] The event type name.
+		 * @param {Function} [event.runner] The runner function that determinate how the handlers are executed, overrides the
+		 * default behaviour of the event emitting.
 		 * @param {...*} [args] Data params that are passed to the listener function.
 		 * @returns {*} Result returned from runner.
 		 */
