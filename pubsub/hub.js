@@ -30,7 +30,6 @@ define([
 
 	var UNDEFINED;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
-	var ARRAY_PUSH = Array.prototype.push;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var MEMORY = "memory";
@@ -112,8 +111,8 @@ define([
 			// Prepare arguments
 			var args = [ event ];
 
-			// Push handlers[MEMORY] on args
-			ARRAY_PUSH.apply(args, handlers[MEMORY]);
+			// Concat handlers[MEMORY]
+			args.concat(handlers[MEMORY]);
 
 			// Delegate the actual emitting to event emitter, with memorized list of values.
 			return me.emit.apply(me, args);
