@@ -3,6 +3,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 	"use strict";
 
 	var assert = buster.referee.assert;
+	var refute = buster.referee.refute;
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_CONCAT = ARRAY_PROTO.concat;
@@ -257,20 +258,29 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 			},
 
 			"publish/subscribe - memory" : function() {
-				var spy = this.spy();
+				var spy1 = this.spy();
+				var spy2 = this.spy();
+
 				var g1 = Gadget.create({
 					"hub:memory/foo/bar": function() {
-						spy.apply(spy,arguments);
+						spy1.apply(spy1,arguments);
 					},
 					"hub/foo/bar": function() {
-						assert.fail("non-memorized method should not be called.");
+						spy2.apply(spy1, arguments);
 					}
 				});
 
 				return g1.publish("foo/bar", "foo", "bar").then(function() {
+
+					// None of them should be called because component not yet started.
+					refute.called(spy1);
+					refute.called(spy2);
+
 					return g1.start().then(function() {
-						assert.calledOnce(spy);
-						assert.calledWithExactly(spy, "foo", "bar");
+
+						// Only the handler declared with memory if is called.
+						assert.calledWithExactly(spy1, "foo", "bar");
+						refute.called(spy2);
 					});
 				});
 			}

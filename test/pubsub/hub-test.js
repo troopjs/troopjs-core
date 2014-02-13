@@ -130,7 +130,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 				return hub.publish("foo/bar", "republish").then(function() {
 
 					hub.subscribe("foo/bar", null, function() {
-						assert.fail();
+						assert(false, "handler from other context should not be called.");
 					});
 					hub.subscribe("foo/bar", context, function(message) {
 						assert.equals(message, "republish");
