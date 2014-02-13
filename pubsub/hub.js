@@ -72,6 +72,7 @@ define([
 		"publish" : function publish(type, args) {
 			var me = this;
 
+			// Prepare event object
 			var event = {};
 			event[TYPE] = type;
 			event[RUNNER] = pipeline;
@@ -101,14 +102,19 @@ define([
 				return when.resolve(UNDEFINED);
 			}
 
+			// Prepare event object
 			var event = {};
 			event[TYPE] = type;
 			event[RUNNER] = pipeline;
 			event[CONTEXT] = context;
 			event[CALLBACK] = callback;
 
+			// Prepare arguments
 			var args = [ event ];
-			args = args.concat(handlers[MEMORY]);
+
+			// Push handlers[MEMORY] on args
+			ARRAY_PUSH.apply(args, handlers[MEMORY]);
+
 			// Delegate the actual emitting to event emitter, with memorized list of values.
 			return me.emit.apply(me, args);
 		},
@@ -121,6 +127,7 @@ define([
 		"peek": function peek(type) {
 			var handlers;
 
+			// Return handlers[type][MEMORY]
 			return ((handlers = this[HANDLERS][type]) !== UNDEFINED) && handlers[MEMORY];
 		}
 	});
