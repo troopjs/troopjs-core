@@ -2,7 +2,11 @@
  * TroopJS core/component/gadget
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, when, hub) {
+define([
+	"./base",
+	"when",
+	"../pubsub/hub"
+],function GadgetModule(Component, when, hub) {
 	"use strict";
 
 	/**
@@ -47,7 +51,6 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 	var TYPE = "type";
 	var VALUE = "value";
 	var HUB = "hub";
-	var HUB_PUBLISH = hub.publish;
 
 	return Component.extend({
 		"displayName" : "core/component/gadget",
@@ -66,7 +69,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 					special = specials[i];
 
 					// Subscribe
-					me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
+					hub.subscribe(special[TYPE], me, special[VALUE], special[FEATURES]);
 				}
 			}
 		},
@@ -89,7 +92,7 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 					// Check if we need to republish
 					if (special[FEATURES] === "memory") {
 						// Republish, store result
-						results[resultsLength++] = me.republish(special[TYPE], special[VALUE]);
+						results[resultsLength++] = hub.republish(special[TYPE], me, special[VALUE]);
 					}
 				}
 			}
@@ -130,14 +133,14 @@ define([ "./base", "when", "../pubsub/hub" ], function GadgetModule(Component, w
 		 * @inheritdoc core.pubsub.hub#publish
 		 */
 		"publish" : function publish() {
-			return HUB_PUBLISH.apply(hub, arguments);
+			return hub.publish.apply(hub, arguments);
 		},
 
 		/**
 		 * @inheritdoc core.pubsub.hub#republish
 		 */
-		"republish" : function republish(event, callback, senile) {
-			return hub.republish(event, this, callback, senile);
+		"republish" : function republish() {
+			return hub.republish.apply(hub, arguments);
 		},
 
 		/**

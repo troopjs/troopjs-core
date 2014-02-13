@@ -5,7 +5,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
 
-	require( [ "troopjs-core/pubsub/hub", "jquery", "when", "when/delay" ] , function (hub, $, when, delay) {
+	require( [ "troopjs-core/pubsub/hub", "troopjs-core/pubsub/runner/sequence", "jquery", "when", "when/delay" ] , function (hub, sequence, $, when, delay) {
 
 		run({
 			"setUp" : function () {
@@ -116,27 +116,40 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						refute.defined(arg2);
 						count++;
 					})
-					.emit("foo/bar:hub_sequence", foo)
+					.emit({
+						"type" : "foo/bar",
+						"runner" : sequence
+					}, foo)
 					.then(function () {
 						assert.same(2, count);
 					});
 			},
 
-			"republish": function () {
-				var context = this;
-				var count = 0;
+			"republish with context": function() {
+				var context = {"foo": "bar"};
+				return hub.publish("foo/bar", "republish").then(function() {
 
-				return hub
-					.subscribe("foo/bar", context, function(message){
-						assert.equals(message, "republish");
-						count++;
-					})
-					.publish("foo/bar", "republish")
-					.then(function () {
-						return hub.republish("foo/bar", context, function(message) {
-								assert.equals(message, "republish");
-							})
+					hub.subscribe("foo/bar", null, function() {
+						assert.fail();
 					});
+					hub.subscribe("foo/bar", context, function(message) {
+						assert.equals(message, "republish");
+						return ["foo","bar"];
+					});
+
+					return hub.republish("foo/bar", context).then(function() {
+						// Remove all previous subscriptions.
+						hub.off("foo/bar",context);
+
+						// Test last returned from the previous handler is memorized.
+						hub.subscribe("foo/bar", context, function(foo, bar) {
+							assert.equals(foo, "foo");
+							assert.equals(bar, "bar");
+						});
+
+						return hub.republish("foo/bar", context);
+					});
+				});
 			},
 
 			"tearDown": function () {
