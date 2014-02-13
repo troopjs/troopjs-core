@@ -108,10 +108,8 @@ define([
 			event[CONTEXT] = context;
 			event[CALLBACK] = callback;
 
-			// Take over the memorized arguments.
-			var args = [ event ].concat(handlers[MEMORY]);
 			// Delegate the actual emitting to event emitter, with memorized list of values.
-			return me.emit.apply(me, args);
+			return me.emit.apply(me, [ event ].concat(handlers[MEMORY]));
 		},
 
 		/**
