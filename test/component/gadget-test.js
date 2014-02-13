@@ -261,6 +261,9 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 				var g1 = Gadget.create({
 					"hub:memory/foo/bar": function() {
 						spy.apply(spy,arguments);
+					},
+					"hub/foo/bar": function() {
+						assert.fail("non-memorized method should not be called.");
 					}
 				});
 
