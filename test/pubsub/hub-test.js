@@ -134,8 +134,21 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 					});
 					hub.subscribe("foo/bar", context, function(message) {
 						assert.equals(message, "republish");
+						return ["foo","bar"];
 					});
-					return hub.republish("foo/bar", context);
+
+					return hub.republish("foo/bar", context).then(function() {
+						// Remove all previous subscriptions.
+						hub.off("foo/bar",context);
+
+						// Test last returned from the previous handler is memorized.
+						hub.subscribe("foo/bar", context, function(foo, bar) {
+							assert.equals(foo, "foo");
+							assert.equals(bar, "bar");
+						});
+
+						return hub.republish("foo/bar", context);
+					});
 				});
 			},
 
