@@ -7,10 +7,6 @@
 define([ "../mixin/base" ], function URIModule(Base) {
 	"use strict";
 
-	/**
-	 * @extends core.mixin.base
-	 */
-
 	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
 	var OBJECT_PROTO = Object.prototype;
@@ -40,6 +36,10 @@ define([ "../mixin/base" ], function URIModule(Base) {
 		QUERY,
 		ANCHOR ];
 
+	/**
+	 * Parse the **query** part of an URI.
+	 * @class core.net.uri.Query
+	 */
 	function Query(arg) {
 		/*jshint forin:false*/
 		var result = {};
@@ -77,6 +77,10 @@ define([ "../mixin/base" ], function URIModule(Base) {
 		return result;
 	}
 
+	/**
+	 * Serialize the query in url encoded format like `key1=value1&key2=value2` without having it encoded.
+	 * @member core.net.uri.Query
+	 */
 	Query.toString = function QueryToString() {
 		/*jshint forin:false*/
 		var me = this;
@@ -128,8 +132,12 @@ define([ "../mixin/base" ], function URIModule(Base) {
 		return query.join("&");
 	};
 
-	// Extend on the instance of array rather than subclass it
+	/**
+	 * Parse the **path** part of an URI.
+	 * @class core.net.uri.Path
+	 */
 	function Path(arg) {
+		// Extend on the instance of array rather than subclass it
 		var result = [];
 
 		result.toString = Path.toString;
@@ -141,10 +149,19 @@ define([ "../mixin/base" ], function URIModule(Base) {
 		return result;
 	}
 
+	/**
+	 * Serialize the URI path using back-slash as delimiter.
+	 * @member core.net.uri.Path
+	 */
 	Path.toString = function PathToString() {
 		return this.join("/");
 	};
 
+	/**
+	 * @class core.net.uri
+	 * @extends core.mixin.base
+	 * The universal URI parser and serializer.
+	 */
 	var URI = Base.extend(function URI(str) {
 		var me = this;
 		var value;
@@ -173,6 +190,10 @@ define([ "../mixin/base" ], function URIModule(Base) {
 	}, {
 		"displayName" : "core/net/uri",
 
+		/**
+		 * Serialize into the URI string.
+		 * @return {String}
+		 */
 		"toString" : function URIToString() {
 			var me = this;
 			var uri = [ PROTOCOL , "://", AUTHORITY, PATH, "?", QUERY, "#", ANCHOR ];
@@ -214,6 +235,7 @@ define([ "../mixin/base" ], function URIModule(Base) {
 	});
 
 	URI.Path = Path;
+
 	URI.Query = Query;
 
 	return URI;

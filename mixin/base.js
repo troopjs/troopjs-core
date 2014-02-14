@@ -8,7 +8,7 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 
 	/**
 	 * Base object with instance count.
-	 * @class core.object.base
+	 * @class core.mixin.base
 	 */
 	return Factory(function ObjectBase() {
 		// Update instance count
