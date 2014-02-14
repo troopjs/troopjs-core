@@ -62,8 +62,11 @@ define([
 	var EMITTER_ON = EMITTER_PROTO.on;
 	var EMITTER_OFF = EMITTER_PROTO.off;
 	var CONFIGURATION = "configuration";
-	var LENGTH = "length";
+	var RUNNER = "runner";
+	var HANDLERS = "handlers";
+	var HEAD = "head";
 	var CONTEXT = "context";
+	var MODIFIED = "modified";
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
@@ -74,24 +77,18 @@ define([
 	var FINALIZED = "finalized";
 	var FINISHED = "finished";
 	var SIG = "sig";
+	var SIG_SETUP = SIG + "/setup";
+	var SIG_TEARDOWN = SIG + "/teardown";
 	var ON = "on";
 
 	return Emitter.extend(function Component() {
 		var me = this;
-		var specials;
-		var special;
-		var i;
-		var iMax;
+		var specials = me.constructor.specials[SIG] || ARRAY_PROTO;
 
-		// Make sure we have SIG specials
-		if ((specials = me.constructor.specials[SIG]) !== UNDEFINED) {
-			// Iterate specials
-			for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
-				special = specials[i];
-
-				me.on(special[NAME], special[VALUE]);
-			}
-		}
+		// Iterate specials
+		specials.forEach(function (special) {
+			me.on(special[NAME], special[VALUE]);
+		});
 
 		// Set configuration
 		me[CONFIGURATION] = {};
@@ -102,38 +99,20 @@ define([
 
 		"sig/initialize" : function onInitialize() {
 			var me = this;
-			var specials;
-			var special;
-			var i;
-			var iMax;
+			var specials = me.constructor.specials[ON] || ARRAY_PROTO;
 
-			// Make sure we have ON specials
-			if ((specials = me.constructor.specials[ON]) !== UNDEFINED) {
-				// Iterate specials
-				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
-					special = specials[i];
-
-					me.on(special[TYPE], special[VALUE]);
-				}
-			}
+			return when.map(specials, function (special) {
+				return me.on(special[TYPE], special[VALUE]);
+			});
 		},
 
 		"sig/finalize" : function onFinalize() {
 			var me = this;
-			var specials;
-			var special;
-			var i;
-			var iMax;
+			var specials = me.constructor.specials[ON] || ARRAY_PROTO;
 
-			// Make sure we have ON specials
-			if ((specials = me.constructor.specials[ON]) !== UNDEFINED) {
-				// Iterate specials
-				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
-					special = specials[i];
-
-					me.off(special[TYPE], special[VALUE]);
-				}
-			}
+			return when.map(specials, function (special) {
+				return me.off(special[TYPE], special[VALUE]);
+			});
 		},
 
 		/**
@@ -181,8 +160,35 @@ define([
 		 */
 		"on": function on(event, callback, data) {
 			var me = this;
+			var handlers;
+			var type = event;
 
-			return EMITTER_ON.call(me, event, me, callback, data);
+			// No me[HANDLERS][event] object, create and emit
+			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+				// Reconstruct event
+				event = {};
+				event[TYPE] = SIG_SETUP;
+				event[RUNNER] = sequence;
+
+				me.emit(event, type, handlers = me[HANDLERS][type] = {});
+			}
+			// Have handlers, but no handlers[HEAD]
+			else if (!(HEAD in handlers)) {
+				// Reconstruct event
+				event = {};
+				event[TYPE] = SIG_SETUP;
+				event[RUNNER] = sequence;
+
+				me.emit(event, type, handlers);
+			}
+
+			// Get result
+			var result = EMITTER_ON.call(me, type, me, callback, data);
+
+			// Set modified
+			handlers[MODIFIED] = new Date().getTime();
+
+			return result;
 		},
 
 		/**
@@ -191,9 +197,33 @@ define([
 		 */
 		"off" : function off(event, callback) {
 			var me = this;
+			var handlers;
+			var type = event;
 
-			// Forward
-			return EMITTER_OFF.call(me, event, me, callback);
+			// Get result
+			var result = EMITTER_OFF.call(me, type, me, callback);
+
+			// No me[HANDLERS][event] object, create and emit
+			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+				var event = {};
+				event[TYPE] = SIG_TEARDOWN;
+				event[RUNNER] = sequence;
+
+				me.emit(event, type, handlers = me[HANDLERS][type] = {});
+			}
+			// Have handlers, but no handlers[HEAD]
+			else if (!(HEAD in handlers)) {
+				var event = {};
+				event[TYPE] = SIG_TEARDOWN;
+				event[RUNNER] = sequence;
+
+				me.emit(event, type, handlers);
+			}
+
+			// Set MODIFIED
+			handlers[MODIFIED] = new Date().getTime();
+
+			return result;
 		},
 
 		/**

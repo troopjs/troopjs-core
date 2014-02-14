@@ -35,7 +35,6 @@ define([
 	var HEAD = "head";
 	var TAIL = "tail";
 	var NEXT = "next";
-	var MODIFIED = "modified";
 
 	return Base.extend(function EventEmitter() {
 		this[HANDLERS] = {};
@@ -93,9 +92,6 @@ define([
 				handler[CONTEXT] = context;
 				handler[DATA] = data;
 			}
-
-			// Set MODIFIED
-			handlers[MODIFIED] = new Date().getTime();
 
 			return me;
 		},
@@ -166,9 +162,6 @@ define([
 						delete handlers[TAIL];
 					}
 				}
-
-				// Set MODIFIED
-				handlers[MODIFIED] = new Date().getTime();
 			}
 
 			return me;
@@ -208,7 +201,7 @@ define([
 			}
 			// Otherwise something is wrong
 			else {
-				throw Error("first argument has to be of type 'String' or have a '" + TYPE + "' property");
+				throw Error("first argument has to be of type '" + TOSTRING_STRING + "' or have a '" + TYPE + "' property");
 			}
 
 			// Get or create handlers[type] as handlers
