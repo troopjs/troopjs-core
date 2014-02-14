@@ -14,7 +14,7 @@ define([ "../component/base", "poly/function" ], function ConsoleLogger(Componen
 	 */
 
 	/*jshint devel:true*/
-	var CONSOLE = console;
+	var CONSOLE = window.console;
 
 	function noop() {}
 
