@@ -66,9 +66,8 @@ define([
 
 		"sig/initialize" : function onInitialize() {
 			var me = this;
-			var specials = me.constructor.specials[HUB] || ARRAY_PROTO;
 
-			return when.map(specials, function (special) {
+			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
 				return me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
 			});
 		},
@@ -102,15 +101,6 @@ define([
 
 			return when.map(specials, function (special) {
 				return me.emit.apply(me, special);
-			});
-		},
-
-		"sig/finalize" : function onFinalize() {
-			var me = this;
-			var specials = me.constructor.specials[HUB] || ARRAY_PROTO;
-
-			return when.map(specials, function (special) {
-				return me.unsubscribe(special[TYPE], special[VALUE]);
 			});
 		},
 

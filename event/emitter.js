@@ -27,6 +27,7 @@ define([
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_STRING = "[object String]";
 	var HANDLERS = "handlers";
+	var LENGTH = "length";
 	var TYPE = "type";
 	var RUNNER = "runner";
 	var CONTEXT = "context";
@@ -36,8 +37,27 @@ define([
 	var TAIL = "tail";
 	var NEXT = "next";
 
-	return Base.extend(function EventEmitter() {
-		this[HANDLERS] = {};
+	/**
+	 * Creates handlers
+	 * @param {String} type
+	 * @param {Object} [handler]
+	 * @return {Object}
+	 */
+	function createHandlers(type, handler) {
+		var me = this;
+
+		// Set default handler if needed
+		handler = handler || {};
+
+		// Set type
+		handler[TYPE] = type;
+
+		// Add handler to handlers
+		return me[me[LENGTH]] = me[type] = handler;
+	}
+
+	var EventEmitter = Base.extend(function EventEmitter() {
+		this[HANDLERS] = [];
 	}, {
 		"displayName" : "core/event/emitter",
 
@@ -47,7 +67,7 @@ define([
 		 * @param {Object} context The context to scope the callback to.
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
-		 * @returns this
+		 * @returns {*} this
 		 */
 		"on" : function on(type, context, callback, data) {
 			var me = this;
@@ -82,9 +102,10 @@ define([
 			// No handlers
 			else {
 				// Create type handlers
-				handlers = handlers[type] = {};
+				handlers = createHandlers.call(handlers, type, {});
 
-				// Create head and tail
+				// Prepare handlers
+				handlers[TYPE] = type;
 				handlers[HEAD] = handlers[TAIL] = handler = {};
 
 				// Prepare handler
@@ -103,7 +124,7 @@ define([
 		 * @param {String} type The event type subscribed to
 		 * @param {Object} [context] The context to scope the callback to remove
 		 * @param {Function} [callback] The event listener function to remove
-		 * @returns this
+		 * @returns {*} this
 		 */
 		"off" : function off(type, context, callback) {
 			var me = this;
@@ -186,17 +207,18 @@ define([
 			var me = this;
 			var type = event;
 			var handlers = me[HANDLERS];
-			var runner = sequence;
+			var runner;
 
 			// If event is a plain string, convert to object with props
 			if (OBJECT_TOSTRING.call(event) === TOSTRING_STRING) {
+				// Recreate event
 				event = {};
-				event[RUNNER] = runner;
+				event[RUNNER] = runner = sequence;
 				event[TYPE] = type;
 			}
 			// If event duck-types an event object we just override or use defaults
 			else if (TYPE in event) {
-				event[RUNNER] = runner = event[RUNNER] || runner;
+				event[RUNNER] = runner = event[RUNNER] || sequence;
 				type = event[TYPE];
 			}
 			// Otherwise something is wrong
@@ -204,13 +226,15 @@ define([
 				throw Error("first argument has to be of type '" + TOSTRING_STRING + "' or have a '" + TYPE + "' property");
 			}
 
-			// Get or create handlers[type] as handlers
-			handlers = type in handlers
-				? handlers[type]
-				: handlers[type] = {};
+			// Get or createHandlers handlers[type] as handlers
+			handlers = handlers[type] || createHandlers.call(handlers, type, {});
 
 			// Return result from runner
 			return runner.call(me, event, handlers, ARRAY_SLICE.call(arguments, 1));
 		}
 	});
+
+	EventEmitter.createHandlers = createHandlers;
+
+	return EventEmitter;
 });

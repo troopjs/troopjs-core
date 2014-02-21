@@ -58,6 +58,7 @@ define([
 	var UNDEFINED;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
 	var EMITTER_PROTO = Emitter.prototype;
 	var EMITTER_ON = EMITTER_PROTO.on;
 	var EMITTER_OFF = EMITTER_PROTO.off;
@@ -99,19 +100,17 @@ define([
 
 		"sig/initialize" : function onInitialize() {
 			var me = this;
-			var specials = me.constructor.specials[ON] || ARRAY_PROTO;
 
-			return when.map(specials, function (special) {
+			return when.map(me.constructor.specials[ON] || ARRAY_PROTO, function (special) {
 				return me.on(special[TYPE], special[VALUE]);
 			});
 		},
 
 		"sig/finalize" : function onFinalize() {
 			var me = this;
-			var specials = me.constructor.specials[ON] || ARRAY_PROTO;
 
-			return when.map(specials, function (special) {
-				return me.off(special[TYPE], special[VALUE]);
+			return when.map(me[HANDLERS].reverse(), function (handlers) {
+				return me.off(handlers[TYPE]);
 			});
 		},
 
@@ -160,8 +159,8 @@ define([
 		 */
 		"on": function on(event, callback, data) {
 			var me = this;
-			var handlers;
 			var type = event;
+			var handlers;
 
 			// No me[HANDLERS][event] object, create and emit
 			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
@@ -170,7 +169,7 @@ define([
 				event[TYPE] = SIG_SETUP;
 				event[RUNNER] = sequence;
 
-				me.emit(event, type, handlers = me[HANDLERS][type] = {});
+				me.emit(event, type, handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type, {}));
 			}
 			// Have handlers, but no handlers[HEAD]
 			else if (!(HEAD in handlers)) {
@@ -179,6 +178,7 @@ define([
 				event[TYPE] = SIG_SETUP;
 				event[RUNNER] = sequence;
 
+				// Emit
 				me.emit(event, type, handlers);
 			}
 
@@ -197,26 +197,29 @@ define([
 		 */
 		"off" : function off(event, callback) {
 			var me = this;
-			var handlers;
 			var type = event;
+			var handlers;
 
 			// Get result
 			var result = EMITTER_OFF.call(me, type, me, callback);
 
 			// No me[HANDLERS][event] object, create and emit
 			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-				var event = {};
+				// Reconstruct event
+				event = {};
 				event[TYPE] = SIG_TEARDOWN;
 				event[RUNNER] = sequence;
 
-				me.emit(event, type, handlers = me[HANDLERS][type] = {});
+				me.emit(event, type, handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type, {}));
 			}
 			// Have handlers, but no handlers[HEAD]
 			else if (!(HEAD in handlers)) {
-				var event = {};
+				// Reconstruct event
+				event = {};
 				event[TYPE] = SIG_TEARDOWN;
 				event[RUNNER] = sequence;
 
+				// Emit
 				me.emit(event, type, handlers);
 			}
 
