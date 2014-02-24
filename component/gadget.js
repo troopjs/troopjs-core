@@ -53,7 +53,7 @@ define([
 	var RUNNER = "runner";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var HANDLER = "handler";
+	var PROXY = "proxy";
 	var FEATURES = "features";
 	var NAME = "name";
 	var TYPE = "type";
@@ -109,7 +109,7 @@ define([
 			var matches;
 
 			if ((matches = RE.exec(type)) !== NULL) {
-				hub.subscribe(matches[1], me, handlers[HANDLER] = function handler(args) {
+				hub.subscribe(matches[1], me, handlers[PROXY] = function hub_proxy(args) {
 					// Redefine args
 					args = {};
 					args[TYPE] = type;
@@ -129,7 +129,7 @@ define([
 			var matches;
 
 			if ((matches = RE.exec(type)) !== NULL) {
-				hub.unsubscribe(matches[1], me, handlers[HANDLER]);
+				hub.unsubscribe(matches[1], me, handlers[PROXY]);
 			}
 		},
 
