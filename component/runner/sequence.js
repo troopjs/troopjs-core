@@ -17,12 +17,12 @@ define([ "poly/array" ], function SequenceModule() {
 	return function sequence(event, handlers, args) {
 		var context = event[CONTEXT];
 		var callback = event[CALLBACK];
+		var candidate;
 		var candidates = [];
 		var candidatesCount = 0;
-		var handler;
 
-		// Copy from handlers list to candidates array
-		for (handler = handlers[HEAD]; handler !== UNDEFINED; handler = handler[NEXT]) {
+		// Iterate handlers
+		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
 			// Filter candidate[CONTEXT] if we have context
 			if (context !== UNDEFINED && candidate[CONTEXT] !== context) {
 				continue;
@@ -33,7 +33,7 @@ define([ "poly/array" ], function SequenceModule() {
 				continue;
 			}
 
-			candidates[candidatesCount++] = handler;
+			candidates[candidatesCount++] = candidate;
 		}
 
 		// Map and return
