@@ -4,10 +4,12 @@
  */
 define([
 	"../event/emitter",
+	"./runner/sequence",
+	"troopjs/version",
 	"when",
 	"troopjs-utils/merge",
 	"poly/array"
-], function ComponentModule(Emitter, when, merge) {
+], function ComponentModule(Emitter, sequence, version, when, merge) {
 	"use strict";
 
 	/**
@@ -95,6 +97,8 @@ define([
 		// Set configuration
 		me[CONFIGURATION] = {};
 	}, {
+		"version" : version,
+
 		"displayName" : "core/component/base",
 
 		"sig/initialize" : function onInitialize() {
