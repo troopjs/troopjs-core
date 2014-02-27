@@ -4,12 +4,11 @@
  */
 define([
 	"../event/emitter",
-	"./runner/sequence",
 	"troopjs/version",
-	"when",
 	"troopjs-utils/merge",
+	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, version, when, merge) {
+], function ComponentModule(Emitter, version, merge, when) {
 	"use strict";
 
 	/**
