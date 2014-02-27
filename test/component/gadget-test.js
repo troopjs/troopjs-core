@@ -10,7 +10,6 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 	var TOPIC = "TEST";
 	var TEST_ARGS = ["abc", "", 1, 0, false, true, {}];
 	var APPLY_ARGS = ARRAY_CONCAT.call(ARRAY_PROTO, [TOPIC], TEST_ARGS);
-	var EMPTY = "";
 	var NAME_HANDLER = "__test_handlers";
 
 	/**
@@ -104,15 +103,6 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 					return g1.publish(TOPIC).then(function() {
 						assert(true);
 					});
-				},
-				"subscribe empty topic": function(){
-					var g1 = new Gadget();
-
-					this.subscribe(g1, EMPTY, function(test){
-						assert(test);
-					});
-
-					return g1.publish(EMPTY, true);
 				},
 				"different topics should not interfere with each other": function(){
 					var g1 = new Gadget();
