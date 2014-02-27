@@ -56,7 +56,7 @@ define([
 		return me[me[LENGTH]] = me[type] = handler;
 	}
 
-	var EventEmitter = Base.extend(function EventEmitter() {
+	var Emitter = Base.extend(function Emitter() {
 		this[HANDLERS] = [];
 	}, {
 		"displayName" : "core/event/emitter",
@@ -234,7 +234,10 @@ define([
 		}
 	});
 
-	EventEmitter.createHandlers = createHandlers;
+	/*
+	 * @inheritdoc #createHandlers
+	 */
+	Emitter.createHandlers = createHandlers;
 
-	return EventEmitter;
+	return Emitter;
 });

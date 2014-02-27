@@ -16,9 +16,6 @@ define([
 	 * A fired event will memorize the "current" value of each event. Each executor may have it's own interpretation
 	 * of what "current" means.
 	 *
-	 * For listeners that are registered after the event emitted thus missing from the call, {@link #republish} will
-	 * compensate the call with memorized data.
-	 *
 	 * **Note:** It's NOT necessarily to pub/sub on this module, prefer to
 	 * use methods like {@link core.component.gadget#publish} and {@link core.component.gadget#subscribe}
 	 * that are provided as shortcuts.
