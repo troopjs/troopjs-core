@@ -38,22 +38,23 @@ define([
 	var NEXT = "next";
 
 	/**
-	 * Creates handlers
-	 * @param {String} type
-	 * @param {Object} [handler]
-	 * @return {Object}
+	 * Helper to initialize the **handlers** object for an event type.
+	 * @static
+	 * @param {String} type The event type.
+	 * @param {Object} [handlers] The handlers object for this event type.
+	 * @return {Object} The created handlers object.
 	 */
-	function createHandlers(type, handler) {
+	function createHandlers(type, handlers) {
 		var me = this;
 
 		// Set default handler if needed
-		handler = handler || {};
+		handlers = handlers || {};
 
 		// Set type
-		handler[TYPE] = type;
+		handlers[TYPE] = type;
 
 		// Add handler to handlers
-		return me[me[LENGTH]] = me[type] = handler;
+		return me[me[LENGTH]] = me[type] = handlers;
 	}
 
 	var Emitter = Base.extend(function Emitter() {
@@ -234,9 +235,6 @@ define([
 		}
 	});
 
-	/*
-	 * @inheritdoc #createHandlers
-	 */
 	Emitter.createHandlers = createHandlers;
 
 	return Emitter;
