@@ -68,7 +68,6 @@ define([
 	var HANDLERS = "handlers";
 	var HEAD = "head";
 	var CONTEXT = "context";
-	var MODIFIED = "modified";
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
@@ -161,35 +160,24 @@ define([
 		"on": function on(event, callback, data) {
 			var me = this;
 			var type = event;
-			var handlers;
+			var all = me[HANDLERS];
+			var handlers = all[type];
 
-			// No me[HANDLERS][event] object, create and emit
-			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-				// Reconstruct event
-				event = {};
-				event[TYPE] = SIG_SETUP;
-				event[RUNNER] = sequence;
-
-				me.emit(event, type, handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type, {}));
+			// Initialize the handlers for this type of event on first subscription only.
+			if (handlers === UNDEFINED) {
+				handlers = EMITTER_CREATEHANDLERS.call(all, type);
 			}
-			// Have handlers, but no handlers[HEAD]
-			else if (!(HEAD in handlers)) {
-				// Reconstruct event
+
+			// Send out a signal to allow setting up handlers.
+			if (!(HEAD in handlers)) {
 				event = {};
 				event[TYPE] = SIG_SETUP;
 				event[RUNNER] = sequence;
-
-				// Emit
 				me.emit(event, type, handlers);
 			}
 
 			// Get result
-			var result = EMITTER_ON.call(me, type, me, callback, data);
-
-			// Set modified
-			handlers[MODIFIED] = new Date().getTime();
-
-			return result;
+			return EMITTER_ON.call(me, type, me, callback, data);
 		},
 
 		/**
@@ -199,33 +187,25 @@ define([
 		"off" : function off(event, callback) {
 			var me = this;
 			var type = event;
-			var handlers;
 
 			// Get result
 			var result = EMITTER_OFF.call(me, type, me, callback);
 
-			// No me[HANDLERS][event] object, create and emit
-			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-				// Reconstruct event
-				event = {};
-				event[TYPE] = SIG_TEARDOWN;
-				event[RUNNER] = sequence;
+			var all = me[HANDLERS];
+			var handlers = all[type];
 
-				me.emit(event, type, handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type, {}));
+			// Initialize the handlers for this type of event on first subscription only.
+			if (handlers === UNDEFINED) {
+				handlers = EMITTER_CREATEHANDLERS.call(all, type);
 			}
-			// Have handlers, but no handlers[HEAD]
-			else if (!(HEAD in handlers)) {
-				// Reconstruct event
+
+			// Send out a signal to allow finalize handlers.
+			if (!(HEAD in handlers)) {
 				event = {};
 				event[TYPE] = SIG_TEARDOWN;
 				event[RUNNER] = sequence;
-
-				// Emit
 				me.emit(event, type, handlers);
 			}
-
-			// Set MODIFIED
-			handlers[MODIFIED] = new Date().getTime();
 
 			return result;
 		},
