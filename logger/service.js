@@ -7,9 +7,8 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 
 	/**
 	 * Provides logging as a service, with appender support.
-	 * @class core.logger.service
-	 * @constructor
 	 * @param {Function...} appenders One or more message appender(s).
+	 * @class core.logger.service
 	 * @extends core.component.service
 	 */
 

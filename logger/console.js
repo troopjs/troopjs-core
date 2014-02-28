@@ -2,7 +2,7 @@
  * TroopJS core/logger/console
  * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
  */
-define([ "../component/base", "poly/function" ], function ConsoleLogger(Component) {
+define([ "../mixin/base", "poly/function" ], function ConsoleLogger(Base) {
 	"use strict";
 
 	/**
@@ -10,7 +10,7 @@ define([ "../component/base", "poly/function" ], function ConsoleLogger(Componen
 	 *
 	 * @singleton
 	 * @class core.logger.console
-	 * @extends core.component.base
+	 * @extends core.mixin.base
 	 */
 
 	/*jshint devel:true*/
@@ -60,7 +60,7 @@ define([ "../component/base", "poly/function" ], function ConsoleLogger(Componen
 	 * @param {String} msg
 	 */
 
-	return Component.create({
+	return Base.create({
 			"displayName" : "core/logger/console"
 		},
 		spec);
