@@ -81,6 +81,7 @@ define([
 	var SIG_SETUP = SIG + "/setup";
 	var SIG_TEARDOWN = SIG + "/teardown";
 	var ON = "on";
+	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
 
 	return Emitter.extend(function Component() {
 		var me = this;
@@ -168,8 +169,8 @@ define([
 				handlers = EMITTER_CREATEHANDLERS.call(all, type);
 			}
 
-			// Send out a signal to allow setting up handlers.
-			if (!(HEAD in handlers)) {
+			// If this event is NOT a signal, send out a signal to allow setting up handlers.
+			if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
 				event = {};
 				event[TYPE] = SIG_SETUP;
 				event[RUNNER] = sequence;
@@ -199,8 +200,8 @@ define([
 				handlers = EMITTER_CREATEHANDLERS.call(all, type);
 			}
 
-			// Send out a signal to allow finalize handlers.
-			if (!(HEAD in handlers)) {
+			// If this event is NOT a signal, send out a signal to allow finalize handlers.
+			if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
 				event = {};
 				event[TYPE] = SIG_TEARDOWN;
 				event[RUNNER] = sequence;
