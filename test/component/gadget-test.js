@@ -27,6 +27,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 			"publish/subscribe": {
 				setUp: function(){
 					var me = this;
+					me.timeout = 500;
 
 					var insts = me.instances = [];
 
@@ -256,6 +257,21 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						assert.calledWithExactly(spy1, "foo", "bar");
 						refute.called(spy2);
 					});
+				});
+			},
+
+			"publish after called .off": function() {
+				var foo = this.spy();
+				var g1 = Gadget.create({
+					'hub/foo': function() {
+						foo();
+					}
+				});
+				return g1.start().then(function() {
+					g1.unsubscribe("foo");
+					return g1.publish("foo").then(function() {
+						refute.called(foo);
+					})
 				});
 			}
 		});
