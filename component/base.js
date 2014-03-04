@@ -154,6 +154,7 @@ define([
 		},
 
 		/**
+		 * @method
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
@@ -181,6 +182,7 @@ define([
 		}),
 
 		/**
+		 * @method
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
