@@ -7,9 +7,11 @@ define([
 	"../event/runner/sequence",
 	"troopjs/version",
 	"troopjs-utils/merge",
+	"troopjs-composer/decorator/before",
+	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, version, merge, when) {
+], function ComponentModule(Emitter, sequence, version, merge, before, around, when) {
 	"use strict";
 
 	/**
@@ -61,8 +63,6 @@ define([
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
 	var EMITTER_PROTO = Emitter.prototype;
-	var EMITTER_ON = EMITTER_PROTO.on;
-	var EMITTER_OFF = EMITTER_PROTO.off;
 	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
@@ -158,7 +158,7 @@ define([
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"on": function on(event, callback, data) {
+		"on": before(function on(event, callback, data) {
 			var me = this;
 			var type = event;
 			var all = me[HANDLERS];
@@ -177,39 +177,42 @@ define([
 				me.emit(event, type, handlers);
 			}
 
-			// Get result
-			return EMITTER_ON.call(me, type, me, callback, data);
-		},
+			// context will always be this widget.
+			return [type, me, callback, data];
+		}),
 
 		/**
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"off" : function off(event, callback) {
-			var me = this;
-			var type = event;
+		"off": around(function(fn) {
+			return function off_widget(event, callback) {
+				var me = this;
+				var type = event;
 
-			// Get result
-			var result = EMITTER_OFF.call(me, type, me, callback);
+				// context will always be this widget.
+				fn.call(me, type, me, callback);
 
-			var all = me[HANDLERS];
-			var handlers = all[type];
+				var all = me[HANDLERS];
+				var handlers = all[type];
 
-			// Initialize the handlers for this type of event on first subscription only.
-			if (handlers === UNDEFINED) {
-				handlers = EMITTER_CREATEHANDLERS.call(all, type);
-			}
+				// Initialize the handlers for this type of event on first subscription only.
+				if (handlers === UNDEFINED) {
+					handlers = EMITTER_CREATEHANDLERS.call(all, type);
+				}
 
-			// If this event is NOT a signal, send out a signal to allow finalize handlers.
-			if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
-				event = {};
-				event[TYPE] = SIG_TEARDOWN;
-				event[RUNNER] = sequence;
-				me.emit(event, type, handlers);
-			}
+				// If this event is NOT a signal, send out a signal to allow finalize handlers.
+				if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
+					debugger;
+					event = {};
+					event[TYPE] = SIG_TEARDOWN;
+					event[RUNNER] = sequence;
+					me.emit(event, type, handlers);
+				}
 
-			return result;
-		},
+				return me;
+			};
+		}),
 
 		/**
 		 * Signals the component
