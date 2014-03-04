@@ -16,9 +16,6 @@ define([
 	 * A fired event will memorize the "current" value of each event. Each executor may have it's own interpretation
 	 * of what "current" means.
 	 *
-	 * For listeners that are registered after the event emitted thus missing from the call, {@link #republish} will
-	 * compensate the call with memorized data.
-	 *
 	 * **Note:** It's NOT necessarily to pub/sub on this module, prefer to
 	 * use methods like {@link core.component.gadget#publish} and {@link core.component.gadget#subscribe}
 	 * that are provided as shortcuts.
@@ -30,8 +27,6 @@ define([
 
 	var UNDEFINED;
 	var COMPONENT_PROTOTYPE = Emitter.prototype;
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
 	var MEMORY = "memory";
 	var HANDLERS = "handlers";
 	var RUNNER = "runner";
@@ -66,7 +61,7 @@ define([
 		 *
 		 * @param {String} type The topic to publish.
 		 * @param {...*} [args] Additional params that are passed to the handler function.
-		 * @method
+		 * @returns {Promise}
 		 */
 		"publish" : function publish(type, args) {
 			var me = this;
@@ -84,44 +79,17 @@ define([
 		},
 
 		/**
-		 * Re-publish any event that are **previously published**, any (new) listeners will be called with the memorized data
-		 * from the previous event publishing procedure.
-		 *
-		 * @param {String} type The topic to re-publish, dismiss if it's not yet published.
-		 * @param {Object} [context] The context to scope the handler to match with.
-		 * @param {Function} [callback] The handler function to match with.
-		 * @returns {Promise}
-		 */
-		"republish": function republish(type, context, callback) {
-			var me = this;
-			var handlers;
-
-			// Return fast if we don't have handlers for type, or those handlers have no MEMORY
-			if ((handlers = me[HANDLERS][type]) === UNDEFINED || !(MEMORY in handlers)) {
-				return when.resolve(UNDEFINED);
-			}
-
-			// Prepare event object
-			var event = {};
-			event[TYPE] = type;
-			event[RUNNER] = pipeline;
-			event[CONTEXT] = context;
-			event[CALLBACK] = callback;
-
-			// Delegate the actual emitting to event emitter, with memorized list of values.
-			return me.emit.apply(me, [ event ].concat(handlers[MEMORY]));
-		},
-
-		/**
 		 * Returns value in handlers MEMORY
 		 * @param {String} type event type to peek at
+		 * @param {*} [value] Value to use _only_ if no memory has been recorder
 		 * @returns {*} Value in MEMORY
 		 */
-		"peek": function peek(type) {
+		"peek": function peek(type, value) {
 			var handlers;
 
-			// Return handlers[type][MEMORY]
-			return ((handlers = this[HANDLERS][type]) !== UNDEFINED) && handlers[MEMORY];
+			return (handlers = this[HANDLERS][type]) === UNDEFINED || !(MEMORY in handlers)
+				? value
+				: handlers[MEMORY];
 		}
 	});
 });

@@ -1,7 +1,4 @@
-define([
-	"./constants",
-	"when"
-], function PipelineModule(CONSTANTS, when) {
+define([ "when" ], function PipelineModule(when) {
 	"use strict";
 
 	var UNDEFINED;
@@ -12,9 +9,6 @@ define([
 	var CALLBACK = "callback";
 	var HEAD = "head";
 	var NEXT = "next";
-	var PHASE = "phase";
-	var MEMORY = "memory";
-	var RE_PHASE = CONSTANTS["pattern"];
 
 	/*
 	 * Runner that filters and executes candidates in pipeline without overlap
@@ -38,7 +32,7 @@ define([
 			}
 
 			// Filter candidate[CALLBACK] if we have callback
-			if (callback !== UNDEFINED && candidate[CALLBACK] !== callback) {
+			if (callback && candidate[CALLBACK] !== callback) {
 				continue;
 			}
 
@@ -57,7 +51,6 @@ define([
 		 */
 		var next = function (result) {
 			/*jshint curly:false*/
-			var context;
 			var candidate;
 			var type;
 
@@ -70,16 +63,10 @@ define([
 					: [ result ];                                                  // otherwise we should just wrap it in a new array
 			}
 
-			// TODO Needs cleaner implementation
-			// Iterate until we find a candidate in a blocked phase
-			while ((candidate = candidates[candidatesCount++]) // Has next candidate
-				&& (context = candidate[CONTEXT])                // Has context
-				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
-
 			// Return promise of next callback, or promise resolved with args
-			return candidate !== UNDEFINED
-				? when(candidate[CALLBACK].apply(context, args), next)
-				: when.resolve(handlers[MEMORY] = args);
+			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
+				? when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
+				: when.resolve(args);
 		};
 
 		return next(args);

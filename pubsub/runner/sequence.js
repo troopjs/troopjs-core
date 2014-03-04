@@ -37,7 +37,7 @@ define([
 			}
 
 			// Filter candidate[CALLBACK] if we have callback
-			if (callback && candidate[CALLBACK] !== callback) {
+			if (callback !== UNDEFINED && candidate[CALLBACK] !== callback) {
 				continue;
 			}
 

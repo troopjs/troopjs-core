@@ -4,11 +4,14 @@
  */
 define([
 	"../event/emitter",
+	"../event/runner/sequence",
 	"troopjs/version",
 	"troopjs-utils/merge",
+	"troopjs-composer/decorator/before",
+	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, version, merge, when) {
+], function ComponentModule(Emitter, sequence, version, merge, before, around, when) {
 	"use strict";
 
 	/**
@@ -58,11 +61,11 @@ define([
 	var UNDEFINED;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var EMITTER_PROTO = Emitter.prototype;
-	var EMITTER_ON = EMITTER_PROTO.on;
-	var EMITTER_OFF = EMITTER_PROTO.off;
+	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
 	var CONFIGURATION = "configuration";
-	var LENGTH = "length";
+	var RUNNER = "runner";
+	var HANDLERS = "handlers";
+	var HEAD = "head";
 	var CONTEXT = "context";
 	var NAME = "name";
 	var TYPE = "type";
@@ -74,24 +77,19 @@ define([
 	var FINALIZED = "finalized";
 	var FINISHED = "finished";
 	var SIG = "sig";
+	var SIG_SETUP = SIG + "/setup";
+	var SIG_TEARDOWN = SIG + "/teardown";
 	var ON = "on";
+	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
 
 	return Emitter.extend(function Component() {
 		var me = this;
-		var specials;
-		var special;
-		var i;
-		var iMax;
+		var specials = me.constructor.specials[SIG] || ARRAY_PROTO;
 
-		// Make sure we have SIG specials
-		if ((specials = me.constructor.specials[SIG]) !== UNDEFINED) {
-			// Iterate specials
-			for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
-				special = specials[i];
-
-				me.on(special[NAME], special[VALUE]);
-			}
-		}
+		// Iterate specials
+		specials.forEach(function (special) {
+			me.on(special[NAME], special[VALUE]);
+		});
 
 		// Set configuration
 		me[CONFIGURATION] = {};
@@ -102,38 +100,18 @@ define([
 
 		"sig/initialize" : function onInitialize() {
 			var me = this;
-			var specials;
-			var special;
-			var i;
-			var iMax;
 
-			// Make sure we have ON specials
-			if ((specials = me.constructor.specials[ON]) !== UNDEFINED) {
-				// Iterate specials
-				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
-					special = specials[i];
-
-					me.on(special[TYPE], special[VALUE]);
-				}
-			}
+			return when.map(me.constructor.specials[ON] || ARRAY_PROTO, function (special) {
+				return me.on(special[TYPE], special[VALUE]);
+			});
 		},
 
 		"sig/finalize" : function onFinalize() {
 			var me = this;
-			var specials;
-			var special;
-			var i;
-			var iMax;
 
-			// Make sure we have ON specials
-			if ((specials = me.constructor.specials[ON]) !== UNDEFINED) {
-				// Iterate specials
-				for (i = 0, iMax = specials[LENGTH]; i < iMax; i++) {
-					special = specials[i];
-
-					me.off(special[TYPE], special[VALUE]);
-				}
-			}
+			return when.map(me[HANDLERS].reverse(), function (handlers) {
+				return me.off(handlers[TYPE]);
+			});
 		},
 
 		/**
@@ -176,25 +154,66 @@ define([
 		},
 
 		/**
+		 * @method
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"on": function on(event, callback, data) {
+		"on": before(function on(event, callback, data) {
 			var me = this;
+			var type = event;
+			var all = me[HANDLERS];
+			var handlers = all[type];
 
-			return EMITTER_ON.call(me, event, me, callback, data);
-		},
+			// Initialize the handlers for this type of event on first subscription only.
+			if (handlers === UNDEFINED) {
+				handlers = EMITTER_CREATEHANDLERS.call(all, type);
+			}
+
+			// If this event is NOT a signal, send out a signal to allow setting up handlers.
+			if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
+				event = {};
+				event[TYPE] = SIG_SETUP;
+				event[RUNNER] = sequence;
+				me.emit(event, type, handlers);
+			}
+
+			// context will always be this widget.
+			return [type, me, callback, data];
+		}),
 
 		/**
+		 * @method
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
-		"off" : function off(event, callback) {
-			var me = this;
+		"off": around(function(fn) {
+			return function off(event, callback) {
+				var me = this;
+				var type = event;
 
-			// Forward
-			return EMITTER_OFF.call(me, event, me, callback);
-		},
+				// context will always be this widget.
+				fn.call(me, type, me, callback);
+
+				var all = me[HANDLERS];
+				var handlers = all[type];
+
+				// Initialize the handlers for this type of event on first subscription only.
+				if (handlers === UNDEFINED) {
+					handlers = EMITTER_CREATEHANDLERS.call(all, type);
+				}
+
+				// If this event is NOT a signal, send out a signal to allow finalize handlers.
+				if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
+					debugger;
+					event = {};
+					event[TYPE] = SIG_TEARDOWN;
+					event[RUNNER] = sequence;
+					me.emit(event, type, handlers);
+				}
+
+				return me;
+			};
+		}),
 
 		/**
 		 * Signals the component
