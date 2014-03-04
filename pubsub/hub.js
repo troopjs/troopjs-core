@@ -5,8 +5,8 @@
 define([
 	"../event/emitter",
 	"./runner/pipeline",
-	"when"
-], function HubModule(Emitter, pipeline, when) {
+	"troopjs-composer/decorator/from"
+], function HubModule(Emitter, pipeline, from) {
 	"use strict";
 
 	/**
@@ -26,7 +26,6 @@ define([
 	 */
 
 	var UNDEFINED;
-	var COMPONENT_PROTOTYPE = Emitter.prototype;
 	var MEMORY = "memory";
 	var HANDLERS = "handlers";
 	var RUNNER = "runner";
@@ -40,14 +39,14 @@ define([
 		 * @inheritdoc #on
 		 * @method
 		 */
-		"subscribe" : COMPONENT_PROTOTYPE.on,
+		"subscribe" : from("on"),
 
 		/**
 		 * Remove a public event listener.
 		 * @inheritdoc #off
 		 * @method
 		 */
-		"unsubscribe" : COMPONENT_PROTOTYPE.off,
+		"unsubscribe" : from("off"),
 
 		/**
 		 * Emit a public event that can be subscribed by other components.
