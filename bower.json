@@ -6,7 +6,7 @@
 		"node_modules"
 	],
 	"dependencies": {
-		"troopjs-composer": "~1",
+		"troopjs-composer": "~2",
 		"troopjs-utils": "~2",
 		"poly": "~0",
 		"when": "~2"
