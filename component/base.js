@@ -62,7 +62,6 @@ define([
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
-	var EMITTER_PROTO = Emitter.prototype;
 	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
