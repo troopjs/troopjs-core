@@ -185,7 +185,7 @@ define([
 		 * @localdoc Context of the callback will always be **this** object.
 		 */
 		"off": around(function(fn) {
-			return function off_widget(event, callback) {
+			return function off(event, callback) {
 				var me = this;
 				var type = event;
 
