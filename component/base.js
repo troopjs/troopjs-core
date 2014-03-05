@@ -1,6 +1,5 @@
 /*
- * TroopJS core/component/base
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
 define([
 	"../event/emitter",
@@ -13,6 +12,30 @@ define([
 	"poly/array"
 ], function ComponentModule(Emitter, sequence, version, merge, before, around, when) {
 	"use strict";
+
+	var UNDEFINED;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
+	var CONFIGURATION = "configuration";
+	var RUNNER = "runner";
+	var HANDLERS = "handlers";
+	var HEAD = "head";
+	var CONTEXT = "context";
+	var NAME = "name";
+	var TYPE = "type";
+	var VALUE = "value";
+	var PHASE = "phase";
+	var STOP = "stop";
+	var INITIALIZE = "initialize";
+	var STARTED = "started";
+	var FINALIZED = "finalized";
+	var FINISHED = "finished";
+	var SIG = "sig";
+	var SIG_SETUP = SIG + "/setup";
+	var SIG_TEARDOWN = SIG + "/teardown";
+	var ON = "on";
+	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
 
 	/**
 	 * Imagine component as an object that has predefined life-cycle, with the following phases:
@@ -54,34 +77,11 @@ define([
 	 * 	$(window).unload(function on_unload (argument) {\
 	 * 	  app.end();
 	 * 	});
+	 *
 	 * @class core.component.base
 	 * @extends core.event.emitter
+	 * @constructor
 	 */
-
-	var UNDEFINED;
-	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
-	var CONFIGURATION = "configuration";
-	var RUNNER = "runner";
-	var HANDLERS = "handlers";
-	var HEAD = "head";
-	var CONTEXT = "context";
-	var NAME = "name";
-	var TYPE = "type";
-	var VALUE = "value";
-	var PHASE = "phase";
-	var STOP = "stop";
-	var INITIALIZE = "initialize";
-	var STARTED = "started";
-	var FINALIZED = "finalized";
-	var FINISHED = "finished";
-	var SIG = "sig";
-	var SIG_SETUP = SIG + "/setup";
-	var SIG_TEARDOWN = SIG + "/teardown";
-	var ON = "on";
-	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
-
 	return Emitter.extend(function Component() {
 		var me = this;
 		var specials = me.constructor.specials[SIG] || ARRAY_PROTO;
@@ -91,13 +91,35 @@ define([
 			me.on(special[NAME], special[VALUE]);
 		});
 
-		// Set configuration
+		/**
+		 * Configuration for this component, access via {@link #configure}
+		 * @private
+		 * @readonly
+		 * @property {Object} configuration
+		 */
 		me[CONFIGURATION] = {};
 	}, {
+		/**
+		 * Current lifecycle phase
+		 * @readonly
+		 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
+		 */
+
+		/**
+		 * Version of TroopJS
+		 * @readonly
+		 * @property {String}
+		 */
 		"version" : version,
 
 		"displayName" : "core/component/base",
 
+		/**
+		 * Triggered when this component enters the initialize phase
+		 * @event
+		 * @template
+		 * @return {Promise}
+		 */
 		"sig/initialize" : function onInitialize() {
 			var me = this;
 
@@ -106,6 +128,28 @@ define([
 			});
 		},
 
+		/**
+		 * Triggered when this component enters the start phase
+		 * @event
+		 * @template
+		 * @return {Promise}
+		 */
+		"sig/start": UNDEFINED,
+
+		/**
+		 * Triggered when this component enters the stop phase
+		 * @event
+		 * @template
+		 * @return {Promise}
+		 */
+		"sig/stop": UNDEFINED,
+
+		/**
+		 * Triggered when this component enters the finalize phase
+		 * @event
+		 * @template
+		 * @return {Promise}
+		 */
 		"sig/finalize" : function onFinalize() {
 			var me = this;
 
@@ -115,7 +159,34 @@ define([
 		},
 
 		/**
-		 * Add to the component configurations, possibly {@link utils.merge merge} with the existing ones.
+		 * Triggered when the first handler of type is added
+		 * @template
+		 * @event
+		 * @param {String} type
+		 * @param {Object} handlers
+		 */
+		"sig/setup": UNDEFINED,
+
+		/**
+		 * Triggered when the last handler of type is removed
+		 * @template
+		 * @event
+		 * @param {String} type
+		 * @param {Object} handlers
+		 */
+		"sig/teardown": UNDEFINED,
+
+		/**
+		 * Triggered when this component starts a task
+		 * @template
+		 * @event
+		 * @param {Promise} task
+		 * @return {Promise}
+		 */
+		"sig/task": UNDEFINED,
+
+		/**
+		 * Add to the component {@link #configuration configuration}, possibly {@link utils.merge merge} with the existing one.
 		 *
 		 * 		var List = Component.extend({
 		 * 			"sig/start": function start() {
@@ -178,7 +249,7 @@ define([
 			}
 
 			// context will always be this widget.
-			return [type, me, callback, data];
+			return [ type, me, callback, data ];
 		}),
 
 		/**

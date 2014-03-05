@@ -1,6 +1,5 @@
 /*
- * TroopJS core/pubsub/hub
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
 define([
 	"../event/emitter",
@@ -8,6 +7,12 @@ define([
 	"troopjs-composer/decorator/from"
 ], function HubModule(Emitter, pipeline, from) {
 	"use strict";
+
+	var UNDEFINED;
+	var MEMORY = "memory";
+	var HANDLERS = "handlers";
+	var RUNNER = "runner";
+	var TYPE = "type";
 
 	/**
 	 * The centric "bus" that handlers publishing and subscription.
@@ -17,34 +22,43 @@ define([
 	 * of what "current" means.
 	 *
 	 * **Note:** It's NOT necessarily to pub/sub on this module, prefer to
-	 * use methods like {@link core.component.gadget#publish} and {@link core.component.gadget#subscribe}
+	 * use methods like {@link core.component.gadget#publish publish} and {@link core.component.gadget#subscribe subscribe}
 	 * that are provided as shortcuts.
 	 *
 	 * @class core.pubsub.hub
-	 * @singleton
 	 * @extends core.event.emitter
+	 * @singleton
+	 * @constructor
+	 * @hide
 	 */
-
-	var UNDEFINED;
-	var MEMORY = "memory";
-	var HANDLERS = "handlers";
-	var RUNNER = "runner";
-	var TYPE = "type";
-
 	return Emitter.create({
 		"displayName": "core/pubsub/hub",
 
 		/**
+		 * @method on
+		 * @hide
+		 */
+
+		/**
+		 * @method off
+		 * @hide
+		 */
+
+		/**
 		 * Listen to an event that are emitted publicly.
-		 * @inheritdoc #on
+		 * @chainable
+		 * @inheritdoc core.event.emitter#on
 		 * @method
+		 * @returns {core.pubsub.hub} this
 		 */
 		"subscribe" : from("on"),
 
 		/**
 		 * Remove a public event listener.
-		 * @inheritdoc #off
+		 * @chainable
+		 * @inheritdoc core.event.emitter#off
 		 * @method
+		 * @returns {core.pubsub.hub} this
 		 */
 		"unsubscribe" : from("off"),
 

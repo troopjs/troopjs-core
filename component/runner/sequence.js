@@ -1,3 +1,6 @@
+/*
+ * @license MIT http://troopjs.mit-license.org/
+ */
 define([ "poly/array" ], function SequenceModule() {
 	"use strict";
 
@@ -7,7 +10,10 @@ define([ "poly/array" ], function SequenceModule() {
 	var CALLBACK = "callback";
 	var CONTEXT = "context";
 
-	/*
+	/**
+	 * @class core.component.runner.sequence
+	 * @static
+	 * @private
 	 * Runner that executes candidates in sequence without overlap
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers

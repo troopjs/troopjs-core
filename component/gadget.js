@@ -1,6 +1,5 @@
 /*
- * TroopJS core/component/gadget
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
 define([
 	"./base",
@@ -9,6 +8,21 @@ define([
 	"../pubsub/hub"
 ],function GadgetModule(Component, pipeline, when, hub) {
 	"use strict";
+
+	var UNDEFINED;
+	var NULL = null;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var RUNNER = "runner";
+	var CONTEXT = "context";
+	var CALLBACK = "callback";
+	var PROXY = "proxy";
+	var FEATURES = "features";
+	var NAME = "name";
+	var TYPE = "type";
+	var VALUE = "value";
+	var HUB = "hub";
+	var RE = new RegExp("^" + HUB + "/(.+)");
 
 	/**
 	 * Component that provides signal and hub features.
@@ -44,23 +58,8 @@ define([
 	 *
 	 * @class core.component.gadget
 	 * @extends core.component.base
+	 * @constructor
 	 */
-
-	var UNDEFINED;
-	var NULL = null;
-	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var RUNNER = "runner";
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
-	var PROXY = "proxy";
-	var FEATURES = "features";
-	var NAME = "name";
-	var TYPE = "type";
-	var VALUE = "value";
-	var HUB = "hub";
-	var RE = new RegExp("^" + HUB + "/(.+)");
-
 	return Component.extend({
 		"displayName" : "core/component/gadget",
 
@@ -133,11 +132,6 @@ define([
 			}
 		},
 
-		/*
-		 * Signal handler for 'task'
-		 * @param {Promise} task
-		 * @returns {Promise}
-		 */
 		"sig/task" : function onTask(task) {
 			return this.publish("task", task);
 		},
@@ -150,6 +144,7 @@ define([
 		},
 
 		/**
+		 * @chainable
 		 * @inheritdoc core.pubsub.hub#subscribe
 		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
@@ -158,6 +153,7 @@ define([
 		},
 
 		/**
+		 * @chainable
 		 * @inheritdoc core.pubsub.hub#unsubscribe
 		 * @localdoc Unsubscribe from public events in context of this component.
 		 */

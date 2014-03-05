@@ -1,6 +1,7 @@
-define([
-	"when"
-], function SequenceModule(when) {
+/*
+ * @license MIT http://troopjs.mit-license.org/
+ */
+define([ "when" ], function SequenceModule(when) {
 	"use strict";
 
 	var UNDEFINED;
@@ -9,7 +10,10 @@ define([
 	var CALLBACK = "callback";
 	var CONTEXT = "context";
 
-	/*
+	/**
+	 * @class core.event.runner.sequence
+	 * @static
+	 * @private
 	 * Runner that executes candidates in sequence without overlap
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers
@@ -31,9 +35,9 @@ define([
 		// Reset candidate count
 		candidatesCount = 0;
 
-		/*
+		/**
 		 * Internal function for sequential execution of candidates
-		 * @private
+		 * @ignore
 		 * @param {Array} [result] result from previous handler callback
 		 * @param {Boolean} [skip] flag indicating if this result should be skipped
 		 * @return {Promise} promise of next handler callback execution

@@ -1,3 +1,6 @@
+/*
+ * @license MIT http://troopjs.mit-license.org/
+ */
 define([
 	"./constants",
 	"when"
@@ -16,7 +19,10 @@ define([
 	var MEMORY = "memory";
 	var RE_PHASE = CONSTANTS["pattern"];
 
-	/*
+	/**
+	 * @class core.pubsub.runner.pipeline
+	 * @static
+	 * @private
 	 * Runner that filters and executes candidates in pipeline without overlap
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers
@@ -49,9 +55,9 @@ define([
 		// Reset candidatesCount
 		candidatesCount = 0;
 
-		/*
+		/**
 		 * Internal function for piped execution of candidates candidates
-		 * @private
+		 * @ignore
 		 * @param {Array} [result] result from previous candidate callback
 		 * @return {Promise} promise of next candidate callback execution
 		 */
