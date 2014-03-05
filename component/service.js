@@ -1,6 +1,5 @@
 /*
- * TroopJS core/component/service
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
 define([ "./gadget" ], function ServiceModule(Gadget) {
 	"use strict";
@@ -10,6 +9,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 	 *
 	 * @class core.component.service
 	 * @extends core.component.gadget
+	 * @constructor
 	 */
 	return Gadget.extend({
 		"displayName" : "core/component/service",

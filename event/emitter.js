@@ -1,26 +1,11 @@
 /*
- * TroopJS core/event/emitter
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
 define([
 	"../mixin/base",
 	"./runner/sequence"
 ], function EventEmitterModule(Base, sequence) {
 	"use strict";
-
-	/**
-	 * The event module of TroopJS that provides common event handling capability, and some highlights:
-	 *
-	 * ## Asynchronous handlers
-	 * Any event handler can be asynchronous depending on the **return value**:
-	 *
-	 *  - a Promise value makes this handler be considered asynchronous, where the next handler will be called
-	 *  upon the completion of this promise.
-	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
-	 *
-	 * @class core.event.emitter
-	 * @extends core.mixin.base
-	 */
 
 	var UNDEFINED;
 	var ARRAY_SLICE = Array.prototype.slice;
@@ -40,6 +25,8 @@ define([
 	/**
 	 * Helper to initialize the **handlers** object for an event type.
 	 * @static
+	 * @protected
+	 * @member core.event.emitter
 	 * @param {String} type The event type.
 	 * @param {Object} [handlers] The handlers object for this event type.
 	 * @return {Object} The created handlers object.
@@ -57,18 +44,40 @@ define([
 		return me[me[LENGTH]] = me[type] = handlers;
 	}
 
+	/**
+	 * This event module is heart of all TroopJS event-based whistles, from the API names it's aligned with Node's events module,
+	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism, which makes it supports for both:
+	 *
+	 *  - **synchronous event**: all your event handlers are run in a single loop.
+	 *  - **async event with promise**: you can return a promise where the next handler will be called upon the
+	 *  completion of that promise.
+	 *
+	 * Event runner can even determinate the **parameters passing** strategy among handlers, which forms in two flavours:
+	 *
+	 *  - sequence: where each handler receives the arguments passed to {@link #method-emit}.
+	 *  - pipeline: where a handler receives the return value of the previous one.
+	 *
+	 * @class core.event.emitter
+	 * @extends core.mixin.base
+	 * @constructor
+	 */
 	var Emitter = Base.extend(function Emitter() {
+		/**
+		 * Handlers attached to this component, addressable either by key or index
+		 * @protected
+		 * @property {Array} handlers
+		 */
 		this[HANDLERS] = [];
 	}, {
 		"displayName" : "core/event/emitter",
 
 		/**
 		 * Adds a listener for the specified event type.
+		 * @chainable
 		 * @param {String} type The event type to subscribe to.
 		 * @param {Object} context The context to scope the callback to.
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
-		 * @returns {*} this
 		 */
 		"on" : function on(type, context, callback, data) {
 			var me = this;
@@ -121,11 +130,10 @@ define([
 		/**
 		 * Remove callback(s) from a subscribed event type, if no callback is specified,
 		 * remove all callbacks of this type.
-		 *
+		 * @chainable
 		 * @param {String} type The event type subscribed to
 		 * @param {Object} [context] The context to scope the callback to remove
 		 * @param {Function} [callback] The event listener function to remove
-		 * @returns {*} this
 		 */
 		"off" : function off(type, context, callback) {
 			var me = this;

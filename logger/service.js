@@ -1,16 +1,12 @@
 /*
- * TroopJS core/logger/pubsub
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../component/service", "troopjs-utils/merge", "when" ], function logger(Service, merge, when) {
+define([
+	"../component/service",
+	"troopjs-utils/merge",
+	"when"
+], function logger(Service, merge, when) {
 	"use strict";
-
-	/**
-	 * Provides logging as a service, with appender support.
-	 * @param {Function...} appenders One or more message appender(s).
-	 * @class core.logger.service
-	 * @extends core.component.service
-	 */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
@@ -69,6 +65,13 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 		}
 	}
 
+	/**
+	 * Provides logging as a service, with appender support.
+	 * @param {Function...} appenders One or more message appender(s).
+	 * @class core.logger.service
+	 * @extends core.component.service
+	 * @constructor
+	 */
 	return Service.extend(function LoggerService() {
 		this[APPENDERS] = ARRAY_SLICE.call(arguments);
 	}, {
@@ -77,12 +80,15 @@ define([ "../component/service", "troopjs-utils/merge", "when" ], function logge
 		"sig/initialize" : function onInitialize() {
 			return forward.call(this, "initialize", arguments);
 		},
+
 		"sig/start" : function onStart() {
 			return forward.call(this, "start", arguments);
 		},
+
 		"sig/stop" : function onStop() {
 			return forward.call(this, "stop", arguments);
 		},
+
 		"sig/finalize" : function onFinalize() {
 			return forward.call(this, "finalize", arguments);
 		},

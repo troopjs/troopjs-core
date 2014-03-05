@@ -1,3 +1,6 @@
+/*
+ * @license MIT http://troopjs.mit-license.org/
+ */
 define([ "when" ], function PipelineModule(when) {
 	"use strict";
 
@@ -10,8 +13,12 @@ define([ "when" ], function PipelineModule(when) {
 	var HEAD = "head";
 	var NEXT = "next";
 
-	/*
-	 * Runner that filters and executes candidates in pipeline without overlap
+	/**
+	 * Run event handlers **asynchronously** in "pipeline", passing the resolved return value (unless it's undefined)
+	 * of the previous listen to the next handler as arguments.
+	 * @class core.component.runner.pipeline
+	 * @protected
+	 * @static
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} args Initial arguments
@@ -43,9 +50,9 @@ define([ "when" ], function PipelineModule(when) {
 		// Reset candidatesCount
 		candidatesCount = 0;
 
-		/*
+		/**
 		 * Internal function for piped execution of candidates candidates
-		 * @private
+		 * @ignore
 		 * @param {Array} [result] result from previous candidate callback
 		 * @return {Promise} promise of next candidate callback execution
 		 */

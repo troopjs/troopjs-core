@@ -1,20 +1,23 @@
 /*
- * TroopJS core/logger/pubsub
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../mixin/base", "../pubsub/hub" ], function PubSubLogger(Base, hub) {
+define([
+	"../mixin/base",
+	"../pubsub/hub"
+], function PubSubLogger(Base, hub) {
 	"use strict";
+
+	var ARRAY_PUSH = Array.prototype.push;
+	var PUBLISH = hub.publish;
 
 	/**
 	 * This module provides a logger that simply publish logging events on hub.
 	 * @class core.logger.pubsub
 	 * @extends core.mixin.base
 	 * @singleton
+	 * @constructor
+	 * @hide
 	 */
-
-	var ARRAY_PUSH = Array.prototype.push;
-	var PUBLISH = hub.publish;
-
 	return Base.create({
 		"displayName" : "core/logger/pubsub",
 
@@ -54,6 +57,9 @@ define([ "../mixin/base", "../pubsub/hub" ], function PubSubLogger(Base, hub) {
 			PUBLISH.apply(hub, args);
 		},
 
+		/**
+		 * @inheritdoc core.logger.console#error
+		 */
 		"error" : function info() {
 			var args = [ "logger/error" ];
 			ARRAY_PUSH.apply(args, arguments);

@@ -1,17 +1,13 @@
 /*
- * TroopJS core/pubsub/proxy/to2x
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../../component/service", "when", "poly/array", "poly/object" ], function To2xModule(Service, when) {
+define([
+	"../../component/service",
+	"when",
+	"poly/array",
+	"poly/object"
+], function To2xModule(Service, when) {
 	"use strict";
-
-	/**
-	 * Proxies to 2.x hub
-	 * @class core.pubsub.proxy.to2x
-	 * @extends core.component.service
-	 * @constructor
-	 * @param {Object...} setting Setting
-	 */
 
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
@@ -26,14 +22,18 @@ define([ "../../component/service", "when", "poly/array", "poly/object" ], funct
 	var TOPIC = "topic";
 	var REPUBLISH = "republish";
 
+	/**
+	 * Proxies to 2.x hub
+	 * @class core.pubsub.proxy.to2x
+	 * @extends core.component.service
+	 * @constructor
+	 * @param {Object...} setting Setting
+	 */
 	return Service.extend(function To2xService(setting) {
 			this[SETTINGS] = ARRAY_SLICE.call(arguments);
 		}, {
 			"displayName" : "core/pubsub/proxy/to2x",
 
-			/**
-			 * @override
-			 */
 			"sig/initialize" : function ()  {
 				var me = this;
 
@@ -131,9 +131,11 @@ define([ "../../component/service", "when", "poly/array", "poly/object" ], funct
 				});
 			},
 
-			/**
-			 * @override
-			 */
+		/**
+		 * @event
+		 * @inheritdoc
+		 * @localdoc Starts bridged topics
+		 */
 			"sig/start" : function () {
 				var me = this;
 				var results = [];
@@ -163,9 +165,6 @@ define([ "../../component/service", "when", "poly/array", "poly/object" ], funct
 				return when.all(results);
 			},
 
-			/**
-			 * @override
-			 */
 			"sig/finalize" : function () {
 				var me = this;
 

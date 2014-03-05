@@ -1,9 +1,14 @@
 /*
- * TroopJS core/registry/service
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../component/service", "poly/object", "poly/array" ], function RegistryServiceModule(Service) {
+define([
+	"../component/service",
+	"poly/object",
+	"poly/array"
+], function RegistryServiceModule(Service) {
 	"use strict";
+
+	var SERVICES = "services";
 
 	/**
 	 * A special {@link core.component.service service} presents the registry table for all
@@ -26,13 +31,15 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 	 *
 	 * @class core.registry.service
 	 * @extends core.component.service
+	 * @constructor
 	 */
-
-	var SERVICES = "services";
-
 	return Service.extend(function RegistryService() {
 		var me = this;
 
+		/**
+		 * Registred services
+		 * @param {core.component.service[]} services
+		 */
 		me[SERVICES] = {};
 
 		me.add(me);
@@ -41,18 +48,28 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 
 		/**
 		 * Register a service.
+		 * @chainable
 		 * @param {core.component.service} service
 		 */
 		"add" : function add(service) {
-			this[SERVICES][service.toString()] = service;
+			var me = this;
+
+			me[SERVICES][service.toString()] = service;
+
+			return me;
 		},
 
 		/**
 		 * Remove a service from the registry.
+		 * @chainable
 		 * @param {core.component.service} service
 		 */
 		"remove": function remove(service) {
-			delete this[SERVICES][service.toString()];
+			var me = this;
+
+			delete me[SERVICES][service.toString()];
+
+			return me;
 		},
 
 		/**
@@ -77,27 +94,25 @@ define([ "../component/service", "poly/object", "poly/array" ], function Registr
 		 * Hub event for adding service.
 		 * @event
 		 * @param {core.component.service} service
-		 * @returns {*}
 		 */
 		"hub/registry/add" : function onAdd(service) {
-			return this.add(service);
+			this.add(service);
 		},
 
 		/**
 		 * Hub event for removing service.
 		 * @event
 		 * @param {core.component.service} service
-		 * @returns {*}
 		 */
 		"hub/registry/remove" : function onRemove(service) {
-			return this.remove(service);
+			this.remove(service);
 		},
 
 		/**
 		 * Hub event for finding service(s).
 		 * @event
 		 * @param {String} pattern
-		 * @returns {*}
+		 * @returns {core.component.service[]}
 		 */
 		"hub/registry/get" : function onGet(pattern) {
 			return this.get(pattern);

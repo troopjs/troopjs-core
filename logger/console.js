@@ -1,17 +1,11 @@
 /*
- * TroopJS core/logger/console
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../mixin/base", "poly/function" ], function ConsoleLogger(Base) {
+define([
+	"../mixin/base",
+	"poly/function"
+], function ConsoleLogger(Base) {
 	"use strict";
-
-	/**
-	 * Module that provides simple logging feature as a wrapper around the "console" global ever found.
-	 *
-	 * @singleton
-	 * @class core.logger.console
-	 * @extends core.mixin.base
-	 */
 
 	/*jshint devel:true*/
 	var CONSOLE = window.console;
@@ -19,7 +13,8 @@ define([ "../mixin/base", "poly/function" ], function ConsoleLogger(Base) {
 	function noop() {}
 
 	var spec = {};
-	["info","log","debug","warn","error"].reduce(function(memo, feature) {
+
+	[ "info","log","debug","warn","error" ].reduce(function(memo, feature) {
 			memo[feature] =
 				typeof CONSOLE != 'undefined' && CONSOLE[feature] ? CONSOLE[feature].bind(CONSOLE) : noop;
 			return memo;
@@ -60,6 +55,15 @@ define([ "../mixin/base", "poly/function" ], function ConsoleLogger(Base) {
 	 * @param {String} msg
 	 */
 
+	/**
+	 * Module that provides simple logging feature as a wrapper around the "console" global ever found.
+	 *
+	 * @class core.logger.console
+	 * @extends core.mixin.base
+	 * @singleton
+	 * @constructor
+	 * @hide
+	 */
 	return Base.create({
 			"displayName" : "core/logger/console"
 		},

@@ -1,3 +1,6 @@
+/*
+ * @license MIT http://troopjs.mit-license.org/
+ */
 define([
 	"./constants",
 	"when"
@@ -13,8 +16,11 @@ define([
 	var MEMORY = "memory";
 	var RE_PHASE = CONSTANTS["pattern"];
 
-	/*
-	 * Runner that filters and executes candidates in sequence without overlap
+	/**
+	 * Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
+	 * @class core.pubsub.runner.sequence
+	 * @static
+	 * @protected
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} args Initial arguments
@@ -48,9 +54,9 @@ define([
 		// Reset candidatesCount
 		candidatesCount = 0;
 
-		/*
+		/**
 		 * Internal function for sequential execution of candidates candidates
-		 * @private
+		 * @ignore
 		 * @param {Array} [result] result from previous candidate callback
 		 * @param {Boolean} [skip] flag indicating if this result should be skipped
 		 * @return {Promise} promise of next candidate callback execution
