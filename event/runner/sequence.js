@@ -13,7 +13,7 @@ define([ "when" ], function SequenceModule(when) {
 	/**
 	 * @class core.event.runner.sequence
 	 * @static
-	 * @private
+	 * @protected
 	 * Runner that executes candidates in sequence without overlap
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers

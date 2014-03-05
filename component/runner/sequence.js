@@ -13,7 +13,7 @@ define([ "poly/array" ], function SequenceModule() {
 	/**
 	 * @class core.component.runner.sequence
 	 * @static
-	 * @private
+	 * @protected
 	 * Runner that executes candidates in sequence without overlap
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers

@@ -25,6 +25,7 @@ define([
 	/**
 	 * Helper to initialize the **handlers** object for an event type.
 	 * @static
+	 * @protected
 	 * @member core.event.emitter
 	 * @param {String} type The event type.
 	 * @param {Object} [handlers] The handlers object for this event type.

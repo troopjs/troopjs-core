@@ -15,7 +15,7 @@ define([ "when" ], function PipelineModule(when) {
 
 	/**
 	 * @class core.component.runner.pipeline
-	 * @private
+	 * @protected
 	 * @static
 	 * Runner that filters and executes candidates in pipeline without overlap
 	 * @param {Object} event Event object
