@@ -102,6 +102,7 @@ define([
 		/**
 		 * Current lifecycle phase
 		 * @readonly
+		 * @protected
 		 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
 		 */
 
