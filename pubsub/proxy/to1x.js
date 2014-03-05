@@ -10,6 +10,12 @@ define([
 ], function To1xModule(Service, when, apply) {
 	"use strict";
 
+	/**
+	 * Proxies to 1.x hub
+	 * @class core.pubsub.proxy.to1x
+	 * @extends core.component.service
+	 */
+
 	var UNDEFINED;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
@@ -28,11 +34,8 @@ define([
 	var MEMORY = "memory";
 
 	/**
-	 * Proxies to 1.x hub
-	 * @class core.pubsub.proxy.to1x
-	 * @extends core.component.service
-	 * @constructor
-	 * @param {Object...} setting Setting
+	 * @method constructor
+	 * @param {...Object} setting Setting
 	 */
 	return Service.extend(function To1xService(setting) {
 			this[SETTINGS] = ARRAY_SLICE.call(arguments);

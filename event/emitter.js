@@ -7,6 +7,23 @@ define([
 ], function EventEmitterModule(Base, sequence) {
 	"use strict";
 
+	/**
+	 * This event module is heart of all TroopJS event-based whistles, from the API names it's aligned with Node's events module,
+	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism, which makes it supports for both:
+	 *
+	 *  - **synchronous event**: all your event handlers are run in a single loop.
+	 *  - **async event with promise**: you can return a promise where the next handler will be called upon the
+	 *  completion of that promise.
+	 *
+	 * Event runner can even determinate the **parameters passing** strategy among handlers, which forms in two flavours:
+	 *
+	 *  - sequence: where each handler receives the arguments passed to {@link #method-emit}.
+	 *  - pipeline: where a handler receives the return value of the previous one.
+	 *
+	 * @class core.event.emitter
+	 * @extends core.mixin.base
+	 */
+
 	var UNDEFINED;
 	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
@@ -26,7 +43,6 @@ define([
 	 * Helper to initialize the **handlers** object for an event type.
 	 * @static
 	 * @protected
-	 * @member core.event.emitter
 	 * @param {String} type The event type.
 	 * @param {Object} [handlers] The handlers object for this event type.
 	 * @return {Object} The created handlers object.
@@ -45,26 +61,13 @@ define([
 	}
 
 	/**
-	 * This event module is heart of all TroopJS event-based whistles, from the API names it's aligned with Node's events module,
-	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism, which makes it supports for both:
-	 *
-	 *  - **synchronous event**: all your event handlers are run in a single loop.
-	 *  - **async event with promise**: you can return a promise where the next handler will be called upon the
-	 *  completion of that promise.
-	 *
-	 * Event runner can even determinate the **parameters passing** strategy among handlers, which forms in two flavours:
-	 *
-	 *  - sequence: where each handler receives the arguments passed to {@link #method-emit}.
-	 *  - pipeline: where a handler receives the return value of the previous one.
-	 *
-	 * @class core.event.emitter
-	 * @extends core.mixin.base
-	 * @constructor
+	 * @method constructor
 	 */
 	var Emitter = Base.extend(function Emitter() {
 		/**
 		 * Handlers attached to this component, addressable either by key or index
 		 * @protected
+		 * @readonly
 		 * @property {Array} handlers
 		 */
 		this[HANDLERS] = [];
@@ -244,6 +247,24 @@ define([
 	});
 
 	Emitter.createHandlers = createHandlers;
+
+	/**
+	 * The runner interface
+	 * @class core.event.emitter.runner
+	 * @abstract
+	 * @singleton
+	 */
+
+	/**
+	 * Run event handlers.
+	 * @abstract
+	 * @method constructor
+	 * @param {Object} event Event object
+	 * @param {String} event.context Event context
+	 * @param {Function} event.callback Event callback
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} args Initial arguments
+	 */
 
 	return Emitter;
 });

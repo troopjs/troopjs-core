@@ -13,30 +13,6 @@ define([
 ], function ComponentModule(Emitter, sequence, version, merge, before, around, when) {
 	"use strict";
 
-	var UNDEFINED;
-	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
-	var CONFIGURATION = "configuration";
-	var RUNNER = "runner";
-	var HANDLERS = "handlers";
-	var HEAD = "head";
-	var CONTEXT = "context";
-	var NAME = "name";
-	var TYPE = "type";
-	var VALUE = "value";
-	var PHASE = "phase";
-	var STOP = "stop";
-	var INITIALIZE = "initialize";
-	var STARTED = "started";
-	var FINALIZED = "finalized";
-	var FINISHED = "finished";
-	var SIG = "sig";
-	var SIG_SETUP = SIG + "/setup";
-	var SIG_TEARDOWN = SIG + "/teardown";
-	var ON = "on";
-	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
-
 	/**
 	 * Imagine component as an object that has predefined life-cycle, with the following phases:
 	 *
@@ -80,7 +56,34 @@ define([
 	 *
 	 * @class core.component.base
 	 * @extends core.event.emitter
-	 * @constructor
+	 */
+
+	var UNDEFINED;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
+	var CONFIGURATION = "configuration";
+	var RUNNER = "runner";
+	var HANDLERS = "handlers";
+	var HEAD = "head";
+	var CONTEXT = "context";
+	var NAME = "name";
+	var TYPE = "type";
+	var VALUE = "value";
+	var PHASE = "phase";
+	var STOP = "stop";
+	var INITIALIZE = "initialize";
+	var STARTED = "started";
+	var FINALIZED = "finalized";
+	var FINISHED = "finished";
+	var SIG = "sig";
+	var SIG_SETUP = SIG + "/setup";
+	var SIG_TEARDOWN = SIG + "/teardown";
+	var ON = "on";
+	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
+
+	/**
+	 * @method constructor
 	 */
 	return Emitter.extend(function Component() {
 		var me = this;

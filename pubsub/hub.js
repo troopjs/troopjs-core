@@ -8,12 +8,6 @@ define([
 ], function HubModule(Emitter, pipeline, from) {
 	"use strict";
 
-	var UNDEFINED;
-	var MEMORY = "memory";
-	var HANDLERS = "handlers";
-	var RUNNER = "runner";
-	var TYPE = "type";
-
 	/**
 	 * The centric "bus" that handlers publishing and subscription.
 	 *
@@ -28,21 +22,43 @@ define([
 	 * @class core.pubsub.hub
 	 * @extends core.event.emitter
 	 * @singleton
-	 * @constructor
+	 */
+
+	var UNDEFINED;
+	var MEMORY = "memory";
+	var HANDLERS = "handlers";
+	var RUNNER = "runner";
+	var TYPE = "type";
+
+	/**
+	 * @method create
+	 * @static
 	 * @hide
 	 */
+
+	/**
+	 * @method extend
+	 * @static
+	 * @hide
+	 */
+
+	/**
+	 * @method constructor
+	 * @hide
+	 */
+
+	/**
+	 * @method on
+	 * @hide
+	 */
+
+	/**
+	 * @method off
+	 * @hide
+	 */
+
 	return Emitter.create({
 		"displayName": "core/pubsub/hub",
-
-		/**
-		 * @method on
-		 * @hide
-		 */
-
-		/**
-		 * @method off
-		 * @hide
-		 */
 
 		/**
 		 * Listen to an event that are emitted publicly.
@@ -57,7 +73,6 @@ define([
 		 * @chainable
 		 * @inheritdoc core.event.emitter#off
 		 * @method
-		 * @returns {core.pubsub.hub} this
 		 */
 		"unsubscribe" : from("off"),
 

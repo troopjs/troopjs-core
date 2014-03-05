@@ -8,8 +8,6 @@ define([
 ], function RegistryServiceModule(Service) {
 	"use strict";
 
-	var SERVICES = "services";
-
 	/**
 	 * A special {@link core.component.service service} presents the registry table for all
 	 * other services across the application.
@@ -31,13 +29,20 @@ define([
 	 *
 	 * @class core.registry.service
 	 * @extends core.component.service
-	 * @constructor
+	 */
+
+	var SERVICES = "services";
+
+	/**
+	 * @method constructor
 	 */
 	return Service.extend(function RegistryService() {
 		var me = this;
 
 		/**
 		 * Registred services
+		 * @private
+		 * @readonly
 		 * @param {core.component.service[]} services
 		 */
 		me[SERVICES] = {};

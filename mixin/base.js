@@ -6,7 +6,11 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 	var INSTANCE_COUNT = "instanceCount";
 
 	/**
-	 * @member core.mixin.base
+	 * Base object with instance count.
+	 * @class core.mixin.base
+	 */
+
+	/**
 	 * @method extend
 	 * @inheritdoc composer.mixin.factory#extend
 	 * @static
@@ -14,7 +18,6 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 	 */
 
 	/**
-	 * @member core.mixin.base
 	 * @method create
 	 * @inheritdoc composer.mixin.factory#create
 	 * @static
@@ -22,9 +25,7 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 	 */
 
 	/**
-	 * Base object with instance count.
-	 * @class core.mixin.base
-	 * @constructor
+	 * @method constructor
 	 */
 	return Factory(function ObjectBase() {
 		// Update instance count

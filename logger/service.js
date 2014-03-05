@@ -8,6 +8,12 @@ define([
 ], function logger(Service, merge, when) {
 	"use strict";
 
+	/**
+	 * Provides logging as a service, with appender support.
+	 * @class core.logger.service
+	 * @extends core.component.service
+	 */
+
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
@@ -66,13 +72,10 @@ define([
 	}
 
 	/**
-	 * Provides logging as a service, with appender support.
-	 * @param {Function...} appenders One or more message appender(s).
-	 * @class core.logger.service
-	 * @extends core.component.service
-	 * @constructor
+	 * @method constructor
+	 * @param {...Function} appender One or more message appender(s).
 	 */
-	return Service.extend(function LoggerService() {
+	return Service.extend(function LoggerService(appender) {
 		this[APPENDERS] = ARRAY_SLICE.call(arguments);
 	}, {
 		displayName : "core/logger/service",

@@ -4,6 +4,13 @@
 define([ "when" ], function PipelineModule(when) {
 	"use strict";
 
+	/**
+	 * @class core.component.runner.pipeline
+	 * @extends core.event.emitter.runner
+	 * @protected
+	 * @singleton
+	 */
+
 	var UNDEFINED;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
@@ -14,14 +21,9 @@ define([ "when" ], function PipelineModule(when) {
 	var NEXT = "next";
 
 	/**
-	 * Run event handlers **asynchronously** in "pipeline", passing the resolved return value (unless it's undefined)
-	 * of the previous listen to the next handler as arguments.
-	 * @class core.component.runner.pipeline
-	 * @protected
-	 * @static
-	 * @param {Object} event Event object
-	 * @param {Object} handlers List of handlers
-	 * @param {Array} args Initial arguments
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Run event handlers **asynchronously** in "pipeline", passing the resolved return value (unless it's undefined) of the previous listen to the next handler as arguments.
 	 * @returns {Promise}
 	 */
 	return function pipeline(event, handlers, args) {

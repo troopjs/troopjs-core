@@ -7,6 +7,13 @@ define([
 ], function PipelineModule(CONSTANTS, when) {
 	"use strict";
 
+	/**
+	 * @class core.pubsub.runner.pipeline
+	 * @extends core.event.emitter.runner
+	 * @protected
+	 * @singleton
+	 */
+
 	var UNDEFINED;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
@@ -20,13 +27,9 @@ define([
 	var RE_PHASE = CONSTANTS["pattern"];
 
 	/**
-	 * @class core.pubsub.runner.pipeline
-	 * @static
-	 * @private
-	 * Runner that filters and executes candidates in pipeline without overlap
-	 * @param {Object} event Event object
-	 * @param {Object} handlers List of handlers
-	 * @param {Array} args Initial arguments
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Runner that filters and executes candidates in pipeline without overlap
 	 * @returns {Promise}
 	 */
 	return function pipeline(event, handlers, args) {

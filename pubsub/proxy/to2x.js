@@ -9,6 +9,12 @@ define([
 ], function To2xModule(Service, when) {
 	"use strict";
 
+	/**
+	 * Proxies to 2.x hub
+	 * @class core.pubsub.proxy.to2x
+	 * @extends core.component.service
+	 */
+
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var ARRAY_SLICE = ARRAY_PROTO.slice;
@@ -23,11 +29,8 @@ define([
 	var REPUBLISH = "republish";
 
 	/**
-	 * Proxies to 2.x hub
-	 * @class core.pubsub.proxy.to2x
-	 * @extends core.component.service
-	 * @constructor
-	 * @param {Object...} setting Setting
+	 * @method constructor
+	 * @param {...Object} setting Setting
 	 */
 	return Service.extend(function To2xService(setting) {
 			this[SETTINGS] = ARRAY_SLICE.call(arguments);

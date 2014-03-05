@@ -9,21 +9,6 @@ define([
 ],function GadgetModule(Component, pipeline, when, hub) {
 	"use strict";
 
-	var UNDEFINED;
-	var NULL = null;
-	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var RUNNER = "runner";
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
-	var PROXY = "proxy";
-	var FEATURES = "features";
-	var NAME = "name";
-	var TYPE = "type";
-	var VALUE = "value";
-	var HUB = "hub";
-	var RE = new RegExp("^" + HUB + "/(.+)");
-
 	/**
 	 * Component that provides signal and hub features.
 	 *
@@ -58,7 +43,25 @@ define([
 	 *
 	 * @class core.component.gadget
 	 * @extends core.component.base
-	 * @constructor
+	 */
+
+	var UNDEFINED;
+	var NULL = null;
+	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var RUNNER = "runner";
+	var CONTEXT = "context";
+	var CALLBACK = "callback";
+	var PROXY = "proxy";
+	var FEATURES = "features";
+	var NAME = "name";
+	var TYPE = "type";
+	var VALUE = "value";
+	var HUB = "hub";
+	var RE = new RegExp("^" + HUB + "/(.+)");
+
+	/**
+	 * @method constructor
 	 */
 	return Component.extend({
 		"displayName" : "core/component/gadget",

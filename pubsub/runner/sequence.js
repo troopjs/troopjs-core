@@ -7,6 +7,13 @@ define([
 ], function SequenceModule(CONSTANTS, when) {
 	"use strict";
 
+	/**
+	 * @class core.pubsub.runner.sequence
+	 * @extends core.event.emitter.runner
+	 * @protected
+	 * @singleton
+	 */
+
 	var UNDEFINED;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
@@ -17,13 +24,9 @@ define([
 	var RE_PHASE = CONSTANTS["pattern"];
 
 	/**
-	 * Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
-	 * @class core.pubsub.runner.sequence
-	 * @static
-	 * @protected
-	 * @param {Object} event Event object
-	 * @param {Object} handlers List of handlers
-	 * @param {Array} args Initial arguments
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @returns {Promise}
 	 */
 	return function sequence(event, handlers, args) {

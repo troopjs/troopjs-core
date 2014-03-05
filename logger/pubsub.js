@@ -7,15 +7,30 @@ define([
 ], function PubSubLogger(Base, hub) {
 	"use strict";
 
-	var ARRAY_PUSH = Array.prototype.push;
-	var PUBLISH = hub.publish;
-
 	/**
 	 * This module provides a logger that simply publish logging events on hub.
 	 * @class core.logger.pubsub
 	 * @extends core.mixin.base
 	 * @singleton
-	 * @constructor
+	 */
+
+	var ARRAY_PUSH = Array.prototype.push;
+	var PUBLISH = hub.publish;
+
+	/**
+	 * @method create
+	 * @static
+	 * @hide
+	 */
+
+	/**
+	 * @method extend
+	 * @static
+	 * @hide
+	 */
+
+	/**
+	 * @method constructor
 	 * @hide
 	 */
 	return Base.create({

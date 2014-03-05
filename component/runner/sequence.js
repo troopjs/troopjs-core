@@ -4,6 +4,13 @@
 define([ "poly/array" ], function SequenceModule() {
 	"use strict";
 
+	/**
+	 * @class core.component.runner.sequence
+	 * @extends core.event.emitter.runner
+	 * @protected
+	 * @singleton
+	 */
+
 	var UNDEFINED;
 	var HEAD = "head";
 	var NEXT = "next";
@@ -11,14 +18,10 @@ define([ "poly/array" ], function SequenceModule() {
 	var CONTEXT = "context";
 
 	/**
-	 * Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
-	 * @class core.component.runner.sequence
-	 * @static
-	 * @protected
-	 * @param {Object} event Event object
-	 * @param {Object} handlers List of handlers
-	 * @param {Array} args Initial arguments
-	 * @returns {Array}
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
+	 * @returns {*[]} Result from each executed handler
 	 */
 	return function sequence(event, handlers, args) {
 		var context = event[CONTEXT];

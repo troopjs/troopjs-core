@@ -7,6 +7,13 @@ define([
 ], function ConsoleLogger(Base) {
 	"use strict";
 
+	/**
+	 * Module that provides simple logging feature as a wrapper around the "console" global ever found.
+	 * @class core.logger.console
+	 * @extends core.mixin.base
+	 * @singleton
+	 */
+
 	/*jshint devel:true*/
 	var CONSOLE = window.console;
 
@@ -22,48 +29,51 @@ define([
 
 	/**
 	 * Writes a message to the console that is information alike,
-	 * @member core.logger.console
 	 * @method info
 	 * @param {String} msg
 	 */
 
 	/**
 	 * Writes a message to the console that is logging alike.
-	 * @member core.logger.console
 	 * @method log
 	 * @param {String} msg
 	 */
 
 	/**
 	 * Writes a message to the console that is debugging alike.
-	 * @member core.logger.console
 	 * @method debug
 	 * @param {String} msg
 	 */
 
 	/**
 	 * Writes a message to the console that is warning alike.
-	 * @member core.logger.console
 	 * @method warn
 	 * @param {String} msg
 	 */
 
 	/**
 	 * Writes a message to the console that is actually an error.
-	 * @member core.logger.console
 	 * @method error
 	 * @param {String} msg
 	 */
 
 	/**
-	 * Module that provides simple logging feature as a wrapper around the "console" global ever found.
-	 *
-	 * @class core.logger.console
-	 * @extends core.mixin.base
-	 * @singleton
-	 * @constructor
+	 * @method create
+	 * @static
 	 * @hide
 	 */
+
+	/**
+	 * @method extend
+	 * @static
+	 * @hide
+	 */
+
+	/**
+	 * @method constructor
+	 * @hide
+	 */
+
 	return Base.create({
 			"displayName" : "core/logger/console"
 		},

@@ -9,7 +9,10 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 	 *
 	 * @class core.component.service
 	 * @extends core.component.gadget
-	 * @constructor
+	 */
+
+	/**
+	 * @method constructor
 	 */
 	return Gadget.extend({
 		"displayName" : "core/component/service",
