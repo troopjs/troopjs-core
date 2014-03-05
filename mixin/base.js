@@ -39,7 +39,7 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 		"instanceCount" : INSTANCE_COUNTER,
 
 		/**
-		 * A friendly name for this component
+		 * The hierarchical namespace for this component that indicates it's functionality.
 		 * @readonly
 		 * @property {String}
 		 */
