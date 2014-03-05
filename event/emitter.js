@@ -74,7 +74,6 @@ define([
 		 * @param {Object} context The context to scope the callback to.
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
-		 * @returns {core.event.emitter} this
 		 */
 		"on" : function on(type, context, callback, data) {
 			var me = this;
@@ -131,7 +130,6 @@ define([
 		 * @param {String} type The event type subscribed to
 		 * @param {Object} [context] The context to scope the callback to remove
 		 * @param {Function} [callback] The event listener function to remove
-		 * @returns {core.event.emitter} this
 		 */
 		"off" : function off(type, context, callback) {
 			var me = this;

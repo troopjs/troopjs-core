@@ -49,7 +49,6 @@ define([
 		 * @chainable
 		 * @inheritdoc core.event.emitter#on
 		 * @method
-		 * @returns {core.pubsub.hub} this
 		 */
 		"subscribe" : from("on"),
 

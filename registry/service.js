@@ -50,7 +50,6 @@ define([
 		 * Register a service.
 		 * @chainable
 		 * @param {core.component.service} service
-		 * @returns {core.registry.service} this
 		 */
 		"add" : function add(service) {
 			var me = this;
@@ -64,7 +63,6 @@ define([
 		 * Remove a service from the registry.
 		 * @chainable
 		 * @param {core.component.service} service
-		 * @returns {core.registry.service} this
 		 */
 		"remove": function remove(service) {
 			var me = this;
