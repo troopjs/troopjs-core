@@ -45,14 +45,17 @@ define([
 	}
 
 	/**
-	 * The event module of TroopJS that provides common event handling capability, and some highlights:
+	 * This event module is heart of all TroopJS event-based whistles, from the API names it's aligned with Node's events module,
+	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism, which makes it supports for both:
 	 *
-	 * ## Asynchronous handlers
-	 * Any event handler can be asynchronous depending on the **return value**:
+	 *  - **synchronous event**: all your event handlers are run in a single loop.
+	 *  - **async event with promise**: you can return a promise where the next handler will be called upon the
+	 *  completion of that promise.
 	 *
-	 *  - a Promise value makes this handler be considered asynchronous, where the next handler will be called
-	 *  upon the completion of this promise.
-	 *  - any non-Promise values make it a ordinary handler, where the next handler will be invoked immediately.
+	 * Event runner can even determinate the **parameters passing** strategy among handlers, which forms in two flavours:
+	 *
+	 *  - sequence: where each handler receives the arguments passed to {@link #method-emit}.
+	 *  - pipeline: where a handler receives the return value of the previous one.
 	 *
 	 * @class core.event.emitter
 	 * @extends core.mixin.base

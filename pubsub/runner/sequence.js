@@ -17,10 +17,10 @@ define([
 	var RE_PHASE = CONSTANTS["pattern"];
 
 	/**
+	 * Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @class core.pubsub.runner.sequence
 	 * @static
-	 * @private
-	 * Runner that filters and executes candidates in sequence without overlap
+	 * @protected
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} args Initial arguments

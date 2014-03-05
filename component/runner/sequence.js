@@ -11,10 +11,10 @@ define([ "poly/array" ], function SequenceModule() {
 	var CONTEXT = "context";
 
 	/**
+	 * Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @class core.component.runner.sequence
 	 * @static
 	 * @protected
-	 * Runner that executes candidates in sequence without overlap
 	 * @param {Object} event Event object
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} args Initial arguments

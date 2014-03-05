@@ -40,11 +40,11 @@ define([
 	/**
 	 * Imagine component as an object that has predefined life-cycle, with the following phases:
 	 *
-	 *   1. initialize (signal)
-	 *   1. start (signal)
+	 *   1. initialize
+	 *   1. start
 	 *   1. started
-	 *   1. stop (signal)
-	 *   1. finalize (signal)
+	 *   1. stop
+	 *   1. finalize
 	 *   1. finalized
 	 *
 	 * Calls on {@link #start} or {@link #stop} method of the component will trigger any defined signal
@@ -107,8 +107,9 @@ define([
 		 */
 
 		/**
-		 * Version of TroopJS
+		 * The exact semantic version that reflects the version defined in bower.json file of troopjs package.
 		 * @readonly
+		 * @since 3.0
 		 * @property {String}
 		 */
 		"version" : version,
@@ -160,8 +161,9 @@ define([
 		},
 
 		/**
-		 * Triggered when the first handler of type is added
+		 * Triggered when the first event handler of a particular type is added via {@link #method-on}.
 		 * @template
+		 * @since 3.0
 		 * @event
 		 * @param {String} type
 		 * @param {Object} handlers
@@ -169,16 +171,17 @@ define([
 		"sig/setup": UNDEFINED,
 
 		/**
-		 * Triggered when the last handler of type is removed
+		 * Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
 		 * @template
 		 * @event
+		 * @since 3.0
 		 * @param {String} type
 		 * @param {Object} handlers
 		 */
 		"sig/teardown": UNDEFINED,
 
 		/**
-		 * Triggered when this component starts a task
+		 * Triggered when this component starts a {@link #method-task}.
 		 * @template
 		 * @event
 		 * @param {Promise} task
