@@ -1,4 +1,4 @@
-/*
+/**
  * @license MIT http://troopjs.mit-license.org/
  */
 define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) {

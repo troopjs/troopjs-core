@@ -1,4 +1,4 @@
-/*
+/**
  * @license MIT http://troopjs.mit-license.org/
  */
 define([ "./gadget" ], function ServiceModule(Gadget) {
