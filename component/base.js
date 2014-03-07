@@ -307,7 +307,7 @@ define([
 		},
 
 		/**
-		 * Start the component life-cycle.
+		 * Start the component life-cycle, sends out {@link #event-sig/initialize} and then {@link #event-sig/start}.
 		 * @param {...*} [args] arguments
 		 * @return {Promise}
 		 */
@@ -377,7 +377,7 @@ define([
 		},
 
 		/**
-		 * Schedule a new promise that runs on this component, sends a "task" signal once finished.
+		 * Schedule a new promise that runs on this component, sends a {@link #event-sig/task} once finished.
 		 *
 		 * **Note:** It's recommended to use **this method instead of an ad-hoc promise** to do async lift on this component,
 		 * since in additional to an ordinary promise, it also helps to track the context of any running promise,
