@@ -284,7 +284,6 @@ define([
 
 				// If this event is NOT a signal, send out a signal to allow finalize handlers.
 				if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
-					debugger;
 					event = {};
 					event[TYPE] = SIG_TEARDOWN;
 					event[RUNNER] = sequence;

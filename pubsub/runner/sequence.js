@@ -2,9 +2,9 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"./constants",
+	"./config",
 	"when"
-], function SequenceModule(CONSTANTS, when) {
+], function SequenceModule(config, when) {
 	"use strict";
 
 	/**
@@ -21,7 +21,7 @@ define([
 	var NEXT = "next";
 	var PHASE = "phase";
 	var MEMORY = "memory";
-	var RE_PHASE = CONSTANTS["pattern"];
+	var RE_PHASE = config["pattern"];
 
 	/**
 	 * @method constructor
