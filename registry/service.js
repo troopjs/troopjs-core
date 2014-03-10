@@ -97,7 +97,7 @@ define([
 
 		/**
 		 * Hub event for adding service.
-		 * @event
+		 * @handler
 		 * @param {core.component.service} service
 		 */
 		"hub/registry/add" : function onAdd(service) {
@@ -106,7 +106,7 @@ define([
 
 		/**
 		 * Hub event for removing service.
-		 * @event
+		 * @handler
 		 * @param {core.component.service} service
 		 */
 		"hub/registry/remove" : function onRemove(service) {
@@ -115,7 +115,7 @@ define([
 
 		/**
 		 * Hub event for finding service(s).
-		 * @event
+		 * @handler
 		 * @param {String} pattern
 		 * @returns {core.component.service[]}
 		 */

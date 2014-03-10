@@ -33,10 +33,21 @@ define([
 	 * @param {...Object} setting Setting
 	 */
 	return Service.extend(function To2xService(setting) {
+			/**
+			 * Proxy settings
+			 * @private
+			 * @readonly
+			 * @property {Object} settings
+			 */
 			this[SETTINGS] = ARRAY_SLICE.call(arguments);
 		}, {
 			"displayName" : "core/pubsub/proxy/to2x",
 
+			/**
+			 * @inheritdoc
+			 * @localdoc Initializes proxy topics
+			 * @handler
+			 */
 			"sig/initialize" : function ()  {
 				var me = this;
 
@@ -134,11 +145,11 @@ define([
 				});
 			},
 
-		/**
-		 * @event
-		 * @inheritdoc
-		 * @localdoc Starts bridged topics
-		 */
+			/**
+			 * @inheritdoc
+			 * @localdoc Republishes memorized values
+			 * @handler
+			 */
 			"sig/start" : function () {
 				var me = this;
 				var results = [];
@@ -168,6 +179,11 @@ define([
 				return when.all(results);
 			},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Finalizes proxy topics
+		 * @handler
+		 */
 			"sig/finalize" : function () {
 				var me = this;
 

@@ -120,50 +120,66 @@ define([
 		"displayName" : "core/component/base",
 
 		/**
-		 * Triggered when this component enters the initialize phase
+		 * Initialize signal
 		 * @event sig/initialize
+		 * @localdoc Triggered when this component enters the initialize phase
+		 * @param {...*} [args] Initialize arguments
 		 */
 
 		/**
-		 * Triggered when this component enters the start phase
+		 * Start signal
 		 * @event sig/start
+		 * @localdoc Triggered when this component enters the start phase
+		 * @param {...*} [args] Initialize arguments
 		 */
 
 		/**
-		 * Triggered when this component enters the stop phase
+		 * Stop signal
+		 * @localdoc Triggered when this component enters the stop phase
 		 * @event sig/stop
+		 * @param {...*} [args] Stop arguments
 		 */
 
 		/**
-		 * Triggered when this component enters the finalize phase
+		 * Finalize signal
 		 * @event sig/finalize
+		 * @localdoc Triggered when this component enters the finalize phase
+		 * @param {...*} [args] Finalize arguments
 		 */
 
 		/**
-		 * Triggered when the first event handler of a particular type is added via {@link #method-on}.
+		 * Setup signal
 		 * @event sig/setup
+		 * @localdoc Triggered when the first event handler of a particular type is added via {@link #method-on}.
 		 * @since 3.0
 		 * @param {String} type
 		 * @param {Object} handlers
 		 */
 
 		/**
-		 * Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
+		 * Teardown signal
 		 * @event sig/teardown
+		 * @localdoc Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
 		 * @since 3.0
 		 * @param {String} type
 		 * @param {Object} handlers
 		 */
 
 		/**
-		 * Triggered when this component starts a {@link #method-task}.
+		 * Task signal
 		 * @event sig/task
-		 * @param {Promise} task
+		 * @localdoc Triggered when this component starts a {@link #method-task}.
+		 * @param {Promise} task Task
+		 * @param {Object} task.context Task context
+		 * @param {Date} task.started Task start date
+		 * @param {String} task.name Task name
 		 * @return {Promise}
 		 */
 
 		/**
-		 * Handles the component initialization, registering event handlers declared on specials.
+		 * Handles the component initialization.
+		 * @inheritdoc #event-sig/initialize
+		 * @localdoc Registers event handlers declared ON specials
 		 * @handler
 		 * @return {Promise}
 		 */
@@ -176,7 +192,9 @@ define([
 		},
 
 		/**
-		 * Handles the component finalization, destroy all event handlers.
+		 * Handles the component finalization.
+		 * @inheritdoc #event-sig/finalize
+		 * @localdoc Un-registers all handlers
 		 * @handler
 		 * @return {Promise}
 		 */
@@ -187,6 +205,46 @@ define([
 				return me.off(handlers[TYPE]);
 			});
 		},
+
+		/**
+		 * Handles the component start
+		 * @handler sig/start
+		 * @inheritdoc #event-sig/start
+		 * @template
+		 * @return {Promise}
+		 */
+
+		/**
+		 * Handles the component stop
+		 * @handler sig/stop
+		 * @inheritdoc #event-sig/stop
+		 * @template
+		 * @return {Promise}
+		 */
+
+		/**
+		 * Handles an event setup
+		 * @handler sig/setup
+		 * @inheritdoc #event-sig/setup
+		 * @template
+		 * @return {Promise}
+		 */
+
+		/**
+		 * Handles an event teardown
+		 * @handler sig/teardown
+		 * @inheritdoc #event-sig/teardown
+		 * @template
+		 * @return {Promise}
+		 */
+
+		/**
+		 * Handles a component task
+		 * @handler sig/task
+		 * @inheritdoc #event-sig/task
+		 * @template
+		 * @return {Promise}
+		 */
 
 		/**
 		 * Add to the component {@link #configuration configuration}, possibly {@link utils.merge merge} with the existing one.
@@ -310,6 +368,8 @@ define([
 		 * Start the component life-cycle, sends out {@link #event-sig/initialize} and then {@link #event-sig/start}.
 		 * @param {...*} [args] arguments
 		 * @return {Promise}
+		 * @fires sig/initialize
+		 * @fires sig/start
 		 */
 		"start" : function start(args) {
 			var me = this;
@@ -345,6 +405,8 @@ define([
 		 * Stops the component life-cycle.
 		 * @param {...*} [args] arguments
 		 * @return {Promise}
+		 * @fires sig/stop
+		 * @fires sig/finalize
 		 */
 		"stop" : function stop(args) {
 			var me = this;
@@ -399,6 +461,7 @@ define([
 		 * @param {Function} resolver.notify Notify the progress of this task.
 		 * @param {String} [name]
 		 * @returns {Promise}
+		 * @fires sig/task
 		 */
 		"task" : function task(resolver, name) {
 			var me = this;

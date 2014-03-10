@@ -38,10 +38,21 @@ define([
 	 * @param {...Object} setting Setting
 	 */
 	return Service.extend(function To1xService(setting) {
+			/**
+			 * Proxy settings
+			 * @private
+			 * @readonly
+			 * @property {Object} settings
+			 */
 			this[SETTINGS] = ARRAY_SLICE.call(arguments);
 		}, {
 			"displayName" : "core/pubsub/proxy/to1x",
 
+			/**
+			 * @inheritdoc
+			 * @localdoc Initializes proxy topics
+			 * @handler
+			 */
 			"sig/initialize" : function () {
 				var me = this;
 
@@ -187,6 +198,11 @@ define([
 				});
 			},
 
+			/**
+			 * @inheritdoc
+			 * @localdoc Finalizes proxy topics
+			 * @handler
+			 */
 			"sig/finalize" : function () {
 				var me = this;
 

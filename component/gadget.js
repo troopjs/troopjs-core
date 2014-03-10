@@ -66,6 +66,11 @@ define([
 	return Component.extend({
 		"displayName" : "core/component/gadget",
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Registers event handlers declared HUB specials
+		 * @handler
+		 */
 		"sig/initialize" : function onInitialize() {
 			var me = this;
 
@@ -74,6 +79,11 @@ define([
 			});
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Triggers memorized values on HUB specials
+		 * @handler
+		 */
 		"sig/start" : function onInitialize() {
 			var me = this;
 			var empty = {};
@@ -106,6 +116,11 @@ define([
 			});
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Registers remote proxy on the {@link core.pubsub.hub hub} that will re-publish on this component
+		 * @handler
+		 */
 		"sig/setup": function onSetup(type, handlers) {
 			var me = this;
 			var matches;
@@ -126,6 +141,11 @@ define([
 			}
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Removes remote proxy on the {@link core.pubsub.hub hub} that was previously registred in {@link #handler-sig/setup}
+		 * @handler
+		 */
 		"sig/teardown": function onTeardown(type, handlers) {
 			var me = this;
 			var matches;
@@ -135,6 +155,11 @@ define([
 			}
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Publishes `task` on the {@link core.pubsub.hub hub} whenever a {@link #event-sig/task task} event is emitted
+		 * @handler
+		 */
 		"sig/task" : function onTask(task) {
 			return this.publish("task", task);
 		},

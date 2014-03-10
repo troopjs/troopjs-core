@@ -76,30 +76,56 @@ define([
 	 * @param {...Function} appender One or more message appender(s).
 	 */
 	return Service.extend(function LoggerService(appender) {
+		/**
+		 * Log appenders
+		 * @private
+		 * @readonly
+		 * @property {...Function[]} appenders
+		 */
 		this[APPENDERS] = ARRAY_SLICE.call(arguments);
 	}, {
 		displayName : "core/logger/service",
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Forwards event to #appenders
+		 * @handler
+		 */
 		"sig/initialize" : function onInitialize() {
 			return forward.call(this, "initialize", arguments);
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Forwards event to #appenders
+		 * @handler
+		 */
 		"sig/start" : function onStart() {
 			return forward.call(this, "start", arguments);
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Forwards event to #appenders
+		 * @handler
+		 */
 		"sig/stop" : function onStop() {
 			return forward.call(this, "stop", arguments);
 		},
 
+		/**
+		 * @inheritdoc
+		 * @localdoc Forwards event to #appenders
+		 * @handler
+		 */
 		"sig/finalize" : function onFinalize() {
 			return forward.call(this, "finalize", arguments);
 		},
 
 		/**
 		 * Log a message on hub event.
-		 * @event
-		 * @param message
+		 * @handler
+		 * @param {String} message
 		 */
 		"hub/logger/log" : function onLog(message) {
 			append.call(this, convert("log", message));
@@ -107,8 +133,8 @@ define([
 
 		/**
 		 * Log a warn on hub event.
-		 * @event
-		 * @param message
+		 * @handler
+		 * @param {String} message
 		 */
 		"hub/logger/warn" : function onWarn(message) {
 			append.call(this, convert("warn", message));
@@ -116,8 +142,8 @@ define([
 
 		/**
 		 * Log a debug on hub event.
-		 * @event
-		 * @param message
+		 * @handler
+		 * @param {String} message
 		 */
 		"hub/logger/debug" : function onDebug(message) {
 			append.call(this, convert("debug", message));
@@ -125,8 +151,8 @@ define([
 
 		/**
 		 * Log an info on hub event.
-		 * @event
-		 * @param message
+		 * @handler
+		 * @param {String} message
 		 */
 		"hub/logger/info" : function onInfo(message) {
 			append.call(this, convert("info", message));
@@ -134,8 +160,8 @@ define([
 
 		/**
 		 * Log an error on hub event.
-		 * @event
-		 * @param message
+		 * @handler
+		 * @param {String} message
 		 */
 		"hub/logger/error" : function onError(message) {
 			append.call(this, convert("error", message));
