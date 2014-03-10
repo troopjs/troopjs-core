@@ -121,8 +121,50 @@ define([
 
 		/**
 		 * Triggered when this component enters the initialize phase
-		 * @event
-		 * @template
+		 * @event sig/initialize
+		 */
+
+		/**
+		 * Triggered when this component enters the start phase
+		 * @event sig/start
+		 */
+
+		/**
+		 * Triggered when this component enters the stop phase
+		 * @event sig/stop
+		 */
+
+		/**
+		 * Triggered when this component enters the finalize phase
+		 * @event sig/finalize
+		 */
+
+		/**
+		 * Triggered when the first event handler of a particular type is added via {@link #method-on}.
+		 * @event sig/setup
+		 * @since 3.0
+		 * @param {String} type
+		 * @param {Object} handlers
+		 */
+
+		/**
+		 * Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
+		 * @event sig/teardown
+		 * @since 3.0
+		 * @param {String} type
+		 * @param {Object} handlers
+		 */
+
+		/**
+		 * Triggered when this component starts a {@link #method-task}.
+		 * @event sig/task
+		 * @param {Promise} task
+		 * @return {Promise}
+		 */
+
+		/**
+		 * Handles the component initialization, registering event handlers declared on specials.
+		 * @handler
 		 * @return {Promise}
 		 */
 		"sig/initialize" : function onInitialize() {
@@ -134,25 +176,8 @@ define([
 		},
 
 		/**
-		 * Triggered when this component enters the start phase
-		 * @event
-		 * @template
-		 * @return {Promise}
-		 */
-		"sig/start": UNDEFINED,
-
-		/**
-		 * Triggered when this component enters the stop phase
-		 * @event
-		 * @template
-		 * @return {Promise}
-		 */
-		"sig/stop": UNDEFINED,
-
-		/**
-		 * Triggered when this component enters the finalize phase
-		 * @event
-		 * @template
+		 * Handles the component finalization, destroy all event handlers.
+		 * @handler
 		 * @return {Promise}
 		 */
 		"sig/finalize" : function onFinalize() {
@@ -162,35 +187,6 @@ define([
 				return me.off(handlers[TYPE]);
 			});
 		},
-
-		/**
-		 * Triggered when the first event handler of a particular type is added via {@link #method-on}.
-		 * @template
-		 * @since 3.0
-		 * @event
-		 * @param {String} type
-		 * @param {Object} handlers
-		 */
-		"sig/setup": UNDEFINED,
-
-		/**
-		 * Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
-		 * @template
-		 * @event
-		 * @since 3.0
-		 * @param {String} type
-		 * @param {Object} handlers
-		 */
-		"sig/teardown": UNDEFINED,
-
-		/**
-		 * Triggered when this component starts a {@link #method-task}.
-		 * @template
-		 * @event
-		 * @param {Promise} task
-		 * @return {Promise}
-		 */
-		"sig/task": UNDEFINED,
 
 		/**
 		 * Add to the component {@link #configuration configuration}, possibly {@link utils.merge merge} with the existing one.
@@ -311,7 +307,7 @@ define([
 		},
 
 		/**
-		 * Start the component life-cycle.
+		 * Start the component life-cycle, sends out {@link #event-sig/initialize} and then {@link #event-sig/start}.
 		 * @param {...*} [args] arguments
 		 * @return {Promise}
 		 */
@@ -381,7 +377,7 @@ define([
 		},
 
 		/**
-		 * Schedule a new promise that runs on this component, sends a "task" signal once finished.
+		 * Schedule a new promise that runs on this component, sends a {@link #event-sig/task} once finished.
 		 *
 		 * **Note:** It's recommended to use **this method instead of an ad-hoc promise** to do async lift on this component,
 		 * since in additional to an ordinary promise, it also helps to track the context of any running promise,
