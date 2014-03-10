@@ -28,31 +28,36 @@ define([
 	}, spec);
 
 	/**
-	 * Writes a message to the console that is information alike,
+	 * Logs a message that is information like
+	 * @localdoc Writes the log message to the console
 	 * @method info
 	 * @param {String} msg
 	 */
 
 	/**
-	 * Writes a message to the console that is logging alike.
+	 * Logs a message that is logging like
+	 * @localdoc Writes the log message to the console
 	 * @method log
 	 * @param {String} msg
 	 */
 
 	/**
-	 * Writes a message to the console that is debugging alike.
+	 * Logs a message that is debugging like
+	 * @localdoc Writes the log message to the console
 	 * @method debug
 	 * @param {String} msg
 	 */
 
 	/**
-	 * Writes a message to the console that is warning alike.
+	 * Logs a message that is warning like
+	 * @localdoc Writes the log message to the console
 	 * @method warn
 	 * @param {String} msg
 	 */
 
 	/**
-	 * Writes a message to the console that is actually an error.
+	 * Logs a message that is actually an error
+	 * @localdoc Writes the log message to the console
 	 * @method error
 	 * @param {String} msg
 	 */

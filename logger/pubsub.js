@@ -38,6 +38,8 @@ define([
 
 		/**
 		 * @inheritdoc core.logger.console#log
+		 * @localdoc Publishes the log message on the {@link core.pubsub.hub hub}
+		 * @fires core.logger.service#event-hub/logger/log
 		 */
 		"log": function log() {
 			var args = [ "logger/log" ];
@@ -47,6 +49,8 @@ define([
 
 		/**
 		 * @inheritdoc core.logger.console#warn
+		 * @localdoc Publishes the log message on the {@link core.pubsub.hub hub}
+		 * @fires core.logger.service#event-hub/logger/warn
 		 */
 		"warn" : function warn() {
 			var args = [ "logger/warn" ];
@@ -56,6 +60,8 @@ define([
 
 		/**
 		 * @inheritdoc core.logger.console#debug
+		 * @localdoc Publishes the log message on the {@link core.pubsub.hub hub}
+		 * @fires core.logger.service#event-hub/logger/debug
 		 */
 		"debug" : function debug() {
 			var args = [ "logger/debug" ];
@@ -65,6 +71,8 @@ define([
 
 		/**
 		 * @inheritdoc core.logger.console#info
+		 * @localdoc Publishes the log message on the {@link core.pubsub.hub hub}
+		 * @fires core.logger.service#event-hub/logger/info
 		 */
 		"info" : function info() {
 			var args = [ "logger/info" ];
@@ -74,6 +82,8 @@ define([
 
 		/**
 		 * @inheritdoc core.logger.console#error
+		 * @localdoc Publishes the log message on the {@link core.pubsub.hub hub}
+		 * @fires core.logger.service#event-hub/logger/error
 		 */
 		"error" : function info() {
 			var args = [ "logger/error" ];
