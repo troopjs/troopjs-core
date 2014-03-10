@@ -18,7 +18,7 @@ define([
 	 * 	})
 	 *
 	 * @class core.pubsub.runner.config
-	 * @private
+	 * @protected
 	 * @singleton
 	 */
 	return merge.call({
