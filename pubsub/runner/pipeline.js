@@ -10,6 +10,7 @@ define([
 	/**
 	 * @class core.pubsub.runner.pipeline
 	 * @extends core.event.emitter.runner
+	 * @mixins core.pubsub.runner.config
 	 * @protected
 	 * @singleton
 	 */
