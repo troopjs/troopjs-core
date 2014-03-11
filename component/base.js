@@ -290,6 +290,9 @@ define([
 		 * @method
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
+		 * @param {String} type The event type to subscribe to.
+		 * @param {Function} callback The event listener function.
+		 * @param {*} [data] Handler data
 		 */
 		"on": before(function on(event, callback, data) {
 			var me = this;
@@ -319,6 +322,8 @@ define([
 		 * @method
 		 * @inheritdoc
 		 * @localdoc Context of the callback will always be **this** object.
+		 * @param {String} type The event type subscribed to
+		 * @param {Function} [callback] The event listener function to remove
 		 */
 		"off": around(function(fn) {
 			return function off(event, callback) {

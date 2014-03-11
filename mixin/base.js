@@ -25,6 +25,7 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 	 */
 
 	/**
+	 * Creates a new component instance
 	 * @method constructor
 	 */
 	return Factory(function ObjectBase() {
