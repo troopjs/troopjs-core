@@ -13,6 +13,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 
 	/**
 	 * @method constructor
+	 * @inheritdoc
 	 */
 	return Gadget.extend({
 		"displayName" : "core/component/service",

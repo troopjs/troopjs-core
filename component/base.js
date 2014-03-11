@@ -84,6 +84,7 @@ define([
 
 	/**
 	 * @method constructor
+	 * @inheritdoc
 	 */
 	return Emitter.extend(function Component() {
 		var me = this;

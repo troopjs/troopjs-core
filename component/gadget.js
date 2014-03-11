@@ -62,6 +62,7 @@ define([
 
 	/**
 	 * @method constructor
+	 * @inheritdoc
 	 */
 	return Component.extend({
 		"displayName" : "core/component/gadget",

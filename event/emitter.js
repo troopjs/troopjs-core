@@ -62,6 +62,7 @@ define([
 
 	/**
 	 * @method constructor
+	 * @inheritdoc
 	 */
 	var Emitter = Base.extend(function Emitter() {
 		/**
