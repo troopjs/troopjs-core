@@ -6,11 +6,10 @@ define([
 	"../event/runner/sequence",
 	"troopjs/version",
 	"troopjs-utils/merge",
-	"troopjs-composer/decorator/before",
 	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, version, merge, before, around, when) {
+], function ComponentModule(Emitter, sequence, version, merge, around, when) {
 	"use strict";
 
 	/**
@@ -59,6 +58,7 @@ define([
 	 */
 
 	var UNDEFINED;
+	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
@@ -318,35 +318,43 @@ define([
 		 * @fires sig/setup
 		 * @fires sig/add
 		 */
-		"on": before(function on(type, callback, data) {
-			var me = this;
-			var handlers;
-			var event;
+		"on": around(function (fn) {
+			return function on(type, callback, data) {
+				var me = this;
+				var event;
+				var handlers;
+				var result;
 
-			// If this type is NOT a signal we don't have to event try
-			if (!EVENT_TYPE_SIG.test(type)) {
-				// Initialize the handlers for this type if they don't exist.
-				if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-					handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type);
+				// If this type is NOT a signal we don't have to event try
+				if (!EVENT_TYPE_SIG.test(type)) {
+					// Initialize the handlers for this type if they don't exist.
+					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+						handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type);
+					}
+
+					// Initialize event
+					event = {};
+					event[RUNNER] = sequence;
+
+					// If this is the first handler signal SIG_SETUP
+					if (!(HEAD in handlers)) {
+						event[TYPE] = SIG_SETUP;
+						result = me.emit(event, type, handlers);
+					}
+
+					// If we were not interrupted
+					if (result !== FALSE) {
+						// Signal SIG_ADD
+						event[TYPE] = SIG_ADD;
+						result = me.emit(event, type, handlers);
+					}
 				}
 
-				// Initialize event
-				event = {};
-				event[RUNNER] = sequence;
-
-				// If this is the first handler signal SIG_SETUP
-				if (!(HEAD in handlers)) {
-					event[TYPE] = SIG_SETUP;
-					me.emit(event, type, handlers);
-				}
-
-				// Signal SIG_ADD
-				event[TYPE] = SIG_ADD;
-				me.emit(event, type, handlers);
-			}
-
-			// context will always be this widget.
-			return [ type, me, callback, data ];
+				// If we were not interrupted return result from super.on, otherwise just this
+				return result !== FALSE
+						? fn.call(me, type, me, callback, data)
+						: me;
+			};
 		}),
 
 		/**
@@ -364,6 +372,7 @@ define([
 				var me = this;
 				var event;
 				var handlers;
+				var result;
 
 				if (!EVENT_TYPE_SIG.test(type)) {
 					// Initialize the handlers for this type if they don't exist.
@@ -377,19 +386,19 @@ define([
 
 					// Signal SIG_REMOVE
 					event[TYPE] = SIG_REMOVE;
-					me.emit(event, type, handlers);
+					result = me.emit(event, type, handlers);
 
-					// If this is the last handler signal SIG_TEARDOWN
-					if (handlers[HEAD] === handlers[TAIL]) {
+					// If we were not interrupted and this is the last handler signal SIG_TEARDOWN
+					if (result !== FALSE && handlers[HEAD] === handlers[TAIL]) {
 						event[TYPE] = SIG_TEARDOWN;
-						me.emit(event, type, handlers);
+						result = me.emit(event, type, handlers);
 					}
 				}
 
-				// context will always be this widget.
-				fn.call(me, type, me, callback);
-
-				return me;
+				// If we were not interrupted return result from super.off, otherwise just this
+				return result !== FALSE
+					? fn.call(me, type, me, callback)
+					: me;
 			};
 		}),
 
