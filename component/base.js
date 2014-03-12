@@ -66,6 +66,7 @@ define([
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
 	var HEAD = "head";
+	var TAIL = "tail";
 	var CONTEXT = "context";
 	var NAME = "name";
 	var TYPE = "type";
@@ -78,6 +79,8 @@ define([
 	var FINISHED = "finished";
 	var SIG = "sig";
 	var SIG_SETUP = SIG + "/setup";
+	var SIG_ADD = SIG + "/add";
+	var SIG_REMOVE = SIG + "/remove";
 	var SIG_TEARDOWN = SIG + "/teardown";
 	var ON = "on";
 	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
@@ -152,6 +155,24 @@ define([
 		 * Setup signal
 		 * @event sig/setup
 		 * @localdoc Triggered when the first event handler of a particular type is added via {@link #method-on}.
+		 * @since 3.0
+		 * @param {String} type
+		 * @param {Object} handlers
+		 */
+
+		/**
+		 * Add signal
+		 * @event sig/add
+		 * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
+		 * @since 3.0
+		 * @param {String} type
+		 * @param {Object} handlers
+		 */
+
+		/**
+		 * Remove signal
+		 * @event sig/remove
+		 * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
 		 * @since 3.0
 		 * @param {String} type
 		 * @param {Object} handlers
@@ -294,23 +315,33 @@ define([
 		 * @param {String} type The event type to subscribe to.
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
+		 * @fires sig/setup
+		 * @fires sig/add
 		 */
-		"on": before(function on(event, callback, data) {
+		"on": before(function on(type, callback, data) {
 			var me = this;
-			var type = event;
-			var all = me[HANDLERS];
-			var handlers = all[type];
+			var handlers;
+			var event;
 
-			// Initialize the handlers for this type of event on first subscription only.
-			if (handlers === UNDEFINED) {
-				handlers = EMITTER_CREATEHANDLERS.call(all, type);
-			}
+			// If this type is NOT a signal we don't have to event try
+			if (!EVENT_TYPE_SIG.test(type)) {
+				// Initialize the handlers for this type if they don't exist.
+				if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+					handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type);
+				}
 
-			// If this event is NOT a signal, send out a signal to allow setting up handlers.
-			if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
+				// Initialize event
 				event = {};
-				event[TYPE] = SIG_SETUP;
 				event[RUNNER] = sequence;
+
+				// If this is the first handler signal SIG_SETUP
+				if (!(HEAD in handlers)) {
+					event[TYPE] = SIG_SETUP;
+					me.emit(event, type, handlers);
+				}
+
+				// Signal SIG_ADD
+				event[TYPE] = SIG_ADD;
 				me.emit(event, type, handlers);
 			}
 
@@ -325,30 +356,38 @@ define([
 		 * @localdoc Context of the callback will always be **this** object.
 		 * @param {String} type The event type subscribed to
 		 * @param {Function} [callback] The event listener function to remove
+		 * @fires sig/remove
+		 * @fires sig/teardown
 		 */
 		"off": around(function(fn) {
-			return function off(event, callback) {
+			return function off(type, callback) {
 				var me = this;
-				var type = event;
+				var event;
+				var handlers;
+
+				if (!EVENT_TYPE_SIG.test(type)) {
+					// Initialize the handlers for this type if they don't exist.
+					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+						handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type);
+					}
+
+					// Initialize event
+					event = {};
+					event[RUNNER] = sequence;
+
+					// Signal SIG_REMOVE
+					event[TYPE] = SIG_REMOVE;
+					me.emit(event, type, handlers);
+
+					// If this is the last handler signal SIG_TEARDOWN
+					if (handlers[HEAD] === handlers[TAIL]) {
+						event[TYPE] = SIG_TEARDOWN;
+						me.emit(event, type, handlers);
+					}
+				}
 
 				// context will always be this widget.
 				fn.call(me, type, me, callback);
-
-				var all = me[HANDLERS];
-				var handlers = all[type];
-
-				// Initialize the handlers for this type of event on first subscription only.
-				if (handlers === UNDEFINED) {
-					handlers = EMITTER_CREATEHANDLERS.call(all, type);
-				}
-
-				// If this event is NOT a signal, send out a signal to allow finalize handlers.
-				if (!(HEAD in handlers) && !EVENT_TYPE_SIG.test(type)) {
-					event = {};
-					event[TYPE] = SIG_TEARDOWN;
-					event[RUNNER] = sequence;
-					me.emit(event, type, handlers);
-				}
 
 				return me;
 			};

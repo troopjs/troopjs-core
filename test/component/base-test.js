@@ -134,32 +134,40 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					});
 				});
 			},
-			'event handlers - setup/teardown': function() {
-				var setup = this.spy();
-				var teardown = this.spy();
-				var foo = Component.create({
-					"sig/setup": function(type, handlers) {
-						setup(type, handlers);
-					},
-					"sig/teardown": function(type, handlers) {
-						teardown(type, handlers);
-					}
-				});
 
+			"event handlers - setup/add/remove/teardown": function() {
 				function handler1() {}
 				function handler2() {}
 
-				foo.on("foo", handler1).on("foo", handler2);
+				var setup = this.spy();
+				var add = this.spy();
+				var remove = this.spy();
+				var teardown = this.spy();
+
+				var foo = Component.create({
+					"sig/setup": setup,
+					"sig/add": add,
+					"sig/remove": remove,
+					"sig/teardown": teardown
+				});
+
+				foo
+					.on("foo", handler1)
+					.on("foo", handler2)
+					.off("foo", handler1)
+					.off("foo", handler2);
 
 				var handlers = foo.handlers["foo"];
-				assert.calledOnce(setup);
-				assert.calledWith(setup, "foo", handlers);
-				foo.off("foo", handler1);
-				refute.called(teardown);
-				foo.off("foo", handler2);
-				assert.calledOnce(teardown);
-				assert.calledWith(teardown, "foo", handlers);
 
+				assert.calledOnce(setup);
+				assert.calledTwice(add);
+				assert.calledTwice(remove);
+				assert.calledOnce(teardown);
+
+				assert.calledWith(setup, "foo", handlers);
+				assert.calledWith(add, "foo", handlers);
+				assert.calledWith(remove, "foo", handlers);
+				assert.calledWith(teardown, "foo", handlers);
 			}
 		});
 	});
