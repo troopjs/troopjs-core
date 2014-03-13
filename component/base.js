@@ -3,7 +3,7 @@
  */
 define([
 	"../event/emitter",
-	"../event/runner/sequence",
+	"./runner/sequence",
 	"troopjs/version",
 	"troopjs-utils/merge",
 	"troopjs-composer/decorator/around",
