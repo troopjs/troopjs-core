@@ -29,6 +29,7 @@ define([ "poly/array" ], function SequenceModule() {
 		var candidate;
 		var candidates = [];
 		var candidatesCount = 0;
+		var result;
 
 		// Iterate handlers
 		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
@@ -45,9 +46,17 @@ define([ "poly/array" ], function SequenceModule() {
 			candidates[candidatesCount++] = candidate;
 		}
 
-		// Map and return
-		return candidates.map(function (candidate) {
-			return candidate[CALLBACK].apply(candidate[CONTEXT], args);
-		});
+		// Reduce and return
+		return candidates.reduce(function (current, candidate) {
+			// Store result if not UNDEFINED
+			if (current !== UNDEFINED) {
+				result = current;
+			}
+
+			// If result is _not_ false, return result of candidate[CALLBACK], otherwise just false
+			return result !== false
+				? candidate[CALLBACK].apply(candidate[CONTEXT], args)
+				: result;
+		}, UNDEFINED);
 	}
 });

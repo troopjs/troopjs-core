@@ -134,32 +134,95 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					});
 				});
 			},
-			'event handlers - setup/teardown': function() {
-				var setup = this.spy();
-				var teardown = this.spy();
-				var foo = Component.create({
-					"sig/setup": function(type, handlers) {
-						setup(type, handlers);
-					},
-					"sig/teardown": function(type, handlers) {
-						teardown(type, handlers);
-					}
-				});
 
+			"event handlers - setup/add/remove/teardown": function() {
 				function handler1() {}
 				function handler2() {}
 
-				foo.on("foo", handler1).on("foo", handler2);
+				var setup = this.spy();
+				var add = this.spy();
+				var remove = this.spy();
+				var teardown = this.spy();
+
+				var foo = Component.create({
+					"sig/setup": setup,
+					"sig/add": add,
+					"sig/remove": remove,
+					"sig/teardown": teardown
+				});
+
+				foo
+					.on("foo", handler1)
+					.on("foo", handler2)
+					.off("foo", handler1)
+					.off("foo", handler2);
 
 				var handlers = foo.handlers["foo"];
-				assert.calledOnce(setup);
-				assert.calledWith(setup, "foo", handlers);
-				foo.off("foo", handler1);
-				refute.called(teardown);
-				foo.off("foo", handler2);
-				assert.calledOnce(teardown);
-				assert.calledWith(teardown, "foo", handlers);
 
+				assert.calledOnce(setup);
+				assert.calledTwice(add);
+				assert.calledTwice(remove);
+				assert.calledOnce(teardown);
+
+				assert.calledWith(setup, handlers, "foo", handler1);
+				assert.calledWith(add, handlers, "foo", handler1);
+				assert.calledWith(add, handlers, "foo", handler2);
+				assert.calledWith(remove, handlers, "foo", handler1);
+				assert.calledWith(remove, handlers, "foo", handler2);
+				assert.calledWith(teardown, handlers, "foo", handler2);
+			},
+
+			"event handlers - add - prevent default": function() {
+				function handler() {
+					assert(false);
+				}
+				var eventData = {};
+
+				var add = this.spy();
+				var bar = Component.extend({
+					"sig/add": function() {
+						assert(false);
+					}
+				}).create({
+					"sig/add": function() {
+						add.apply(add, arguments);
+						return false;
+					}
+				});
+
+				var evt = "bar";
+				bar.on(evt, handler, eventData);
+				assert.calledOnce(add);
+				assert.calledWith(add, bar.handlers[evt], evt, handler, eventData);
+				bar.emit(evt);
+			},
+
+			"event handlers - off - prevent default": function() {
+				var handle = this.spy();
+				function handler() {
+					handle();
+				}
+
+				var off = this.spy();
+
+				var bar = Component.extend({
+					"sig/remove": function() {
+						assert(false);
+					}
+				}).create({
+					"sig/remove": function() {
+						off.apply(off, arguments);
+						return false;
+					}
+				});
+
+				var evt = "bar";
+				bar.on(evt, handler);
+				bar.off(evt, handler);
+				assert.calledOnce(off);
+				assert.calledWith(off, bar.handlers[evt], evt, handler);
+				bar.emit(evt);
+				assert.calledOnce(handle);
 			}
 		});
 	});
