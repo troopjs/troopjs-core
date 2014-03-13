@@ -4,12 +4,11 @@
 define([
 	"../event/emitter",
 	"./runner/sequence",
-	"troopjs/version",
 	"troopjs-utils/merge",
 	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, version, merge, around, when) {
+], function ComponentModule(Emitter, sequence, merge, around, when) {
 	"use strict";
 
 	/**
@@ -112,14 +111,6 @@ define([
 		 * @protected
 		 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
 		 */
-
-		/**
-		 * The exact semantic version that reflects the version defined in bower.json file of troopjs package.
-		 * @readonly
-		 * @since 3.0
-		 * @property {String}
-		 */
-		"version" : version,
 
 		"displayName" : "core/component/base",
 
