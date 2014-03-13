@@ -346,7 +346,7 @@ define([
 					if (result !== FALSE) {
 						// Signal SIG_ADD
 						event[TYPE] = SIG_ADD;
-						result = me.emit(event, type, handlers);
+						result = me.emit(event, type, callback, data);
 					}
 				}
 
@@ -386,7 +386,7 @@ define([
 
 					// Signal SIG_REMOVE
 					event[TYPE] = SIG_REMOVE;
-					result = me.emit(event, type, handlers);
+					result = me.emit(event, type, callback);
 
 					// If we were not interrupted and this is the last handler signal SIG_TEARDOWN
 					if (result !== FALSE && handlers[HEAD] === handlers[TAIL]) {

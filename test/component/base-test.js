@@ -165,8 +165,10 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				assert.calledOnce(teardown);
 
 				assert.calledWith(setup, "foo", handlers);
-				assert.calledWith(add, "foo", handlers);
-				assert.calledWith(remove, "foo", handlers);
+				assert.calledWith(add, "foo", handler1);
+				assert.calledWith(add, "foo", handler2);
+				assert.calledWith(remove, "foo", handler1);
+				assert.calledWith(remove, "foo", handler2);
 				assert.calledWith(teardown, "foo", handlers);
 			}
 		});
