@@ -164,12 +164,12 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				assert.calledTwice(remove);
 				assert.calledOnce(teardown);
 
-				assert.calledWith(setup, "foo", handlers);
-				assert.calledWith(add, "foo", handler1);
-				assert.calledWith(add, "foo", handler2);
-				assert.calledWith(remove, "foo", handler1);
-				assert.calledWith(remove, "foo", handler2);
-				assert.calledWith(teardown, "foo", handlers);
+				assert.calledWith(setup, handlers, "foo", handler1);
+				assert.calledWith(add, handlers, "foo", handler1);
+				assert.calledWith(add, handlers, "foo", handler2);
+				assert.calledWith(remove, handlers, "foo", handler1);
+				assert.calledWith(remove, handlers, "foo", handler2);
+				assert.calledWith(teardown, handlers, "foo", handler2);
 			},
 
 			"event handlers - add - prevent default": function() {
@@ -193,7 +193,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				var evt = "bar";
 				bar.on(evt, handler, eventData);
 				assert.calledOnce(add);
-				assert.calledWith(add, evt, handler, eventData);
+				assert.calledWith(add, bar.handlers[evt], evt, handler, eventData);
 				bar.emit(evt);
 			},
 
@@ -220,7 +220,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				bar.on(evt, handler);
 				bar.off(evt, handler);
 				assert.calledOnce(off);
-				assert.calledWith(off, evt, handler);
+				assert.calledWith(off, bar.handlers[evt], evt, handler);
 				bar.emit(evt);
 				assert.calledOnce(handle);
 			}

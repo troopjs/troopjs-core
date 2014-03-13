@@ -156,8 +156,10 @@ define([
 		 * @event sig/setup
 		 * @localdoc Triggered when the first event handler of a particular type is added via {@link #method-on}.
 		 * @since 3.0
-		 * @param {String} type
 		 * @param {Object} handlers
+		 * @param {String} type
+		 * @param {Function} callback
+		 * @param {*} [data]
 		 */
 
 		/**
@@ -165,8 +167,10 @@ define([
 		 * @event sig/add
 		 * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
 		 * @since 3.0
-		 * @param {String} type
 		 * @param {Object} handlers
+		 * @param {String} type
+		 * @param {Function} callback
+		 * @param {*} [data]
 		 */
 
 		/**
@@ -174,8 +178,9 @@ define([
 		 * @event sig/remove
 		 * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
 		 * @since 3.0
-		 * @param {String} type
 		 * @param {Object} handlers
+		 * @param {String} type
+		 * @param {Function} callback
 		 */
 
 		/**
@@ -183,8 +188,9 @@ define([
 		 * @event sig/teardown
 		 * @localdoc Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
 		 * @since 3.0
-		 * @param {String} type
 		 * @param {Object} handlers
+		 * @param {String} type
+		 * @param {Function} callback
 		 */
 
 		/**
@@ -339,14 +345,14 @@ define([
 					// If this is the first handler signal SIG_SETUP
 					if (!(HEAD in handlers)) {
 						event[TYPE] = SIG_SETUP;
-						result = me.emit(event, type, handlers);
+						result = me.emit(event, handlers, type, callback, data);
 					}
 
 					// If we were not interrupted
 					if (result !== FALSE) {
 						// Signal SIG_ADD
 						event[TYPE] = SIG_ADD;
-						result = me.emit(event, type, callback, data);
+						result = me.emit(event, handlers, type, callback, data);
 					}
 				}
 
@@ -386,12 +392,12 @@ define([
 
 					// Signal SIG_REMOVE
 					event[TYPE] = SIG_REMOVE;
-					result = me.emit(event, type, callback);
+					result = me.emit(event, handlers, type, callback);
 
 					// If we were not interrupted and this is the last handler signal SIG_TEARDOWN
 					if (result !== FALSE && handlers[HEAD] === handlers[TAIL]) {
 						event[TYPE] = SIG_TEARDOWN;
-						result = me.emit(event, type, handlers);
+						result = me.emit(event, handlers, type, callback);
 					}
 				}
 

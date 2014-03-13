@@ -122,7 +122,7 @@ define([
 		 * @localdoc Registers remote proxy on the {@link core.pubsub.hub hub} that will re-publish on this component
 		 * @handler
 		 */
-		"sig/setup": function onSetup(type, handlers) {
+		"sig/setup": function onSetup(handlers, type) {
 			var me = this;
 			var matches;
 
@@ -147,7 +147,7 @@ define([
 		 * @localdoc Removes remote proxy on the {@link core.pubsub.hub hub} that was previously registred in {@link #handler-sig/setup}
 		 * @handler
 		 */
-		"sig/teardown": function onTeardown(type, handlers) {
+		"sig/teardown": function onTeardown(handlers, type) {
 			var me = this;
 			var matches;
 
