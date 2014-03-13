@@ -83,7 +83,7 @@ define([
 		 * @localdoc Triggers memorized values on HUB specials
 		 * @handler
 		 */
-		"sig/start" : function onInitialize() {
+		"sig/start" : function onStart() {
 			var me = this;
 			var empty = {};
 			var specials = me.constructor.specials[HUB] || ARRAY_PROTO;
@@ -134,7 +134,7 @@ define([
 		 * @localdoc Removes remote subscription from the {@link core.pubsub.hub hub} that was previously registered in {@link #handler-sig/add}
 		 * @handler
 		 */
-		"sig/remove": function onTeardown(handlers, type, callback) {
+		"sig/remove": function onRemove(handlers, type, callback) {
 			var me = this;
 			var matches;
 
