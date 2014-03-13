@@ -156,6 +156,7 @@ define([
 		 * @event sig/setup
 		 * @localdoc Triggered when the first event handler of a particular type is added via {@link #method-on}.
 		 * @since 3.0
+		 * @preventable
 		 * @param {Object} handlers
 		 * @param {String} type
 		 * @param {Function} callback
@@ -167,6 +168,7 @@ define([
 		 * @event sig/add
 		 * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
 		 * @since 3.0
+		 * @preventable
 		 * @param {Object} handlers
 		 * @param {String} type
 		 * @param {Function} callback
@@ -178,6 +180,7 @@ define([
 		 * @event sig/remove
 		 * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
 		 * @since 3.0
+		 * @preventable
 		 * @param {Object} handlers
 		 * @param {String} type
 		 * @param {Function} callback
@@ -188,6 +191,7 @@ define([
 		 * @event sig/teardown
 		 * @localdoc Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
 		 * @since 3.0
+		 * @preventable
 		 * @param {Object} handlers
 		 * @param {String} type
 		 * @param {Function} callback
