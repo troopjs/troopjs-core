@@ -48,11 +48,9 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var RUNNER = "runner";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var PROXY = "proxy";
 	var FEATURES = "features";
 	var NAME = "name";
 	var TYPE = "type";
@@ -85,7 +83,7 @@ define([
 		 * @localdoc Triggers memorized values on HUB specials
 		 * @handler
 		 */
-		"sig/start" : function onInitialize() {
+		"sig/start" : function onStart() {
 			var me = this;
 			var empty = {};
 			var specials = me.constructor.specials[HUB] || ARRAY_PROTO;
@@ -119,40 +117,29 @@ define([
 
 		/**
 		 * @inheritdoc
-		 * @localdoc Registers remote proxy on the {@link core.pubsub.hub hub} that will re-publish on this component
+		 * @localdoc Registers subscription on the {@link core.pubsub.hub hub} for matching callbacks
 		 * @handler
 		 */
-		"sig/setup": function onSetup(handlers, type) {
+		"sig/add": function onAdd(handlers, type, callback) {
 			var me = this;
 			var matches;
 
 			if ((matches = RE.exec(type)) !== NULL) {
-				hub.subscribe(matches[1], me, handlers[PROXY] = function hub_proxy(args) {
-					// Redefine args
-					args = {};
-					args[TYPE] = type;
-					args[RUNNER] = pipeline;
-					args = [ args ];
-
-					// Push original arguments on args
-					ARRAY_PUSH.apply(args, arguments);
-
-					return me.emit.apply(me, args);
-				});
+				hub.subscribe(matches[1], me, callback);
 			}
 		},
 
 		/**
 		 * @inheritdoc
-		 * @localdoc Removes remote proxy on the {@link core.pubsub.hub hub} that was previously registred in {@link #handler-sig/setup}
+		 * @localdoc Removes remote subscription from the {@link core.pubsub.hub hub} that was previously registered in {@link #handler-sig/add}
 		 * @handler
 		 */
-		"sig/teardown": function onTeardown(handlers, type) {
+		"sig/remove": function onRemove(handlers, type, callback) {
 			var me = this;
 			var matches;
 
 			if ((matches = RE.exec(type)) !== NULL) {
-				hub.unsubscribe(matches[1], me, handlers[PROXY]);
+				hub.unsubscribe(matches[1], me, callback);
 			}
 		},
 
