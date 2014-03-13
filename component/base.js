@@ -259,7 +259,23 @@ define([
 		 * @handler sig/setup
 		 * @inheritdoc #event-sig/setup
 		 * @template
-		 * @return {Promise}
+		 * @return {*|Boolean}
+		 */
+
+		/**
+		 * Handles an event add
+		 * @handler sig/add
+		 * @inheritdoc #event-sig/add
+		 * @template
+		 * @return {*|Boolean}
+		 */
+
+		/**
+		 * Handles an event remove
+		 * @handler sig/remove
+		 * @inheritdoc #event-sig/remove
+		 * @template
+		 * @return {*|Boolean}
 		 */
 
 		/**
@@ -267,7 +283,7 @@ define([
 		 * @handler sig/teardown
 		 * @inheritdoc #event-sig/teardown
 		 * @template
-		 * @return {Promise}
+		 * @return {*|Boolean}
 		 */
 
 		/**
