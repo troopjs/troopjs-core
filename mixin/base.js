@@ -49,7 +49,8 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 
 		/**
 		 * Gives string representation of this component instance.
-		 * @returns {String} {@link #displayName} and {@link #instanceCount}
+		 * @returns {String} {@link #displayName}`@`{@link #instanceCount}
+		 * @protected
 		 */
 		"toString" : function _toString() {
 			var me = this;
