@@ -65,11 +65,6 @@ define([
 	 * @private
 	 */
 
-	/**
-	 * @method emit
-	 * @hide
-	 */
-
 	return Emitter.create({
 		"displayName": "core/pubsub/hub",
 
