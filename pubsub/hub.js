@@ -49,12 +49,20 @@ define([
 
 	/**
 	 * @method on
-	 * @hide
+	 * @inheritdoc
+	 * @private
 	 */
 
 	/**
 	 * @method off
-	 * @hide
+	 * @inheritdoc
+	 * @private
+	 */
+
+	/**
+	 * @method emit
+	 * @inheritdoc
+	 * @private
 	 */
 
 	return Emitter.create({
@@ -63,7 +71,7 @@ define([
 		/**
 		 * Listen to an event that are emitted publicly.
 		 * @chainable
-		 * @inheritdoc core.event.emitter#on
+		 * @inheritdoc #on
 		 * @method
 		 */
 		"subscribe" : from("on"),
@@ -71,7 +79,7 @@ define([
 		/**
 		 * Remove a public event listener.
 		 * @chainable
-		 * @inheritdoc core.event.emitter#off
+		 * @inheritdoc #off
 		 * @method
 		 */
 		"unsubscribe" : from("off"),
