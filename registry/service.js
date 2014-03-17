@@ -43,7 +43,7 @@ define([
 		 * Registred services
 		 * @private
 		 * @readonly
-		 * @param {core.component.service[]} services
+		 * @property {core.component.service[]} services
 		 */
 		me[SERVICES] = {};
 
