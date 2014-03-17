@@ -8,20 +8,7 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 	/**
 	 * Base object with instance count.
 	 * @class core.mixin.base
-	 */
-
-	/**
-	 * @method extend
-	 * @inheritdoc composer.mixin.factory#extend
-	 * @static
-	 * @inheritable
-	 */
-
-	/**
-	 * @method create
-	 * @inheritdoc composer.mixin.factory#create
-	 * @static
-	 * @inheritable
+	 * @extends composer.mixin
 	 */
 
 	/**
