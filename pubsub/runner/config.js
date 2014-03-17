@@ -8,17 +8,10 @@ define([
 	"use strict";
 
 	/**
-	 * This module provide configuration for the **pubsub runners** from it's AMD module config.
-	 *
-	 * To change the configuration, refer to RequireJS [module config API](http://requirejs.org/docs/api.html#config-moduleconfig):
-	 *
-	 * 	requirejs.config(
-	 * 	{
-	 * 		config: { "troopjs-core/pubsub/runner/config" : { "pattern" : /regexp/ } }
-	 * 	})
-	 *
 	 * @class core.pubsub.runner.config
 	 * @extends requirejs.config
+	 * @inheritdoc
+	 * @localdoc This module provide configuration for the **pubsub runners** from it's AMD module config.
 	 * @protected
 	 * @static
 	 */
