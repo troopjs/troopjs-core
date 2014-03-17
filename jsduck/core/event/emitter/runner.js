@@ -1,6 +1,7 @@
 /**
  * The runner interface
  * @class core.event.emitter.runner
+ * @extends Function
  * @abstract
  */
 
