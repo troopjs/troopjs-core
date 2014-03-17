@@ -20,7 +20,7 @@ define([
 	 * @class core.pubsub.runner.config
 	 * @extends requirejs.config
 	 * @protected
-	 * @singleton
+	 * @static
 	 */
 	return merge.call({
 		/**
