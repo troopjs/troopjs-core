@@ -60,7 +60,6 @@ define([
 	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var EMITTER_CREATEHANDLERS = Emitter.createHandlers;
 	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
@@ -346,7 +345,8 @@ define([
 				if (!EVENT_TYPE_SIG.test(type)) {
 					// Initialize the handlers for this type if they don't exist.
 					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-						handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type);
+						handlers = {};
+						handlers[TYPE] = type;
 					}
 
 					// Initialize event
@@ -364,6 +364,11 @@ define([
 						// Signal SIG_ADD
 						event[TYPE] = SIG_ADD;
 						result = me.emit(event, handlers, type, callback, data);
+					}
+
+					// If we were not interrupted and `handlers` is not the list for `type` append it
+					if (result !== FALSE && me[HANDLERS][type] !== handlers) {
+						ARRAY_PUSH.call(me[HANDLERS], me[HANDLERS][type] = handlers);
 					}
 				}
 
@@ -394,7 +399,8 @@ define([
 				if (!EVENT_TYPE_SIG.test(type)) {
 					// Initialize the handlers for this type if they don't exist.
 					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-						handlers = EMITTER_CREATEHANDLERS.call(me[HANDLERS], type);
+						handlers = {};
+						handlers[TYPE] = type;
 					}
 
 					// Initialize event
@@ -409,6 +415,11 @@ define([
 					if (result !== FALSE && handlers[HEAD] === handlers[TAIL]) {
 						event[TYPE] = SIG_TEARDOWN;
 						result = me.emit(event, handlers, type, callback);
+					}
+
+					// If we were not interrupted and `handlers` is not the list for `type` append it
+					if (result !== FALSE && me[HANDLERS][type] !== handlers) {
+						ARRAY_PUSH.call(me[HANDLERS], me[HANDLERS][type] = handlers);
 					}
 				}
 

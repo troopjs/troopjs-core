@@ -40,31 +40,10 @@ define([
 	var NEXT = "next";
 
 	/**
-	 * Helper to initialize the **handlers** object for an event type.
-	 * @static
-	 * @protected
-	 * @param {String} type The event type.
-	 * @param {Object} [handlers] The handlers object for this event type.
-	 * @return {Object} The created handlers object.
-	 */
-	function createHandlers(type, handlers) {
-		var me = this;
-
-		// Set default handler if needed
-		handlers = handlers || {};
-
-		// Set type
-		handlers[TYPE] = type;
-
-		// Add handler to handlers
-		return me[me[LENGTH]] = me[type] = handlers;
-	}
-
-	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	var Emitter = Base.extend(function Emitter() {
+	return Base.extend(function Emitter() {
 		/**
 		 * Handlers attached to this component, addressable either by key or index
 		 * @protected
@@ -85,7 +64,7 @@ define([
 		 */
 		"on" : function on(type, context, callback, data) {
 			var me = this;
-			var handlers = me[HANDLERS];
+			var handlers;
 			var handler;
 
 			// Get callback from next arg
@@ -94,10 +73,7 @@ define([
 			}
 
 			// Have handlers
-			if (type in handlers) {
-				// Get handlers
-				handlers = handlers[type];
-
+			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {
 				// Create new handler
 				handler = {};
 
@@ -115,8 +91,11 @@ define([
 			}
 			// No handlers
 			else {
+				// Get HANDLERS
+				handlers = me[HANDLERS];
+
 				// Create type handlers
-				handlers = createHandlers.call(handlers, type, {});
+				handlers = handlers[handlers[LENGTH]] = handlers[type] = {};
 
 				// Prepare handlers
 				handlers[TYPE] = type;
@@ -141,16 +120,13 @@ define([
 		 */
 		"off" : function off(type, context, callback) {
 			var me = this;
-			var handlers = me[HANDLERS];
+			var handlers;
 			var handler;
 			var head;
 			var tail;
 
 			// Have handlers
-			if (type in handlers) {
-				// Get handlers
-				handlers = handlers[type];
-
+			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {
 				// Have HEAD in handlers
 				if (HEAD in handlers) {
 					// Iterate handlers
@@ -219,7 +195,7 @@ define([
 		"emit" : function emit(event, args) {
 			var me = this;
 			var type = event;
-			var handlers = me[HANDLERS];
+			var handlers;
 			var runner;
 
 			// If event is a plain string, convert to object with props
@@ -239,15 +215,20 @@ define([
 				throw Error("first argument has to be of type '" + TOSTRING_STRING + "' or have a '" + TYPE + "' property");
 			}
 
-			// Get or createHandlers handlers[type] as handlers
-			handlers = handlers[type] || createHandlers.call(handlers, type, {});
+			// Get handlers[type] as handlers
+			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+				// Get HANDLERS
+				handlers = me[HANDLERS];
+
+				// Create type handlers
+				handlers = handlers[handlers[LENGTH]] = handlers[type] = {};
+
+				// Prepare handlers
+				handlers[TYPE] = type;
+			}
 
 			// Return result from runner
 			return runner.call(me, event, handlers, ARRAY_SLICE.call(arguments, 1));
 		}
 	});
-
-	Emitter.createHandlers = createHandlers;
-
-	return Emitter;
 });

@@ -3,7 +3,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 	"use strict";
 
 	var assert = buster.referee.assert;
-	var refute = buster.referee.refute;
+	var sinon = buster.sinon;
 
 	require( [ "troopjs-core/component/base", "when/delay" ] , function (Component, delay) {
 
@@ -193,7 +193,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				var evt = "bar";
 				bar.on(evt, handler, eventData);
 				assert.calledOnce(add);
-				assert.calledWith(add, bar.handlers[evt], evt, handler, eventData);
+				assert.calledWith(add, sinon.match.any, evt, handler, eventData);
 				bar.emit(evt);
 			},
 
@@ -220,7 +220,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				bar.on(evt, handler);
 				bar.off(evt, handler);
 				assert.calledOnce(off);
-				assert.calledWith(off, bar.handlers[evt], evt, handler);
+				assert.calledWith(off, sinon.match.any, evt, handler);
 				bar.emit(evt);
 				assert.calledOnce(handle);
 			}
