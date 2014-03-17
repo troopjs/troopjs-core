@@ -2,13 +2,20 @@
  * The runner interface
  * @class core.event.emitter.runner
  * @extends Function
+ * @static
  * @abstract
  */
 
 /**
- * Run event handlers.
- * @abstract
  * @method constructor
+ * @hide
+ */
+
+/**
+ * Run event handlers.
+ * @method constructor
+ * @static
+ * @abstract
  * @param {Object} event Event object
  * @param {String} event.context Event context
  * @param {Function} event.callback Event callback

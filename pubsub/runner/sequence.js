@@ -12,7 +12,7 @@ define([
 	 * @extends core.event.emitter.runner
 	 * @mixins core.pubsub.runner.config
 	 * @protected
-	 * @singleton
+	 * @static
 	 */
 
 	var UNDEFINED;
@@ -26,6 +26,7 @@ define([
 
 	/**
 	 * @method constructor
+	 * @static
 	 * @inheritdoc
 	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @returns {Promise}

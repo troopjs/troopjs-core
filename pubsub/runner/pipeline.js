@@ -12,7 +12,7 @@ define([
 	 * @extends core.event.emitter.runner
 	 * @mixins core.pubsub.runner.config
 	 * @protected
-	 * @singleton
+	 * @static
 	 */
 
 	var UNDEFINED;
@@ -29,6 +29,7 @@ define([
 
 	/**
 	 * @method constructor
+	 * @static
 	 * @inheritdoc
 	 * @localdoc Runner that filters and executes candidates in pipeline without overlap
 	 * @returns {Promise}
