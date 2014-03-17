@@ -42,6 +42,7 @@ define([ "troopjs-composer/mixin/factory" ], function ObjectBaseModule(Factory) 
 
 		/**
 		 * The hierarchical namespace for this component that indicates it's functionality.
+		 * @private
 		 * @readonly
 		 * @property {String}
 		 */
