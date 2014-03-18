@@ -36,6 +36,13 @@ define([
 	 * @param {Date} payload.time Time
 	 * @param {String} payload.cat Category
 	 * @param {String} [payload.msg] Message
+	 * @returns {Promise} Promise that is resolved once all log taps are done
+	 */
+
+	/**
+	 * Forwards payload to all {@link #event-log/append} callbacks registered via {@link #tap}
+	 * @handler log/append
+	 * @inheritdoc #event-log/append
 	 */
 
 	/**
@@ -82,19 +89,19 @@ define([
 	function appender(cat) {
 		return function append(msg) {
 			var me = this;
-			var result = {
+			var payload = {
 				"cat" : cat,
 				"time": new Date().getTime()
 			};
 
 			if (OBJECT_TOSTRING.call(msg) === TOSTRING_OBJECT) {
-				merge.call(result, msg);
+				merge.call(payload, msg);
 			}
 			else {
-				result.msg = msg;
+				payload.msg = msg;
 			}
 
-			return me.emit.call(me, LOG_APPEND, result);
+			return me.emit.call(me, LOG_APPEND, payload);
 		}
 	}
 
@@ -127,10 +134,12 @@ define([
 		},
 
 		/**
-		 * Forwards payload to all {@link #event-log/append} callbacks registered via {@link #tap}
-		 * @handler log/append
+		 * Logs a message that is debugging like
+		 * @method
 		 * @inheritdoc #event-log/append
+		 * @fires log/append
 		 */
+		"debug": appender("debug"),
 
 		/**
 		 * Logs a message that is logging like
@@ -155,14 +164,6 @@ define([
 		 * @fires log/append
 		 */
 		"warn": appender("warn"),
-
-		/**
-		 * Logs a message that is debugging like
-		 * @method
-		 * @inheritdoc #event-log/append
-		 * @fires log/append
-		 */
-		"debug": appender("debug"),
 
 		/**
 		 * Logs a message that is actually an error

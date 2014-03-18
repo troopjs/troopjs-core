@@ -4,11 +4,12 @@
 define([
 	"../event/emitter",
 	"./runner/sequence",
+	"../logger/component",
 	"troopjs-utils/merge",
 	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, merge, around, when) {
+], function ComponentModule(Emitter, sequence, logger, merge, around, when) {
 	"use strict";
 
 	/**
@@ -84,6 +85,171 @@ define([
 	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
 
 	/**
+	 * Current lifecycle phase
+	 * @readonly
+	 * @protected
+	 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
+	 */
+
+	/**
+	 * Initialize signal
+	 * @event sig/initialize
+	 * @localdoc Triggered when this component enters the initialize phase
+	 * @param {...*} [args] Initialize arguments
+	 */
+
+	/**
+	 * Start signal
+	 * @event sig/start
+	 * @localdoc Triggered when this component enters the start phase
+	 * @param {...*} [args] Initialize arguments
+	 */
+
+	/**
+	 * Stop signal
+	 * @localdoc Triggered when this component enters the stop phase
+	 * @event sig/stop
+	 * @param {...*} [args] Stop arguments
+	 */
+
+	/**
+	 * Finalize signal
+	 * @event sig/finalize
+	 * @localdoc Triggered when this component enters the finalize phase
+	 * @param {...*} [args] Finalize arguments
+	 */
+
+	/**
+	 * Setup signal
+	 * @event sig/setup
+	 * @localdoc Triggered when the first event handler of a particular type is added via {@link #method-on}.
+	 * @since 3.0
+	 * @preventable
+	 * @param {Object} handlers
+	 * @param {String} type
+	 * @param {Function} callback
+	 * @param {*} [data]
+	 */
+
+	/**
+	 * Add signal
+	 * @event sig/add
+	 * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
+	 * @since 3.0
+	 * @preventable
+	 * @param {Object} handlers
+	 * @param {String} type
+	 * @param {Function} callback
+	 * @param {*} [data]
+	 */
+
+	/**
+	 * Remove signal
+	 * @event sig/remove
+	 * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
+	 * @since 3.0
+	 * @preventable
+	 * @param {Object} handlers
+	 * @param {String} type
+	 * @param {Function} callback
+	 */
+
+	/**
+	 * Teardown signal
+	 * @event sig/teardown
+	 * @localdoc Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
+	 * @since 3.0
+	 * @preventable
+	 * @param {Object} handlers
+	 * @param {String} type
+	 * @param {Function} callback
+	 */
+
+	/**
+	 * Task signal
+	 * @event sig/task
+	 * @localdoc Triggered when this component starts a {@link #method-task}.
+	 * @param {Promise} task Task
+	 * @param {Object} task.context Task context
+	 * @param {Date} task.started Task start date
+	 * @param {String} task.name Task name
+	 * @return {Promise}
+	 */
+
+	/**
+	 * Handles the component start
+	 * @handler sig/start
+	 * @inheritdoc #event-sig/start
+	 * @template
+	 * @return {Promise}
+	 */
+
+	/**
+	 * Handles the component stop
+	 * @handler sig/stop
+	 * @inheritdoc #event-sig/stop
+	 * @template
+	 * @return {Promise}
+	 */
+
+	/**
+	 * Handles an event setup
+	 * @handler sig/setup
+	 * @inheritdoc #event-sig/setup
+	 * @template
+	 * @return {*|Boolean}
+	 */
+
+	/**
+	 * Handles an event add
+	 * @handler sig/add
+	 * @inheritdoc #event-sig/add
+	 * @template
+	 * @return {*|Boolean}
+	 */
+
+	/**
+	 * Handles an event remove
+	 * @handler sig/remove
+	 * @inheritdoc #event-sig/remove
+	 * @template
+	 * @return {*|Boolean}
+	 */
+
+	/**
+	 * Handles an event teardown
+	 * @handler sig/teardown
+	 * @inheritdoc #event-sig/teardown
+	 * @template
+	 * @return {*|Boolean}
+	 */
+
+	/**
+	 * Handles a component task
+	 * @handler sig/task
+	 * @inheritdoc #event-sig/task
+	 * @template
+	 * @return {Promise}
+	 */
+
+
+	/**
+	 * Creates categorized append method
+	 * @param {String} cat Category
+	 * @return {Function}
+	 * @ignore
+	 */
+	function appender(cat) {
+		return function append(msg) {
+			var payload = {};
+			payload[CONTEXT] = this;
+			payload["msg"] = msg;
+
+			return logger[cat](payload)
+		}
+	}
+
+	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
@@ -104,99 +270,7 @@ define([
 		 */
 		me[CONFIGURATION] = {};
 	}, {
-		/**
-		 * Current lifecycle phase
-		 * @readonly
-		 * @protected
-		 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
-		 */
-
 		"displayName" : "core/component/base",
-
-		/**
-		 * Initialize signal
-		 * @event sig/initialize
-		 * @localdoc Triggered when this component enters the initialize phase
-		 * @param {...*} [args] Initialize arguments
-		 */
-
-		/**
-		 * Start signal
-		 * @event sig/start
-		 * @localdoc Triggered when this component enters the start phase
-		 * @param {...*} [args] Initialize arguments
-		 */
-
-		/**
-		 * Stop signal
-		 * @localdoc Triggered when this component enters the stop phase
-		 * @event sig/stop
-		 * @param {...*} [args] Stop arguments
-		 */
-
-		/**
-		 * Finalize signal
-		 * @event sig/finalize
-		 * @localdoc Triggered when this component enters the finalize phase
-		 * @param {...*} [args] Finalize arguments
-		 */
-
-		/**
-		 * Setup signal
-		 * @event sig/setup
-		 * @localdoc Triggered when the first event handler of a particular type is added via {@link #method-on}.
-		 * @since 3.0
-		 * @preventable
-		 * @param {Object} handlers
-		 * @param {String} type
-		 * @param {Function} callback
-		 * @param {*} [data]
-		 */
-
-		/**
-		 * Add signal
-		 * @event sig/add
-		 * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
-		 * @since 3.0
-		 * @preventable
-		 * @param {Object} handlers
-		 * @param {String} type
-		 * @param {Function} callback
-		 * @param {*} [data]
-		 */
-
-		/**
-		 * Remove signal
-		 * @event sig/remove
-		 * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
-		 * @since 3.0
-		 * @preventable
-		 * @param {Object} handlers
-		 * @param {String} type
-		 * @param {Function} callback
-		 */
-
-		/**
-		 * Teardown signal
-		 * @event sig/teardown
-		 * @localdoc Triggered when the last event handler of type is removed for a particular type via {@link #method-off}.
-		 * @since 3.0
-		 * @preventable
-		 * @param {Object} handlers
-		 * @param {String} type
-		 * @param {Function} callback
-		 */
-
-		/**
-		 * Task signal
-		 * @event sig/task
-		 * @localdoc Triggered when this component starts a {@link #method-task}.
-		 * @param {Promise} task Task
-		 * @param {Object} task.context Task context
-		 * @param {Date} task.started Task start date
-		 * @param {String} task.name Task name
-		 * @return {Promise}
-		 */
 
 		/**
 		 * Handles the component initialization.
@@ -227,62 +301,6 @@ define([
 				return me.off(handlers[TYPE]);
 			});
 		},
-
-		/**
-		 * Handles the component start
-		 * @handler sig/start
-		 * @inheritdoc #event-sig/start
-		 * @template
-		 * @return {Promise}
-		 */
-
-		/**
-		 * Handles the component stop
-		 * @handler sig/stop
-		 * @inheritdoc #event-sig/stop
-		 * @template
-		 * @return {Promise}
-		 */
-
-		/**
-		 * Handles an event setup
-		 * @handler sig/setup
-		 * @inheritdoc #event-sig/setup
-		 * @template
-		 * @return {*|Boolean}
-		 */
-
-		/**
-		 * Handles an event add
-		 * @handler sig/add
-		 * @inheritdoc #event-sig/add
-		 * @template
-		 * @return {*|Boolean}
-		 */
-
-		/**
-		 * Handles an event remove
-		 * @handler sig/remove
-		 * @inheritdoc #event-sig/remove
-		 * @template
-		 * @return {*|Boolean}
-		 */
-
-		/**
-		 * Handles an event teardown
-		 * @handler sig/teardown
-		 * @inheritdoc #event-sig/teardown
-		 * @template
-		 * @return {*|Boolean}
-		 */
-
-		/**
-		 * Handles a component task
-		 * @handler sig/task
-		 * @inheritdoc #event-sig/task
-		 * @template
-		 * @return {Promise}
-		 */
 
 		/**
 		 * Add to the component {@link #configuration configuration}, possibly {@link utils.merge merge} with the existing one.
@@ -559,6 +577,41 @@ define([
 			promise[NAME] = name;
 
 			return me.signal("task", promise).yield(promise);
-		}
+		},
+
+		/**
+		 * @inheritdoc core.logger.component#debug
+		 * @localdoc Forwards message to {@link core.logger.component#debug} while setting `payload.context` to `this`
+		 * @param {String} msg Message
+		 */
+		"debug": appender("debug"),
+
+		/**
+		 * @inheritdoc core.logger.component#log
+		 * @localdoc Forwards message to {@link core.logger.component#log} while setting `payload.context` to `this`
+		 * @param {String} msg Message
+		 */
+		"log": appender("log"),
+
+		/**
+		 * @inheritdoc core.logger.component#info
+		 * @localdoc Forwards message to {@link core.logger.component#info} while setting `payload.context` to `this`
+		 * @param {String} msg Message
+		 */
+		"info": appender("info"),
+
+	/**
+		 * @inheritdoc core.logger.component#warn
+	 * @localdoc Forwards message to {@link core.logger.component#warn} while setting `payload.context` to `this`
+		 * @param {String} msg Message
+		 */
+		"warn": appender("warn"),
+
+		/**
+		 * @inheritdoc core.logger.component#error
+		 * @localdoc Forwards message to {@link core.logger.component#error} while setting `payload.context` to `this`
+		 * @param {String} msg Message
+		 */
+		"error": appender("error")
 	});
 });
