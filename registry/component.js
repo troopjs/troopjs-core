@@ -28,9 +28,10 @@ define([
 	 */
 	return Base.extend(function Registry() {
 		/**
+		 * Registry storage
 		 * @private
 		 * @readonly
-		 * @property {Object[]} storage Registry storage
+		 * @property {Object[]} storage
 		 * @property {String} storage.key Entry key
 		 * @property {Number} storage.index Entry index
 		 * @property {*} storage.value Entry value
