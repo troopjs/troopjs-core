@@ -60,6 +60,20 @@ buster.testCase("troopjs-core/registry/component", function (run) {
 					assert.calledOnceWith(spy, item, 0);
 				},
 
+				"can remove by key": function () {
+					var reg = this.registry;
+					reg.access("key1", "foo");
+					reg.access("key2", "bar");
+
+					reg.remove("key1");
+					refute.defined(reg.access("key1"));
+					assert.equals("bar", reg.access("key2"));
+
+					var spy = this.spy();
+					reg.access().forEach(spy);
+					assert.calledOnceWith(spy, "bar", 0);
+				},
+
 				"throws if entry is created without a string key": function () {
 					assert.exception(function () {
 						this.registry.access(0, {});
