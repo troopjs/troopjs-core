@@ -3,7 +3,7 @@
  */
 define([
 	"troopjs-composer/mixin/factory",
-	"troopjs-logging/logger"
+	"troopjs-log/logger"
 ], function ObjectBaseModule(Factory, logger) {
 	var INSTANCE_COUNTER = 0;
 	var INSTANCE_COUNT = "instanceCount";
@@ -12,7 +12,7 @@ define([
 	 * Base object with instance count.
 	 * @class core.mixin.base
 	 * @implement composer.mixin
-	 * @mixin logging.logger
+	 * @mixin log.logger
 	 */
 
 	/**
