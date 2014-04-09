@@ -4,7 +4,7 @@
 define([
 	"../event/emitter",
 	"./runner/pipeline",
-	"troopjs-composer/decorator/from"
+	"troopjs-compose/decorator/from"
 ], function HubModule(Emitter, pipeline, from) {
 	"use strict";
 

@@ -2,7 +2,7 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"troopjs-composer/mixin/factory",
+	"troopjs-compose/mixin/factory",
 	"troopjs-log/logger"
 ], function ObjectBaseModule(Factory, logger) {
 	var INSTANCE_COUNTER = 0;
@@ -11,7 +11,7 @@ define([
 	/**
 	 * Base object with instance count.
 	 * @class core.mixin.base
-	 * @implement composer.mixin
+	 * @implement compose.mixin
 	 * @mixin log.logger
 	 */
 

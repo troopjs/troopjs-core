@@ -7,7 +7,7 @@ define([
 	"./registry",
 	"../task/registry",
 	"troopjs-utils/merge",
-	"troopjs-composer/decorator/around",
+	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
 ], function ComponentModule(Emitter, sequence, componentRegistry, taskRegistry, merge, around, when) {
