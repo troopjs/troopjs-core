@@ -6,9 +6,10 @@ define([ "poly/array" ], function SequenceModule() {
 
 	/**
 	 * @class core.component.runner.sequence
-	 * @extends core.event.emitter.runner
+	 * @implement core.event.emitter.runner
 	 * @protected
 	 * @static
+	 * @alias feature.runner
 	 */
 
 	var UNDEFINED;
@@ -19,7 +20,6 @@ define([ "poly/array" ], function SequenceModule() {
 
 	/**
 	 * @method constructor
-	 * @static
 	 * @inheritdoc
 	 * @localdoc Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @returns {*[]} Result from each executed handler

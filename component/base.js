@@ -4,12 +4,13 @@
 define([
 	"../event/emitter",
 	"./runner/sequence",
-	"../logger/component",
+	"./registry",
+	"../task/registry",
 	"troopjs-utils/merge",
 	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, logger, merge, around, when) {
+], function ComponentModule(Emitter, sequence, componentRegistry, taskRegistry, merge, around, when) {
 	"use strict";
 
 	/**
@@ -71,6 +72,7 @@ define([
 	var TYPE = "type";
 	var VALUE = "value";
 	var PHASE = "phase";
+	var TASK = "task";
 	var STOP = "stop";
 	var INITIALIZE = "initialize";
 	var STARTED = "started";
@@ -225,31 +227,6 @@ define([
 	 */
 
 	/**
-	 * Handles a component task
-	 * @handler sig/task
-	 * @inheritdoc #event-sig/task
-	 * @template
-	 * @return {Promise}
-	 */
-
-
-	/**
-	 * Creates categorized append method
-	 * @param {String} cat Category
-	 * @return {Function}
-	 * @ignore
-	 */
-	function appender(cat) {
-		return function append(msg) {
-			var payload = {};
-			payload[CONTEXT] = this;
-			payload["msg"] = msg;
-
-			return logger[cat](payload)
-		}
-	}
-
-	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
@@ -282,6 +259,10 @@ define([
 		"sig/initialize" : function onInitialize() {
 			var me = this;
 
+			// Register component
+			componentRegistry.access(me.toString(), me);
+
+			// Initialize ON specials
 			return when.map(me.constructor.specials[ON] || ARRAY_PROTO, function (special) {
 				return me.on(special[TYPE], special[VALUE]);
 			});
@@ -297,9 +278,30 @@ define([
 		"sig/finalize" : function onFinalize() {
 			var me = this;
 
+			// Unregister component
+			componentRegistry.remove(me.toString());
+
+			// Finialize all handlers, in reverse
 			return when.map(me[HANDLERS].reverse(), function (handlers) {
 				return me.off(handlers[TYPE]);
 			});
+		},
+
+		/**
+		 * Handles a component task
+		 * @handler sig/task
+		 * @inheritdoc #event-sig/task
+		 * @template
+		 * @return {Promise}
+		 */
+		"sig/task": function onTask(task) {
+			// Compute task key
+			var key = task[NAME] + "@" + task[STARTED];
+
+			// Register task with remove callback
+			return taskRegistry.access(key, task.ensure(function () {
+				taskRegistry.remove(key);
+			}));
 		},
 
 		/**
@@ -574,44 +576,9 @@ define([
 
 			promise[CONTEXT] = me;
 			promise[STARTED] = new Date();
-			promise[NAME] = name;
+			promise[NAME] = name || TASK;
 
-			return me.signal("task", promise).yield(promise);
-		},
-
-		/**
-		 * @inheritdoc core.logger.component#debug
-		 * @localdoc Forwards message to {@link core.logger.component#debug} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"debug": appender("debug"),
-
-		/**
-		 * @inheritdoc core.logger.component#log
-		 * @localdoc Forwards message to {@link core.logger.component#log} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"log": appender("log"),
-
-		/**
-		 * @inheritdoc core.logger.component#info
-		 * @localdoc Forwards message to {@link core.logger.component#info} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"info": appender("info"),
-
-	/**
-		 * @inheritdoc core.logger.component#warn
-	 * @localdoc Forwards message to {@link core.logger.component#warn} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"warn": appender("warn"),
-
-		/**
-		 * @inheritdoc core.logger.component#error
-		 * @localdoc Forwards message to {@link core.logger.component#error} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"error": appender("error")
+			return me.signal(TASK, promise).yield(promise);
+		}
 	});
 });

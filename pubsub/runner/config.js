@@ -8,16 +8,16 @@ define([
 	"use strict";
 
 	/**
+	 * Provides configuration for the pubsub package
 	 * @class core.pubsub.runner.config
-	 * @extends requirejs.config
-	 * @inheritdoc
-	 * @localdoc This module provide configuration for the **pubsub runners** from it's AMD module config.
 	 * @protected
 	 * @static
+	 * @alias feature.config
 	 */
 	return merge.call({
 		/**
 		 * @cfg {RegExp} pattern RegExp used to determine if a {@link core.component.base#phase phase} should be protected
+		 * @private
 		 */
 		"pattern" : /^(?:initi|fin)alized?$/
 	}, module.config());

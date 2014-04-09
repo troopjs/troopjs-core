@@ -6,9 +6,10 @@ define([ "when" ], function SequenceModule(when) {
 
 	/**
 	 * @class core.event.runner.sequence
-	 * @extends core.event.emitter.runner
+	 * @implement core.event.emitter.runner
 	 * @protected
 	 * @static
+	 * @alias feature.runner
 	 */
 
 	var UNDEFINED;
@@ -19,7 +20,6 @@ define([ "when" ], function SequenceModule(when) {
 
 	/**
 	 * @method constructor
-	 * @static
 	 * @inheritdoc
 	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @returns {Promise}
