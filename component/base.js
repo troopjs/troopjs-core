@@ -6,12 +6,11 @@ define([
 	"./runner/sequence",
 	"./registry",
 	"../task/registry",
-	"../logger/component",
 	"troopjs-utils/merge",
 	"troopjs-composer/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, componentRegistry, taskRegistry, logger, merge, around, when) {
+], function ComponentModule(Emitter, sequence, componentRegistry, taskRegistry, merge, around, when) {
 	"use strict";
 
 	/**
@@ -226,22 +225,6 @@ define([
 	 * @template
 	 * @return {*|Boolean}
 	 */
-
-	/**
-	 * Creates categorized append method
-	 * @param {String} cat Category
-	 * @return {Function}
-	 * @ignore
-	 */
-	function appender(cat) {
-		return function append(msg) {
-			var payload = {};
-			payload[CONTEXT] = this;
-			payload["msg"] = msg;
-
-			return logger[cat](payload)
-		}
-	}
 
 	/**
 	 * @method constructor
@@ -596,41 +579,6 @@ define([
 			promise[NAME] = name || TASK;
 
 			return me.signal(TASK, promise).yield(promise);
-		},
-
-		/**
-		 * @inheritdoc core.logger.component#debug
-		 * @localdoc Forwards message to {@link core.logger.component#debug} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"debug": appender("debug"),
-
-		/**
-		 * @inheritdoc core.logger.component#log
-		 * @localdoc Forwards message to {@link core.logger.component#log} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"log": appender("log"),
-
-		/**
-		 * @inheritdoc core.logger.component#info
-		 * @localdoc Forwards message to {@link core.logger.component#info} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"info": appender("info"),
-
-	/**
-		 * @inheritdoc core.logger.component#warn
-	 * @localdoc Forwards message to {@link core.logger.component#warn} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"warn": appender("warn"),
-
-		/**
-		 * @inheritdoc core.logger.component#error
-		 * @localdoc Forwards message to {@link core.logger.component#error} while setting `payload.context` to `this`
-		 * @param {String} msg Message
-		 */
-		"error": appender("error")
+		}
 	});
 });

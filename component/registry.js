@@ -3,9 +3,8 @@
  */
 define([
 	"../registry/component",
-	"../pubsub/hub",
-	"../logger/component"
-], function ComponentRegistryModule(Registry, hub, logger) {
+	"../pubsub/hub"
+], function ComponentRegistryModule(Registry, hub) {
 	"use strict";
 
 	/**
@@ -33,9 +32,6 @@ define([
 
 	return Registry.create(function ComponentRegistry() {
 		var me = this;
-
-		// Register the logger
-		me.access(logger.toString(), logger);
 
 		// Register the hub
 		me.access(hub.toString(), hub);

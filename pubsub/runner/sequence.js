@@ -9,10 +9,11 @@ define([
 
 	/**
 	 * @class core.pubsub.runner.sequence
-	 * @extends core.event.emitter.runner
-	 * @mixins core.pubsub.runner.config
+	 * @implement core.event.emitter.runner
+	 * @mixin core.pubsub.runner.config
 	 * @protected
 	 * @static
+	 * @alias feature.runner
 	 */
 
 	var UNDEFINED;
@@ -26,7 +27,6 @@ define([
 
 	/**
 	 * @method constructor
-	 * @static
 	 * @inheritdoc
 	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @returns {Promise}

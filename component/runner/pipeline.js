@@ -6,9 +6,10 @@ define([ "when" ], function PipelineModule(when) {
 
 	/**
 	 * @class core.component.runner.pipeline
-	 * @extends core.event.emitter.runner
+	 * @implement core.event.emitter.runner
 	 * @protected
 	 * @static
+	 * @alias feature.runner
 	 */
 
 	var UNDEFINED;
@@ -22,7 +23,6 @@ define([ "when" ], function PipelineModule(when) {
 
 	/**
 	 * @method constructor
-	 * @static
 	 * @inheritdoc
 	 * @localdoc Run event handlers **asynchronously** in "pipeline", passing the resolved return value (unless it's undefined) of the previous listen to the next handler as arguments.
 	 * @returns {Promise}

@@ -18,7 +18,8 @@ define([
 	var INDEX = "index";
 	var KEY = "key";
 	var VALUE = "value";
-	var STORAGE = "storage";
+	var INDEX_KEY = "index_key";
+	var INDEX_POS = "index_pos";
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_STRING = "[object String]";
 
@@ -28,15 +29,26 @@ define([
 	 */
 	return Base.extend(function Registry() {
 		/**
-		 * Registry storage
+		 * Registry key storage
 		 * @private
 		 * @readonly
-		 * @property {Object[]} storage
-		 * @property {String} storage.key Entry key
-		 * @property {Number} storage.index Entry index
-		 * @property {*} storage.value Entry value
+		 * @property {Object[]} index_key
+		 * @property {String} index_key.key Entry key
+		 * @property {Number} index_key.index Entry index
+		 * @property {*} index_key.value Entry value
 		 */
-		this[STORAGE] = [];
+		this[INDEX_KEY] = {};
+
+		/**
+		 * Registry pos storage
+		 * @private
+		 * @readonly
+		 * @property {Object[]} index_pos
+		 * @property {String} index_pos.key Entry key
+		 * @property {Number} index_pos.index Entry index
+		 * @property {*} index_pos.value Entry value
+		 */
+		this[INDEX_POS] = [];
 	}, {
 		"displayName": "core/registry/component",
 
@@ -52,26 +64,27 @@ define([
 		 * @throws Error if a new entry is created and key is not of type String
 		 */
 		"access": function access(key, value) {
-			var storage = this[STORAGE];
+			var index_key = this[INDEX_KEY];
+			var index_pos = this[INDEX_POS];
 			var result;
 			var argc;
 
 			// Reading _all_
 			if ((argc = arguments[LENGTH]) === 0) {
-				result = storage.map(function (item) {
+				result = index_pos.map(function (item) {
 					return item[VALUE];
 				});
 			}
 			// Reading
 			else if (argc === 1) {
-				result = (result = storage[key]) !== UNDEFINED
+				result = (result = index_key[key]) !== UNDEFINED
 					? result[VALUE]
 					: UNDEFINED;
 			}
 			// Writing
 			else {
 				// Replace existing entry
-				if ((result = storage[key]) !== UNDEFINED) {
+				if ((result = index_key[key]) !== UNDEFINED) {
 					result = result[VALUE] = value;
 				}
 				// Check type of key (as now we're creating a new one)
@@ -81,7 +94,7 @@ define([
 				// Create new entry
 				else {
 					result = {};
-					result = storage[result[KEY] = key] = storage[result[INDEX] = storage[LENGTH]] = result;
+					result = index_key[result[KEY] = key] = index_pos[result[INDEX] = index_pos[LENGTH]] = result;
 					result = result[VALUE] = value;
 				}
 			}
@@ -97,18 +110,25 @@ define([
 		 * @param {String|Number} [key] Entry key or index
 		 */
 		"remove": function remove(key) {
-			var storage;
+			var me = this;
 			var result;
+			var index_key = me[INDEX_KEY];
+			var index_pos = me[INDEX_POS];
 
 			// Remove all entries
 			if (arguments[LENGTH] === 0) {
-				this[STORAGE] = [];
+				me[INDEX_KEY] = {};
+				me[INDEX_POS] = [];
 			}
 			// Remove entry by key
-			else if ((storage = this[STORAGE]) && (result = storage[key]) !== UNDEFINED) {
-				delete storage[result[KEY]];
-				delete storage[result[INDEX]];
+			else if ((result = index_key[key]) !== UNDEFINED) {
+				delete index_key[result[KEY]];
+				delete index_pos[result[INDEX]];
 			}
+		},
+
+		"compact": function compact() {
+
 		}
 	});
 });

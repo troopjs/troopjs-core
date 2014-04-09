@@ -9,10 +9,11 @@ define([
 
 	/**
 	 * @class core.pubsub.runner.pipeline
-	 * @extends core.event.emitter.runner
-	 * @mixins core.pubsub.runner.config
+	 * @implement core.event.emitter.runner
+	 * @mixin core.pubsub.runner.config
 	 * @protected
 	 * @static
+	 * @alias feature.runner
 	 */
 
 	var UNDEFINED;
@@ -29,7 +30,6 @@ define([
 
 	/**
 	 * @method constructor
-	 * @static
 	 * @inheritdoc
 	 * @localdoc Runner that filters and executes candidates in pipeline without overlap
 	 * @returns {Promise}
