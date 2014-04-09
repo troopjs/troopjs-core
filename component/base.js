@@ -6,7 +6,7 @@ define([
 	"./runner/sequence",
 	"./registry",
 	"../task/registry",
-	"troopjs-utils/merge",
+	"troopjs-util/merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
@@ -305,7 +305,7 @@ define([
 		},
 
 		/**
-		 * Add to the component {@link #configuration configuration}, possibly {@link utils.merge merge} with the existing one.
+		 * Add to the component {@link #configuration configuration}, possibly {@link util.merge merge} with the existing one.
 		 *
 		 * 		var List = Component.extend({
 		 * 			"sig/start": function start() {

@@ -3,7 +3,7 @@
  */
 define([
 	"module",
-	"troopjs-utils/merge"
+	"troopjs-util/merge"
 ], function LoomConfigModule(module, merge) {
 	"use strict";
 
