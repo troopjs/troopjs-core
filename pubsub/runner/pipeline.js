@@ -32,7 +32,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 * @localdoc Runner that filters and executes candidates in pipeline without overlap
-	 * @returns {Promise}
+	 * @return {Promise}
 	 */
 	return function pipeline(event, handlers, args) {
 		var context = event[CONTEXT];

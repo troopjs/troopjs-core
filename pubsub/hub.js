@@ -96,7 +96,7 @@ define([
 		 *
 		 * @param {String} type The topic to publish.
 		 * @param {...*} [args] Additional params that are passed to the handler function.
-		 * @returns {Promise}
+		 * @return {Promise}
 		 */
 		"publish" : function publish(type, args) {
 			var me = this;
@@ -117,7 +117,7 @@ define([
 		 * Returns value in handlers MEMORY
 		 * @param {String} type event type to peek at
 		 * @param {*} [value] Value to use _only_ if no memory has been recorder
-		 * @returns {*} Value in MEMORY
+		 * @return {*} Value in MEMORY
 		 */
 		"peek": function peek(type, value) {
 			var handlers;

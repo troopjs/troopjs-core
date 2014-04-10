@@ -190,7 +190,7 @@ define([
 		 * @param {Function} [event.runner] The runner function that determinate how the handlers are executed, overrides the
 		 * default behaviour of the event emitting.
 		 * @param {...*} [args] Data params that are passed to the listener function.
-		 * @returns {*} Result returned from runner.
+		 * @return {*} Result returned from runner.
 		 */
 		"emit" : function emit(event, args) {
 			var me = this;

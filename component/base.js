@@ -337,7 +337,7 @@ define([
 		 * 		print(dropdown.configuration.shadow);
 		 *
 		 * @param {...Object} [config] Config(s) to add.
-		 * @returns {Object} The new configuration.
+		 * @return {Object} The new configuration.
 		 */
 		"configure" : function configure(config) {
 			return merge.apply(this[CONFIGURATION], arguments);
@@ -559,7 +559,7 @@ define([
 		 *
 		 * @param {Resolver} resolver The task resolver.
 		 * @param {String} [name]
-		 * @returns {Promise}
+		 * @return {Promise}
 		 * @fires sig/task
 		 */
 		"task" : function task(resolver, name) {
