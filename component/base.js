@@ -557,10 +557,7 @@ define([
 		 * 		$(this.$element).fadeOut(resolve);
 		 * 	}, 'animate');
 		 *
-		 * @param {Function} resolver The task resolver function.
-		 * @param {Function} resolver.resolve Resolve the task.
-		 * @param {Function} resolver.reject Reject the task.
-		 * @param {Function} resolver.notify Notify the progress of this task.
+		 * @param {Resolver} resolver The task resolver.
 		 * @param {String} [name]
 		 * @returns {Promise}
 		 * @fires sig/task
