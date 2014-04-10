@@ -13,7 +13,7 @@ define([
 	/**
 	 * Proxies to 1.x hub
 	 * @class core.pubsub.proxy.to1x
-	 * @extends core.component.service
+	 * @extend core.component.service
 	 */
 
 	var UNDEFINED;

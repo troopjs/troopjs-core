@@ -10,7 +10,7 @@ define([
 	/**
 	 * A light weight implementation to register key/value pairs by key and index
 	 * @class core.registry.component
-	 * @extends core.mixin.base
+	 * @extend core.mixin.base
 	 */
 
 	var UNDEFINED;

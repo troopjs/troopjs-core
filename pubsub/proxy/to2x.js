@@ -12,7 +12,7 @@ define([
 	/**
 	 * Proxies to 2.x hub
 	 * @class core.pubsub.proxy.to2x
-	 * @extends core.component.service
+	 * @extend core.component.service
 	 */
 
 	var ARRAY_PROTO = Array.prototype;

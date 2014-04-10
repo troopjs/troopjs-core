@@ -42,7 +42,7 @@ define([
 	 * 	});
 	 *
 	 * @class core.component.gadget
-	 * @extends core.component.base
+	 * @extend core.component.base
 	 */
 
 	var UNDEFINED;

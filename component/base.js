@@ -55,7 +55,7 @@ define([
 	 * 	});
 	 *
 	 * @class core.component.base
-	 * @extends core.event.emitter
+	 * @extend core.event.emitter
 	 */
 
 	var UNDEFINED;

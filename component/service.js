@@ -8,7 +8,7 @@ define([ "./gadget" ], function ServiceModule(Gadget) {
 	 * Base class for all service alike components.
 	 *
 	 * @class core.component.service
-	 * @extends core.component.gadget
+	 * @extend core.component.gadget
 	 */
 
 	/**
