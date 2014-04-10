@@ -10,6 +10,6 @@
     "troopjs-compose": "~3",
     "troopjs-util": "~3",
     "poly": "~0",
-    "when": "~2"
+    "when": "~3"
   }
 }
