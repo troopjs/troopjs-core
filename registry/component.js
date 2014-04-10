@@ -104,10 +104,12 @@ define([
 
 		/**
 		 * Removes entries from the registry
+		 * TODO: Fixed screwed up index when item is removed from registry.
 		 *
 		 * - If no key is provided, all entries in the registry are removed.
 		 * - Otherwise only the corresponding entry for key is removed.
 		 * @param {String|Number} [key] Entry key or index
+		 *
 		 */
 		"remove": function remove(key) {
 			var me = this;
