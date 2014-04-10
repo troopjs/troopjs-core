@@ -75,27 +75,29 @@ define([
 					return item[VALUE];
 				});
 			}
-			// Reading
-			else if (argc === 1) {
-				result = (result = index_key[key]) !== UNDEFINED
-					? result[VALUE]
-					: UNDEFINED;
-			}
-			// Writing
 			else {
-				// Replace existing entry
-				if ((result = index_key[key]) !== UNDEFINED) {
-					result = result[VALUE] = value;
+				result = (typeof key === 'number' ? index_pos : index_key)[key];
+
+				// Reading
+				if (argc === 1) {
+					result = result !== UNDEFINED ? result[VALUE] : UNDEFINED;
 				}
-				// Check type of key (as now we're creating a new one)
-				else if (OBJECT_TOSTRING.call(key) !== TOSTRING_STRING) {
-					throw Error("key has to be of type String");
-				}
-				// Create new entry
+				// Writing
 				else {
-					result = {};
-					result = index_key[result[KEY] = key] = index_pos[result[INDEX] = index_pos[LENGTH]] = result;
-					result = result[VALUE] = value;
+					// Replace existing entry
+					if (result !== UNDEFINED) {
+						result = result[VALUE] = value;
+					}
+					// Check type of key (as now we're creating a new one)
+					else if (OBJECT_TOSTRING.call(key) !== TOSTRING_STRING) {
+						throw Error("key has to be of type String");
+					}
+					// Create new entry
+					else {
+						result = {};
+						result = index_key[result[KEY] = key] = index_pos[result[INDEX] = index_pos[LENGTH]] = result;
+						result = result[VALUE] = value;
+					}
 				}
 			}
 
