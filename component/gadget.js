@@ -1,240 +1,187 @@
 /**
- * TroopJS core/component/gadget
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../event/emitter", "when", "../pubsub/hub" ], function GadgetModule(Emitter, when, hub) {
+define([
+	"./base",
+	"./runner/pipeline",
+	"when",
+	"../pubsub/hub"
+],function GadgetModule(Component, pipeline, when, hub) {
 	"use strict";
 
+	/**
+	 * Component that provides signal and hub features.
+	 *
+	 * 	var one = Gadget.create({
+	 * 		"hub/kick/start": function(foo) {
+	 * 			// handle kick start
+	 * 		},
+	 *
+	 * 		"hub/piss/off": function() {
+	 * 			// handle piss off
+	 * 		},
+	 *
+	 * 		"sig/task": function() {
+	 * 			// handle "bar" task.
+	 * 		},
+	 *
+	 * 		"hub/task": function() {
+	 * 			// handle both "foo" and "bar".
+	 * 		}
+	 * 	});
+	 *
+	 * 	var other = Gadget.create();
+	 *
+	 * 	other.publish("kick/start","foo");
+	 * 	other.publish("piss/off");
+	 * 	other.task("foo", function() {
+	 * 		// some dirty lift.
+	 * 	});
+	 * 	one.task("bar", function() {
+	 * 		// some dirty lift.
+	 * 	});
+	 *
+	 * @class core.component.gadget
+	 * @extends core.component.base
+	 */
+
+	var UNDEFINED;
+	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var PUBLISH = hub.publish;
-	var REPUBLISH = hub.republish;
-	var SUBSCRIBE = hub.subscribe;
-	var UNSUBSCRIBE = hub.unsubscribe;
-	var LENGTH = "length";
+	var RUNNER = "runner";
+	var CONTEXT = "context";
+	var CALLBACK = "callback";
 	var FEATURES = "features";
+	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
-	var SUBSCRIPTIONS = "subscriptions";
-	var EMITTER_PROTO = Emitter.prototype;
-	var ON = EMITTER_PROTO.on;
-	var OFF = EMITTER_PROTO.off;
-	var REEMITT = EMITTER_PROTO.reemit;
+	var HUB = "hub";
+	var RE = new RegExp("^" + HUB + "/(.+)");
 
-	return Emitter.extend(function Gadget() {
-		this[SUBSCRIPTIONS] = [];
-	}, {
+	/**
+	 * @method constructor
+	 * @inheritdoc
+	 */
+	return Component.extend({
 		"displayName" : "core/component/gadget",
 
 		/**
-		 * Signal handler for 'initialize'
+		 * @inheritdoc
+		 * @localdoc Registers event handlers declared HUB specials
+		 * @handler
 		 */
 		"sig/initialize" : function onInitialize() {
 			var me = this;
-			var subscription;
-			var subscriptions = me[SUBSCRIPTIONS];
-			var special;
-			var specials = me.constructor.specials.hub;
-			var i;
-			var iMax;
-			var type;
-			var value;
 
-			// Iterate specials
-			for (i = 0, iMax = specials ? specials[LENGTH] : 0; i < iMax; i++) {
-				// Get special
-				special = specials[i];
-
-				// Create subscription
-				subscription = subscriptions[i] = {};
-
-				// Set subscription properties
-				subscription[TYPE] = type = special[TYPE];
-				subscription[FEATURES] = special[FEATURES];
-				subscription[VALUE] = value = special[VALUE];
-
-				// Subscribe
-				SUBSCRIBE.call(hub, type, me, value);
-			}
+			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
+				return me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
+			});
 		},
 
 		/**
-		 * Signal handler for 'start'
+		 * @inheritdoc
+		 * @localdoc Triggers memorized values on HUB specials
+		 * @handler
 		 */
 		"sig/start" : function onStart() {
 			var me = this;
-			var args = arguments;
-			var subscription;
-			var subscriptions = me[SUBSCRIPTIONS];
-			var results = [];
-			var resultsLength = 0;
-			var i;
-			var iMax;
+			var empty = {};
+			var specials = me.constructor.specials[HUB] || ARRAY_PROTO;
 
-			// Iterate subscriptions
-			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
-				// Get subscription
-				subscription = subscriptions[i];
+			// Calculate specials
+			specials = specials
+				.map(function (special) {
+					var memory;
+					var result;
 
-				// If this is not a "memory" subscription - continue
-				if (subscription[FEATURES] !== "memory") {
-					continue;
-				}
+					if (special[FEATURES] === "memory" && (memory = me.peek(special[TYPE], empty)) !== empty) {
+						// Redefine result
+						result = {};
+						result[TYPE] = special[NAME];
+						result[RUNNER] = pipeline;
+						result[CONTEXT] = me;
+						result[CALLBACK] = special[VALUE];
+						result = [ result ].concat(memory);
+					}
 
-				// Republish, store result
-				results[resultsLength++] = REPUBLISH.call(hub, subscription[TYPE], false, me, subscription[VALUE]);
-			}
+					return result;
+				})
+				.filter(function (special) {
+					return special !== UNDEFINED;
+				});
 
-			// Return promise that will be fulfilled when all results are, and yield args
-			return when.all(results).yield(args);
+			return when.map(specials, function (special) {
+				return me.emit.apply(me, special);
+			});
 		},
 
 		/**
-		 * Signal handler for 'finalize'
+		 * @inheritdoc
+		 * @localdoc Registers subscription on the {@link core.pubsub.hub hub} for matching callbacks
+		 * @handler
 		 */
-		"sig/finalize" : function onFinalize() {
+		"sig/add": function onAdd(handlers, type, callback) {
 			var me = this;
-			var subscription;
-			var subscriptions = me[SUBSCRIPTIONS];
-			var i;
-			var iMax;
+			var matches;
 
-			// Iterate subscriptions
-			for (i = 0, iMax = subscriptions[LENGTH]; i < iMax; i++) {
-				// Get subscription
-				subscription = subscriptions[i];
-
-				// Unsubscribe
-				UNSUBSCRIBE.call(hub, subscription[TYPE], me, subscription[VALUE]);
+			if ((matches = RE.exec(type)) !== NULL) {
+				hub.subscribe(matches[1], me, callback);
 			}
 		},
 
 		/**
-		 * Signal handler for 'task'
-		 * @param {Promise} task
-		 * @returns {Promise}
+		 * @inheritdoc
+		 * @localdoc Removes remote subscription from the {@link core.pubsub.hub hub} that was previously registered in {@link #handler-sig/add}
+		 * @handler
+		 */
+		"sig/remove": function onRemove(handlers, type, callback) {
+			var me = this;
+			var matches;
+
+			if ((matches = RE.exec(type)) !== NULL) {
+				hub.unsubscribe(matches[1], me, callback);
+			}
+		},
+
+		/**
+		 * @inheritdoc
+		 * @localdoc Publishes `task` on the {@link core.pubsub.hub hub} whenever a {@link #event-sig/task task} event is emitted
+		 * @handler
 		 */
 		"sig/task" : function onTask(task) {
 			return this.publish("task", task);
 		},
 
 		/**
-		 * Reemits event with forced context to this
-		 * @param {String} event to publish
-		 * @param {Boolean} senile flag
-		 * @param {...Function} callback to limit reemit to
-		 * @returns {Promise}
+		 * @inheritdoc core.pubsub.hub#publish
 		 */
-		"reemit" : function reemit(event, senile, callback) {
-			var me = this;
-			var args = [ event, senile, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
-
-			// Forward
-			return REEMITT.apply(me, args);
+		"publish" : function publish() {
+			return hub.publish.apply(hub, arguments);
 		},
 
 		/**
-		 * Adds callback to event with forced context to this
-		 * @param {String} event to publish
-		 * @param {...Function} callback to add
-		 * @returns {Object} instance of this
+		 * @chainable
+		 * @inheritdoc core.pubsub.hub#subscribe
+		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
-		"on": function on(event, callback) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Forward
-			return ON.apply(me, args);
+		"subscribe" : function subscribe(event, callback, data) {
+			return this.on("hub/" + event, callback, data);
 		},
 
 		/**
-		 * Removes callback from event with forced context to this
-		 * @param {String} event to remove callback from
-		 * @param {...Function} callback to remove
-		 * @returns {Object} instance of this
-		 */
-		"off" : function off(event, callback) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Forward
-			return OFF.apply(me, args);
-		},
-
-		/**
-		 * Calls hub.publish
-		 * @arg {String} event to publish
-		 * @arg {...*} arg to pass to subscribed callbacks
-		 * @returns {Promise}
-		 */
-		"publish" : function publish(event, arg) {
-			return PUBLISH.apply(hub, arguments);
-		},
-
-		/**
-		 * Calls hub.republish
-		 * @param {String} event to publish
-		 * @param {Boolean} senile flag
-		 * @param {...Function} callback to limit republish to
-		 * @returns {Promise}
-		 */
-		"republish" : function republish(event, senile, callback) {
-			var me = this;
-			var args = [ event, senile, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 2));
-
-			// Republish
-			return REPUBLISH.apply(hub, args);
-		},
-
-		/**
-		 * Calls hub.subscribe
-		 * @param {String} event to subscribe to
-		 * @param {...Function} callback to subscribe
-		 * @returns {Object} instance of this
-		 */
-		"subscribe" : function subscribe(event, callback) {
-			var me = this;
-			var args = [ event, me ];
-
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Subscribe
-			SUBSCRIBE.apply(hub, args);
-
-			return me;
-		},
-
-		/**
-		 * Calls hub.unsubscribe
-		 * @param {String} event to unsubscribe from
-		 * @param {...Function} callback to unsubscribe
-		 * @returns {Object} instance of this
+		 * @chainable
+		 * @inheritdoc core.pubsub.hub#unsubscribe
+		 * @localdoc Unsubscribe from public events in context of this component.
 		 */
 		"unsubscribe" : function unsubscribe(event, callback) {
-			var me = this;
-			var args = [ event, me ];
+			return this.off("hub/" + event, callback);
+		},
 
-			// Add args
-			ARRAY_PUSH.apply(args, ARRAY_SLICE.call(arguments, 1));
-
-			// Unsubscribe
-			UNSUBSCRIBE.apply(hub, args);
-
-			return me;
+		/**
+		 * @inheritdoc core.pubsub.hub#peek
+		 */
+		"peek" : function peek(event, value) {
+			return hub.peek(event, value);
 		}
 	});
 });

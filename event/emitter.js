@@ -1,464 +1,234 @@
 /**
- * TroopJS core/event/emitter
- * @license MIT http://troopjs.mit-license.org/ © Mikael Karon mailto:mikael@karon.se
+ * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../component/base", "when", "poly/array" ], function EventEmitterModule(Component, when) {
+define([
+	"../mixin/base",
+	"./runner/sequence"
+], function EventEmitterModule(Base, sequence) {
 	"use strict";
 
+	/**
+	 * This event module is heart of all TroopJS event-based whistles, from the API names it's aligned with Node's events module,
+	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism, which makes it supports for both:
+	 *
+	 *  - **synchronous event**: all your event handlers are run in a single loop.
+	 *  - **async event with promise**: you can return a promise where the next handler will be called upon the
+	 *  completion of that promise.
+	 *
+	 * Event runner can even determinate the **parameters passing** strategy among handlers, which forms in two flavours:
+	 *
+	 *  - sequence: where each handler receives the arguments passed to {@link #method-emit}.
+	 *  - pipeline: where a handler receives the return value of the previous one.
+	 *
+	 * @class core.event.emitter
+	 * @extends core.mixin.base
+	 */
+
 	var UNDEFINED;
-	var NULL = null;
-	var MEMORY = "memory";
+	var ARRAY_SLICE = Array.prototype.slice;
+	var OBJECT_TOSTRING = Object.prototype.toString;
+	var TOSTRING_STRING = "[object String]";
+	var HANDLERS = "handlers";
+	var LENGTH = "length";
+	var TYPE = "type";
+	var RUNNER = "runner";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var LENGTH = "length";
+	var DATA = "data";
 	var HEAD = "head";
 	var TAIL = "tail";
 	var NEXT = "next";
-	var HANDLED = "handled";
-	var HANDLERS = "handlers";
-	var PHASE = "phase";
-	var RE_HINT = /^(\w+)(?::(pipeline|sequence))/;
-	var RE_PHASE = /^(?:initi|fin)alized?$/;
-	var ARRAY_SLICE = Array.prototype.slice;
 
 	/**
-	 * Constructs a function that executes handlers in sequence without overlap
-	 * @private
-	 * @param {Array} handlers Array of handlers
-	 * @param {Number} handled Handled counter
-	 * @param {Array} [result=[]] Result array
-	 * @returns {Function}
+	 * @method constructor
+	 * @inheritdoc
 	 */
-	function sequence(handlers, handled, result) {
-		// Default value for result
-		result = result || [];
-
-		var handlersCount = 0;
-		var resultLength = result[LENGTH];
-		var resultCount = resultLength - 1;
-
+	return Base.extend(function Emitter() {
 		/**
-		 * Internal function for sequential execution of handlers handlers
-		 * @private
-		 * @param {Array} [args] result from previous handler callback
-		 * @return {Promise} promise of next handler callback execution
+		 * Handlers attached to this component, addressable either by key or index
+		 * @protected
+		 * @readonly
+		 * @property {Array} handlers
 		 */
-		var next = function (args) {
-			/*jshint curly:false*/
-			var context;
-			var handler;
-
-			// Store result
-			if (resultCount++ >= resultLength) {
-				result[resultCount] = args;
-			}
-
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++])	// Has next handler
-				&& (context = handler[CONTEXT])				// Has context
-				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
-
-			// Return promise of next callback, or a promise resolved with result
-			return handler
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, args), next)
-				: when.resolve(result);
-		};
-
-		return next;
-	}
-
-	/**
-	 * Constructs a function that executes handlers in a pipeline without overlap
-	 * @private
-	 * @param {Array} handlers Array of handlers
-	 * @param {Number} handled Handled counter
-	 * @param {Object} [anchor={}] Object for saving MEMORY on
-	 * @returns {Function}
-	 */
-	function pipeline(handlers, handled, anchor) {
-		// Default value for anchor
-		anchor = anchor || {};
-
-		var handlersCount = 0;
-		var result;
-
-		/**
-		 * Internal function for piped execution of handlers handlers
-		 * @private
-		 * @param {Array} [args] result from previous handler callback
-		 * @return {Promise} promise of next handler callback execution
-		 */
-		var next = function (args) {
-			/*jshint curly:false*/
-			var context;
-			var handler;
-
-			// Check that we have args
-			if (args !== UNDEFINED) {
-				// Update memory and result
-				anchor[MEMORY] = result = args;
-			}
-
-			// Iterate until we find a handler in a blocked phase
-			while ((handler = handlers[handlersCount++])	// Has next handler
-				&& (context = handler[CONTEXT])				// Has context
-				&& RE_PHASE.test(context[PHASE]));			// In blocked phase
-
-			// Return promise of next callback,or promise resolved with result
-			return handler
-				? (handler[HANDLED] = handled) === handled && when(handler[CALLBACK].apply(context, result), next)
-				: when.resolve(result);
-		};
-
-		return next;
-	}
-
-	return Component.extend(
-	/**
-	 * Creates a new EventEmitter
-	 * @constructor
-	 */
-	function EventEmitter() {
-		this[HANDLERS] = {};
+		this[HANDLERS] = [];
 	}, {
 		"displayName" : "core/event/emitter",
 
 		/**
-		 * Adds a listener for the specified event.
-		 * @param {String} event to subscribe to
-		 * @param {Object} context to scope callbacks to
-		 * @param {...Function} callback for this event
-		 * @returns {Object} instance of this
+		 * Adds a listener for the specified event type.
+		 * @chainable
+		 * @param {String} type The event type to subscribe to.
+		 * @param {Object} context The context to scope the callback to.
+		 * @param {Function} callback The event listener function.
+		 * @param {*} [data] Handler data
 		 */
-		"on" : function on(event, context, callback) {
+		"on" : function on(type, context, callback, data) {
 			var me = this;
-			var args = arguments;
-			var handlers = me[HANDLERS];
+			var handlers;
 			var handler;
-			var head;
-			var tail;
-			var offset = 2;
 
 			// Get callback from next arg
-			if ((callback = args[offset++]) === UNDEFINED) {
+			if (callback === UNDEFINED) {
 				throw new Error("no callback provided");
 			}
 
 			// Have handlers
-			if (event in handlers) {
-				// Get handlers
-				handlers = handlers[event];
-
+			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {
 				// Create new handler
 				handler = {};
 
-				// Set handler callback
+				// Prepare handler
 				handler[CALLBACK] = callback;
-
-				// Set handler context
 				handler[CONTEXT] = context;
+				handler[DATA] = data;
 
-				// Get tail handler
-				tail = TAIL in handlers
+				// Set tail handler
+				handlers[TAIL] = TAIL in handlers
 					// Have tail, update handlers[TAIL][NEXT] to point to handler
 					? handlers[TAIL][NEXT] = handler
 					// Have no tail, update handlers[HEAD] to point to handler
 					: handlers[HEAD] = handler;
-
-				// Iterate callbacks
-				while ((callback = args[offset++]) !== UNDEFINED) {
-					// Set tail -> tail[NEXT] -> handler
-					tail = tail[NEXT] = handler = {};
-
-					// Set handler callback
-					handler[CALLBACK] = callback;
-
-					// Set handler context
-					handler[CONTEXT] = context;
-				}
-
-				// Set tail handler
-				handlers[TAIL] = tail;
 			}
 			// No handlers
 			else {
-				// Create head and tail
-				head = tail = handler = {};
+				// Get HANDLERS
+				handlers = me[HANDLERS];
 
-				// Set handler callback
+				// Create type handlers
+				handlers = handlers[handlers[LENGTH]] = handlers[type] = {};
+
+				// Prepare handlers
+				handlers[TYPE] = type;
+				handlers[HEAD] = handlers[TAIL] = handler = {};
+
+				// Prepare handler
 				handler[CALLBACK] = callback;
-
-				// Set handler context
 				handler[CONTEXT] = context;
-
-				// Iterate callbacks
-				while ((callback = args[offset++]) !== UNDEFINED) {
-					// Set tail -> tail[NEXT] -> handler
-					tail = tail[NEXT] = handler = {};
-
-					// Set handler callback
-					handler[CALLBACK] = callback;
-
-					// Set handler context
-					handler[CONTEXT] = context;
-				}
-
-				// Create event handlers
-				handlers = handlers[event] = {};
-
-				// Initialize event handlers
-				handlers[HEAD] = head;
-				handlers[TAIL] = tail;
-				handlers[HANDLED] = 0;
+				handler[DATA] = data;
 			}
 
 			return me;
 		},
 
 		/**
-		 * Remove a listener for the specified event.
-		 * @param {String} event to remove callback from
-		 * @param {Object} [context] to scope callback to
-		 * @param {...Function} [callback] to remove
-		 * @returns {Object} instance of this
+		 * Remove callback(s) from a subscribed event type, if no callback is specified,
+		 * remove all callbacks of this type.
+		 * @chainable
+		 * @param {String} type The event type subscribed to
+		 * @param {Object} [context] The context to scope the callback to remove
+		 * @param {Function} [callback] The event listener function to remove
 		 */
-		"off" : function off(event, context, callback) {
+		"off" : function off(type, context, callback) {
 			var me = this;
-			var args = arguments;
-			var argsLength = args[LENGTH];
-			var handlers = me[HANDLERS];
+			var handlers;
 			var handler;
 			var head;
 			var tail;
-			var offset;
-			var found;
 
-			// Return fast if we don't have subscribers
-			if (!(event in handlers)) {
-				return me;
-			}
+			// Have handlers
+			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {
+				// Have HEAD in handlers
+				if (HEAD in handlers) {
+					// Iterate handlers
+					for (handler = handlers[HEAD]; handler !== UNDEFINED; handler = handler[NEXT]) {
+						// Should we remove?
+						remove : {
+							// If no context or context does not match we should break
+							if (context && handler[CONTEXT] !== context) {
+								break remove;
+							}
 
-			// Get handlers
-			handlers = handlers[event];
+							// If no callback or callback does not match we should break
+							if (callback && handler[CALLBACK] !== callback) {
+								break remove;
+							}
 
-			// Return fast if there's no HEAD
-			if (!(HEAD in handlers)) {
-				return me;
-			}
+							// Remove this handler, just continue
+							continue;
+						}
 
-			// Get first handler
-			handler = handlers[HEAD];
-
-			// Iterate handlers
-			do {
-				// Should we remove?
-				remove : {
-					// If no context or context does not match we should break
-					if (context && handler[CONTEXT] && handler[CONTEXT] !== context) {
-						break remove;
-					}
-
-					// Reset offset, then loop callbacks
-					for (found = false, offset = 2; offset < argsLength; offset++) {
-						// If handler CALLBACK matches update found and break
-						if (handler[CALLBACK] === args[offset]) {
-							found = true;
-							break;
+						// It there's no head - link head -> tail -> handler
+						if (!head) {
+							head = tail = handler;
+						}
+						// Otherwise just link tail -> tail[NEXT] -> handler
+						else {
+							tail = tail[NEXT] = handler;
 						}
 					}
 
-					// If nothing is found break
-					if (!found) {
-						break remove;
+					// If we have both head and tail we should update handlers
+					if (head && tail) {
+						// Set handlers HEAD and TAIL
+						handlers[HEAD] = head;
+						handlers[TAIL] = tail;
+
+						// Make sure to remove NEXT from tail
+						delete tail[NEXT];
 					}
-
-					// Remove this handler, just continue
-					continue;
+					// Otherwise we remove the handlers list
+					else {
+						delete handlers[HEAD];
+						delete handlers[TAIL];
+					}
 				}
-
-				// It there's no head - link head -> tail -> handler
-				if (!head) {
-					head = tail = handler;
-				}
-				// Otherwise just link tail -> tail[NEXT] -> handler
-				else {
-					tail = tail[NEXT] = handler;
-				}
-			}
-			// While there's a next handler
-			while ((handler = handler[NEXT]));
-
-			// If we have both head and tail we should update handlers
-			if (head && tail) {
-				// Set handlers HEAD and TAIL
-				handlers[HEAD] = head;
-				handlers[TAIL] = tail;
-
-				// Make sure to remove NEXT from tail
-				delete tail[NEXT];
-			}
-			// Otherwise we remove the handlers list
-			else {
-				delete handlers[HEAD];
-				delete handlers[TAIL];
 			}
 
 			return me;
 		},
 
 		/**
-		 * Execute each of the listeners in order with the supplied arguments
-		 * @param {String} event to emit
-		 * @returns {Promise} promise that resolves with results from all listeners
+		 * Trigger an event which notifies each of the listeners of their subscribing,
+		 * optionally pass data values to the listeners.
+		 *
+		 *  A sequential runner, is the default runner for this module, in which all handlers are running
+		 *  with the same argument data specified by the {@link #emit} function.
+		 *  Each handler will wait for the completion for the previous one if it returns a promise.
+		 *
+		 * @param {String|Object} event The event type to emit, or an event object
+		 * @param {String} [event.type] The event type name.
+		 * @param {Function} [event.runner] The runner function that determinate how the handlers are executed, overrides the
+		 * default behaviour of the event emitting.
+		 * @param {...*} [args] Data params that are passed to the listener function.
+		 * @returns {*} Result returned from runner.
 		 */
-		"emit" : function emit(event) {
+		"emit" : function emit(event, args) {
 			var me = this;
-			var args = ARRAY_SLICE.call(arguments, 1);
-			var handlers = me[HANDLERS];
-			var handler;
-			var candidates;
-			var candidatesCount;
-			var matches;
-			var method;
+			var type = event;
+			var handlers;
+			var runner;
 
-			// See if we should override event and method
-			if ((matches = RE_HINT.exec(event)) !== NULL) {
-				event = matches[1];
-				method = matches[2];
+			// If event is a plain string, convert to object with props
+			if (OBJECT_TOSTRING.call(event) === TOSTRING_STRING) {
+				// Recreate event
+				event = {};
+				event[RUNNER] = runner = sequence;
+				event[TYPE] = type;
 			}
-
-			// Have event in handlers
-			if (event in handlers) {
-				// Get handlers
-				handlers = handlers[event];
-
-				// Have head in handlers
-				if (HEAD in handlers) {
-					// Create candidates array and count
-					candidates = [];
-					candidatesCount = 0;
-
-					// Get first handler
-					handler = handlers[HEAD];
-
-					// Step handlers
-					do {
-						// Push handler on candidates
-						candidates[candidatesCount++] = handler;
-					}
-					// While there is a next handler
-					while ((handler = handler[NEXT]));
-
-					// Return promise
-					return (method === "sequence")
-						? sequence(candidates, ++handlers[HANDLED])(args)
-						: pipeline(candidates, ++handlers[HANDLED], handlers)(args);
-				}
+			// If event duck-types an event object we just override or use defaults
+			else if (TYPE in event) {
+				event[RUNNER] = runner = event[RUNNER] || sequence;
+				type = event[TYPE];
 			}
-			// No event in handlers
+			// Otherwise something is wrong
 			else {
-				// Create handlers and store with event
-				handlers[event] = handlers = {};
-
-				// Set handled
-				handlers[HANDLED] = 0;
+				throw Error("first argument has to be of type '" + TOSTRING_STRING + "' or have a '" + TYPE + "' property");
 			}
 
-			// Remember arg
-			handlers[MEMORY] = args;
+			// Get handlers[type] as handlers
+			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
+				// Get HANDLERS
+				handlers = me[HANDLERS];
 
-			// Return promise resolved with arg
-			return when.resolve(args);
-		},
+				// Create type handlers
+				handlers = handlers[handlers[LENGTH]] = handlers[type] = {};
 
-		/**
-		 * Reemit event from memory
-		 * @param {String} event to reemit
-		 * @param {Boolean} senile flag to indicate if already trigger callbacks should still be called
-		 * @param {Object} [context] to scope callback to
-		 * @param {...Function} [callback] to reemit
-		 * @returns {Object} instance of this
-		 */
-		"reemit" : function reemit(event, senile, context, callback) {
-			var me = this;
-			var args = arguments;
-			var argsLength = args[LENGTH];
-			var handlers = me[HANDLERS];
-			var handler;
-			var handled;
-			var candidates;
-			var candidatesCount;
-			var matches;
-			var method;
-			var offset;
-			var found;
-
-			// See if we should override event and method
-			if ((matches = RE_HINT.exec(event)) !== NULL) {
-				event = matches[1];
-				method = matches[2];
+				// Prepare handlers
+				handlers[TYPE] = type;
 			}
 
-			// Have event in handlers
-			if (event in handlers) {
-				// Get handlers
-				handlers = handlers[event];
-
-				// Have memory in handlers
-				if (MEMORY in handlers) {
-					// If we have no HEAD we can return a promise resolved with memory
-					if (!(HEAD in handlers)) {
-						return when.resolve(handlers[MEMORY]);
-					}
-
-					// Create candidates array and count
-					candidates = [];
-					candidatesCount = 0;
-
-					// Get first handler
-					handler = handlers[HEAD];
-
-					// Get handled
-					handled = handlers[HANDLED];
-
-					// Iterate handlers
-					do {
-						add : {
-							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] && handler[CONTEXT] !== context) {
-								break add;
-							}
-
-							// Reset found and offset, iterate args
-							for (found = false, offset = 3; offset < argsLength; offset++) {
-								// If callback matches set found and break
-								if (handler[CALLBACK] === args[offset]) {
-									found = true;
-									break;
-								}
-							}
-
-							// If we found a callback and are already handled and not senile break add
-							if (found && handler[HANDLED] === handled && !senile) {
-								break add;
-							}
-
-							// Push handler on candidates
-							candidates[candidatesCount++] = handler;
-						}
-					}
-					// While there's a next handler
-					while ((handler = handler[NEXT]));
-
-					// Return promise
-					return (method === "sequence")
-						? sequence(candidates, handled)(handlers[MEMORY])
-						: pipeline(candidates, handled)(handlers[MEMORY]);
-				}
-			}
-
-			// Return resolved promise
-			return when.resolve();
+			// Return result from runner
+			return runner.call(me, event, handlers, ARRAY_SLICE.call(arguments, 1));
 		}
 	});
 });
