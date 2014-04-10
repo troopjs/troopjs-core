@@ -103,10 +103,10 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 						return ++count;
 					})
 					.on("one", context, function () {
-						return delay(++count, 500);	// Backwards, but needs to be as both params are numbers
+						return delay(500, ++count);
 					})
 					.on("one", context, function () {
-						return delay(++count, 500);	// Backwards, but needs to be as both params are numbers
+						return delay(500, ++count);
 					})
 					.emit("one")
 					.spread(function (first, second, third) {
