@@ -6,7 +6,7 @@
 		"node_modules"
 	],
 	"dependencies": {
-		"troopjs-log": "~0",
+		"troopjs-log": "~1",
 		"troopjs-compose": "~3",
 		"troopjs-util": "~3",
 		"poly": "~0",
