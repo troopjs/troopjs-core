@@ -22,7 +22,7 @@ define([ "poly/array" ], function SequenceModule() {
 	 * @method constructor
 	 * @inheritdoc
 	 * @localdoc Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
-	 * @returns {*[]} Result from each executed handler
+	 * @return {*[]} Result from each executed handler
 	 */
 	return function sequence(event, handlers, args) {
 		var context = event[CONTEXT];

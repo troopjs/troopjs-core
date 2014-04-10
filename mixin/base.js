@@ -16,6 +16,22 @@ define([
 	 */
 
 	/**
+	 * @method create
+	 * @static
+	 * @inheritable
+	 * @inheritdoc
+	 * @return {core.mixin.base} Instance of this class
+	 */
+
+	/**
+	 * @method extend
+	 * @static
+	 * @inheritable
+	 * @inheritdoc
+	 * @return {core.mixin.base} The extended subclass
+	 */
+
+	/**
 	 * Creates a new component instance
 	 * @method constructor
 	 */
@@ -41,7 +57,7 @@ define([
 
 		/**
 		 * Gives string representation of this component instance.
-		 * @returns {String} {@link #displayName}`@`{@link #instanceCount}
+		 * @return {String} {@link #displayName}`@`{@link #instanceCount}
 		 * @protected
 		 */
 		"toString" : function _toString() {

@@ -22,7 +22,7 @@ define([ "when" ], function SequenceModule(when) {
 	 * @method constructor
 	 * @inheritdoc
 	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
-	 * @returns {Promise}
+	 * @return {Promise}
 	 */
 	return function sequence(event, handlers, args) {
 		var results = [];
