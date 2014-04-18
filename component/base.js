@@ -50,7 +50,7 @@ define([
 	 * 		app.start();
 	 * 	});
 	 *
-	 * 	$(window).unload(function on_unload (argument) {\
+	 * 	$(window).unload(function on_unload (argument) {
 	 * 	  app.end();
 	 * 	});
 	 *
