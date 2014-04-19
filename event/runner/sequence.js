@@ -7,7 +7,7 @@ define([ "when" ], function SequenceModule(when) {
 	/**
 	 * @class core.event.runner.sequence
 	 * @implement core.event.emitter.runner
-	 * @protected
+	 * @private
 	 * @static
 	 * @alias feature.runner
 	 */

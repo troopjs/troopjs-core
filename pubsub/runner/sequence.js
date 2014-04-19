@@ -2,16 +2,15 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"./config",
+	"./pattern",
 	"when"
-], function SequenceModule(config, when) {
+], function SequenceModule(RE_PHASE, when) {
 	"use strict";
 
 	/**
 	 * @class core.pubsub.runner.sequence
 	 * @implement core.event.emitter.runner
-	 * @mixin core.pubsub.runner.config
-	 * @protected
+	 * @private
 	 * @static
 	 * @alias feature.runner
 	 */
@@ -23,7 +22,6 @@ define([
 	var NEXT = "next";
 	var PHASE = "phase";
 	var MEMORY = "memory";
-	var RE_PHASE = config["pattern"];
 
 	/**
 	 * @method constructor
