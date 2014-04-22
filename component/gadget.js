@@ -4,9 +4,10 @@
 define([
 	"./base",
 	"./runner/pipeline",
+	"troopjs-compose/mixin/config",
 	"when",
 	"../pubsub/hub"
-],function GadgetModule(Component, pipeline, when, hub) {
+],function GadgetModule(Component, pipeline, COMPOSE_CONF, when, hub) {
 	"use strict";
 
 	/**
@@ -51,12 +52,20 @@ define([
 	var RUNNER = "runner";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var FEATURES = "features";
+	var ARGS = "args";
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
 	var HUB = "hub";
 	var RE = new RegExp("^" + HUB + "/(.+)");
+
+	// Add pragma for HUB special
+	COMPOSE_CONF.pragmas.push({
+		"pattern": /^hub(?:\:(memory))?\/(([^\/]+).*)/,
+		"replace": function ($0, $1, $2, $3) {
+			return HUB + "/" + $2 + "(\"" + $3 + "\", " + !!$1 + ")";
+		}
+	});
 
 	/**
 	 * @method constructor
@@ -74,7 +83,7 @@ define([
 			var me = this;
 
 			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
-				return me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
+				return me.subscribe(special[TYPE], special[VALUE], special[ARGS][0]);
 			});
 		},
 
@@ -94,7 +103,7 @@ define([
 					var memory;
 					var result;
 
-					if (special[FEATURES] === "memory" && (memory = me.peek(special[TYPE], empty)) !== empty) {
+					if (special[ARGS][1] === true && (memory = me.peek(special[TYPE], empty)) !== empty) {
 						// Redefine result
 						result = {};
 						result[TYPE] = special[NAME];
