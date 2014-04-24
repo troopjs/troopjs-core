@@ -61,9 +61,9 @@ define([
 
 	// Add pragma for HUB special
 	COMPOSE_CONF.pragmas.push({
-		"pattern": /^hub(?:\:(memory))?\/(([^\/]+).*)/,
-		"replace": function ($0, $1, $2, $3) {
-			return HUB + "/" + $2 + "(\"" + $3 + "\", " + !!$1 + ")";
+		"pattern": /^hub(?:\:(memory))?\/(.+)/,
+		"replace": function ($0, $1, $2) {
+			return HUB + "(\"" + $2 + "\", " + !!$1 + ")";
 		}
 	});
 
@@ -83,7 +83,7 @@ define([
 			var me = this;
 
 			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
-				return me.subscribe(special[TYPE], special[VALUE], special[ARGS][0]);
+				return me.subscribe(special[ARGS][0], special[VALUE]);
 			});
 		},
 
@@ -102,11 +102,12 @@ define([
 				.map(function (special) {
 					var memory;
 					var result;
+					var topic = special[ARGS][0];
 
-					if (special[ARGS][1] === true && (memory = me.peek(special[TYPE], empty)) !== empty) {
+					if (special[ARGS][1] === true && (memory = me.peek(topic, empty)) !== empty) {
 						// Redefine result
 						result = {};
-						result[TYPE] = special[NAME];
+						result[TYPE] = HUB + "/" + topic;
 						result[RUNNER] = pipeline;
 						result[CONTEXT] = me;
 						result[CALLBACK] = special[VALUE];
@@ -174,7 +175,7 @@ define([
 		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
 		"subscribe" : function subscribe(event, callback, data) {
-			return this.on("hub/" + event, callback, data);
+			return this.on(HUB + "/" + event, callback, data);
 		},
 
 		/**
@@ -183,7 +184,7 @@ define([
 		 * @localdoc Unsubscribe from public events in context of this component.
 		 */
 		"unsubscribe" : function unsubscribe(event, callback) {
-			return this.off("hub/" + event, callback);
+			return this.off(HUB + "/" + event, callback);
 		},
 
 		/**

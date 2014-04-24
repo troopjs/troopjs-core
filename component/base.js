@@ -4,13 +4,14 @@
 define([
 	"../event/emitter",
 	"./runner/sequence",
+	"troopjs-compose/mixin/config",
 	"./registry",
 	"../task/registry",
 	"troopjs-util/merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, componentRegistry, taskRegistry, merge, around, when) {
+], function ComponentModule(Emitter, sequence, COMPOSE_CONF, componentRegistry, taskRegistry, merge, around, when) {
 	"use strict";
 
 	/**
@@ -225,6 +226,12 @@ define([
 	 * @template
 	 * @return {*|Boolean}
 	 */
+
+	// Add pragma for signals and events.
+	COMPOSE_CONF.pragmas.push({
+		"pattern": /^(?:sig|on)\/.+/,
+		"replace": "$&()"
+	});
 
 	/**
 	 * @method constructor
