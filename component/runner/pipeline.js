@@ -7,7 +7,7 @@ define([ "when" ], function PipelineModule(when) {
 	/**
 	 * @class core.component.runner.pipeline
 	 * @implement core.event.emitter.runner
-	 * @protected
+	 * @private
 	 * @static
 	 * @alias feature.runner
 	 */

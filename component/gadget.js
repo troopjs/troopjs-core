@@ -4,9 +4,10 @@
 define([
 	"./base",
 	"./runner/pipeline",
+	"troopjs-compose/mixin/config",
 	"when",
 	"../pubsub/hub"
-],function GadgetModule(Component, pipeline, when, hub) {
+],function GadgetModule(Component, pipeline, COMPOSE_CONF, when, hub) {
 	"use strict";
 
 	/**
@@ -42,7 +43,7 @@ define([
 	 * 	});
 	 *
 	 * @class core.component.gadget
-	 * @extends core.component.base
+	 * @extend core.component.base
 	 */
 
 	var UNDEFINED;
@@ -51,12 +52,20 @@ define([
 	var RUNNER = "runner";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var FEATURES = "features";
+	var ARGS = "args";
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
 	var HUB = "hub";
 	var RE = new RegExp("^" + HUB + "/(.+)");
+
+	// Add pragma for HUB special
+	COMPOSE_CONF.pragmas.push({
+		"pattern": /^hub(?:\:(memory))?\/(.+)/,
+		"replace": function ($0, $1, $2) {
+			return HUB + "(\"" + $2 + "\", " + !!$1 + ")";
+		}
+	});
 
 	/**
 	 * @method constructor
@@ -74,7 +83,7 @@ define([
 			var me = this;
 
 			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
-				return me.subscribe(special[TYPE], special[VALUE], special[FEATURES]);
+				return me.subscribe(special[ARGS][0], special[VALUE]);
 			});
 		},
 
@@ -93,11 +102,12 @@ define([
 				.map(function (special) {
 					var memory;
 					var result;
+					var topic = special[ARGS][0];
 
-					if (special[FEATURES] === "memory" && (memory = me.peek(special[TYPE], empty)) !== empty) {
+					if (special[ARGS][1] === true && (memory = me.peek(topic, empty)) !== empty) {
 						// Redefine result
 						result = {};
-						result[TYPE] = special[NAME];
+						result[TYPE] = HUB + "/" + topic;
 						result[RUNNER] = pipeline;
 						result[CONTEXT] = me;
 						result[CALLBACK] = special[VALUE];
@@ -165,7 +175,7 @@ define([
 		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
 		"subscribe" : function subscribe(event, callback, data) {
-			return this.on("hub/" + event, callback, data);
+			return this.on(HUB + "/" + event, callback, data);
 		},
 
 		/**
@@ -174,7 +184,7 @@ define([
 		 * @localdoc Unsubscribe from public events in context of this component.
 		 */
 		"unsubscribe" : function unsubscribe(event, callback) {
-			return this.off("hub/" + event, callback);
+			return this.off(HUB + "/" + event, callback);
 		},
 
 		/**

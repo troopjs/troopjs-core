@@ -20,7 +20,7 @@ define([
 	 * that are provided as shortcuts.
 	 *
 	 * @class core.pubsub.hub
-	 * @extends core.event.emitter
+	 * @extend core.event.emitter
 	 * @singleton
 	 */
 
