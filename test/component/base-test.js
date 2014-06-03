@@ -117,20 +117,14 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				return started;
 			},
 
-			"phase - guardian": function () {
+			"phase - validation": function () {
 				var foo = Component.create({});
-				// Invalid call to stop before component started.
-				assert.exception(function() {
-					foo.stop();
-				});
-
+				foo.phase = "start";
 				return foo.start().then(function() {
-					// Invalid call to start after started.
-					assert.exception(function() { foo.start(); });
-
+					assert.equals(foo.phase, "start");
+					foo.phase = "finalize";
 					return foo.stop().then(function() {
-						// Invalid call to stop after stopped.
-						assert.exception(function() { foo.stop(); });
+						assert.equals(foo.phase, "finalize");
 					});
 				});
 			},
