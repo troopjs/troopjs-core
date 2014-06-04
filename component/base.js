@@ -487,7 +487,7 @@ define([
 
 			// Check PHASE
 			if ((phase = me[PHASE]) !== UNDEFINED && phase !== FINALIZED) {
-				throw new Error("Can't transition phase from '" + phase + "' to '" + INITIALIZE + "'");
+				return when.resolve(UNDEFINED);
 			}
 
 			// Modify args to change signal (and store in PHASE)
@@ -520,11 +520,10 @@ define([
 		"stop" : function stop(args) {
 			var me = this;
 			var signal = me.signal;
-			var phase;
 
 			// Check PHASE
-			if ((phase = me[PHASE]) !== STARTED) {
-				throw new Error("Can't transition phase from '" + phase + "' to '" + STOP + "'");
+			if (me[PHASE] !== STARTED) {
+				return when.resolve(UNDEFINED);
 			}
 
 			// Modify args to change signal (and store in PHASE)
