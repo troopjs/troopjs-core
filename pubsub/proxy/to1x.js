@@ -160,7 +160,7 @@ define([ "../../component/service", "when", "when/apply", "poly/array", "poly/ob
 
 							// If we have a deferred we should chain it to result
 							if (deferred) {
-								when(result, apply(deferred.resolve), deferred.reject, deferred.progress);
+								when(result, apply(deferred.resolve), deferred.reject, deferred.notify);
 							}
 
 							// Return result
