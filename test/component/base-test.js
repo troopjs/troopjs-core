@@ -5,7 +5,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 	var assert = buster.referee.assert;
 	var sinon = buster.sinon;
 
-	require( [ "troopjs-core/component/base", "when/delay" ] , function (Component, delay) {
+	require( [ "troopjs-core/component/base", "when", "when/delay" ], function (Component, when, delay) {
 
 		var PHASES = {
 			"INITIAL": undefined,
@@ -137,6 +137,17 @@ buster.testCase("troopjs-core/component/base", function (run) {
 					}
 				});
 				return foo.start().otherwise(function(error) {
+					assert.same(error, err);
+				});
+			},
+
+			"bug out within task": function () {
+				var err = new Error("bug out");
+				return Component.create({
+					"sig/task": function() {
+						throw err;
+					}
+				}).task(delay(100)).otherwise(function(error) {
 					assert.same(error, err);
 				});
 			},
