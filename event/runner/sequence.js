@@ -49,16 +49,23 @@ define([ "when" ], function SequenceModule(when) {
 		var next = function (result, skip) {
 			/*jshint curly:false*/
 			var candidate;
+			var callback;
 
 			// Store result if no skip
 			if (skip !== true) {
 				results[resultsCount++] = result;
 			}
 
-			// Return promise of next callback, or a promise resolved with result
-			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
-				? when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
-				: when.resolve(results);
+			if((candidate = candidates[candidatesCount++]) !== UNDEFINED){
+				// make sure the first handler is always called inside of a promise
+				callback = when.lift(candidate[CALLBACK]);
+
+				// Return promise of next callback, or a promise resolved with result
+				return when(callback.apply(candidate[CONTEXT], args), next)
+			}
+			else {
+				return when.resolve(results);
+			}
 		};
 
 		return next(args, true);

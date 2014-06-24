@@ -302,6 +302,8 @@ define([
 		 * @return {Promise}
 		 */
 		"sig/task": function onTask(task) {
+			if(!task)
+				debugger;
 			// Compute task key
 			var key = task[NAME] + "@" + task[STARTED];
 

@@ -124,7 +124,15 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						assert.same(2, count);
 					});
 			},
-
+			"bug out in first hub subscriber": function() {
+				var err = new Error("bug out");
+				hub.subscribe("foo/bar", this, function() {
+					throw err;
+				});
+				return hub.publish("foo/bar").otherwise(function(error) {
+					assert.same(error, err);
+				});
+			},
 			"tearDown": function () {
 				hub.unsubscribe("foo/bar");
 			}

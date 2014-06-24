@@ -233,6 +233,17 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 								assert(false);
 							});
 					});
+			},
+
+			"bug out in the first event handler": function() {
+				var emitter = Emitter();
+				var err = new Error("bug out");
+				return emitter.on("foo", this, function() {
+					throw err;
+				})
+				.emit("foo").otherwise(function(error) {
+						assert.same(error, err);
+				});
 			}
 		});
 	});

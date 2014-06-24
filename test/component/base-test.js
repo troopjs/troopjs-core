@@ -129,6 +129,18 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				});
 			},
 
+			"bug out in first sig/initialize handler": function () {
+				var err = new Error("bug out");
+				var foo = Component.create({
+					"sig/initialize": function() {
+						throw err;
+					}
+				});
+				return foo.start().otherwise(function(error) {
+					assert.same(error, err);
+				});
+			},
+
 			"event handlers - setup/add/remove/teardown": function() {
 				function handler1() {}
 				function handler2() {}
@@ -215,8 +227,9 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				bar.off(evt, handler);
 				assert.calledOnce(off);
 				assert.calledWith(off, sinon.match.any, evt, handler);
-				bar.emit(evt);
-				assert.calledOnce(handle);
+				return bar.emit(evt).then(function() {
+					assert.calledOnce(handle);
+				});
 			}
 		});
 	});
