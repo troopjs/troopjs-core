@@ -22,6 +22,7 @@ define([
 	var INDEX_POS = "index_pos";
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_STRING = "[object String]";
+	var REGEXP_STRING = "[object RegExp]";
 
 	/**
 	 * @method constructor
@@ -56,7 +57,9 @@ define([
 		 * Either gets or puts values into the registry.
 		 *
 		 * - If no key is provided, all entries in the registry are returned.
-		 * - If no value is provided the current value for key is returned.
+		 * - If no value is provided, it depends on the **key**
+		 *   - if key is string, current value under this key is returned.
+		 *   - if key is regexp, all values whose key match this pattern are returned
 		 * - If value is provided it replaces the current value for the key
 		 * @param {String|Number} [key] Entry key or index
 		 * @param {*} [value] Entry value
@@ -73,6 +76,14 @@ define([
 			if ((argc = arguments[LENGTH]) === 0) {
 				result = index_pos.map(function (item) {
 					return item[VALUE];
+				});
+			}
+			// query registry by keys
+			else if (OBJECT_TOSTRING.call(key) === REGEXP_STRING && value === UNDEFINED){
+				result = Object.keys(index_key).filter(function filterByDisplayName(name) {
+						return key.test(name);
+				}).map(function map(key) {
+					return index_key[key][VALUE];
 				});
 			}
 			else {
