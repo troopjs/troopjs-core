@@ -305,8 +305,6 @@ define([
 		 * @return {Promise}
 		 */
 		"sig/task": function onTask(task) {
-			if(!task)
-				debugger;
 			// Compute task key
 			var key = task[NAME] + "@" + task[STARTED];
 
@@ -576,7 +574,9 @@ define([
 		"task" : function task(promiseOrResolver, name) {
 			var me = this;
 			// Try to respect the original promise otherwise will create one.
-			var promise = when.isPromiseLike(promiseOrResolver) ? promiseOrResolver: when.promise(promiseOrResolver);
+			var promise = when.isPromiseLike(promiseOrResolver)
+					? promiseOrResolver
+					: when.promise(promiseOrResolver);
 			promise.ensure(function () {
 				task[FINISHED] = +new Date();
 			});

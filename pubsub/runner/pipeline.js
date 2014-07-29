@@ -91,9 +91,9 @@ define([
 				// make sure the first handler is always called inside of a promise
 				callback = when.lift(candidate[CALLBACK]);
 				return when(callback.apply(candidate[CONTEXT], args), next);
-			}
-			else
+			} else {
 				return when.resolve(handlers[MEMORY] = args);
+			}
 		};
 
 		return next(args);

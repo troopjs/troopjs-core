@@ -79,9 +79,9 @@ define([ "when" ], function PipelineModule(when) {
 				// make sure the first handler is always called inside of a promise
 				callback = when.lift(candidate[CALLBACK]);
 				return when(callback.apply(candidate[CONTEXT], args), next);
-			}
-			else
+			} else {
 				return when.resolve(args);
+			}
 		};
 
 		return next(args);
