@@ -68,6 +68,7 @@ define([
 			/*jshint curly:false*/
 			var candidate;
 			var context;
+			var callback;
 
 			// Store result if no skip
 			if (skip !== true) {
@@ -80,10 +81,14 @@ define([
 				&& (context = candidate[CONTEXT])                // Has context
 				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
 
-			// Return promise of next callback, or a promise resolved with result
-			return candidate !== UNDEFINED
-				? when(candidate[CALLBACK].apply(context, args), next)
-				: (handlers[MEMORY] = args) === args && when.resolve(results);
+			if (candidate !== UNDEFINED) {
+				// make sure the first handler is always called inside of a promise
+				callback = when.lift(candidate[CALLBACK]);
+				return when(callback.apply(context, args), next);
+			}
+			else {
+				return (handlers[MEMORY] = args) === args && when.resolve(results);
+			}
 		};
 
 		return next(args, true);

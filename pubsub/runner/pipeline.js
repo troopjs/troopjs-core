@@ -68,6 +68,7 @@ define([
 			/*jshint curly:false*/
 			var context;
 			var candidate;
+			var callback;
 			var type;
 
 			// Check that result is not UNDEFINED and not equals to args
@@ -86,9 +87,13 @@ define([
 				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
 
 			// Return promise of next callback, or promise resolved with args
-			return candidate !== UNDEFINED
-				? when(candidate[CALLBACK].apply(context, args), next)
-				: when.resolve(handlers[MEMORY] = args);
+			if (candidate !== UNDEFINED) {
+				// make sure the first handler is always called inside of a promise
+				callback = when.lift(candidate[CALLBACK]);
+				return when(callback.apply(candidate[CONTEXT], args), next);
+			} else {
+				return when.resolve(handlers[MEMORY] = args);
+			}
 		};
 
 		return next(args);

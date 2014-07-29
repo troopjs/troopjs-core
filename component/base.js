@@ -77,6 +77,7 @@ define([
 	var STOP = "stop";
 	var INITIALIZE = "initialize";
 	var STARTED = "started";
+	var PROMISE = "promise";
 	var FINALIZED = "finalized";
 	var FINISHED = "finished";
 	var SIG = "sig";
@@ -172,9 +173,11 @@ define([
 	 * Task signal
 	 * @event sig/task
 	 * @localdoc Triggered when this component starts a {@link #method-task}.
-	 * @param {Promise} task Task
-	 * @param {Object} task.context Task context
+	 * @param {Object} task Task
+	 * @param {Promise} task.promise The Promise that makes up of this task
+	 * @param {Object} task.context from which component the task is issued
 	 * @param {Date} task.started Task start date
+	 * @param {Date} task.finished Task completion date
 	 * @param {String} task.name Task name
 	 * @return {Promise}
 	 */
@@ -306,7 +309,7 @@ define([
 			var key = task[NAME] + "@" + task[STARTED];
 
 			// Register task with remove callback
-			return taskRegistry.access(key, task.ensure(function () {
+			return taskRegistry.access(key, task.promise.ensure(function () {
 				taskRegistry.remove(key);
 			}));
 		},
@@ -554,8 +557,8 @@ define([
 		 * including it's name, completion time and a given ID.
 		 *
 		 * 	var widget = Widget.create({
-		 * 		"sig/task" : function(promise) {
-		 * 			print('task %s started at: %s, finished at: %s', promise.name, promise.started);
+		 * 		"sig/task" : function(task) {
+		 * 			print('task %s started at: %s, finished at: %s', task.name, task.started, task.finished);
 		 * 		}
 		 * 	});
 		 *
@@ -563,25 +566,30 @@ define([
 		 * 		$(this.$element).fadeOut(resolve);
 		 * 	}, 'animate');
 		 *
-		 * @param {Resolver} resolver The task resolver.
+		 * @param {Resolver} promiseOrResolver The task resolver.
 		 * @param {String} [name]
 		 * @return {Promise}
 		 * @fires sig/task
 		 */
-		"task" : function task(resolver, name) {
+		"task" : function task(promiseOrResolver, name) {
 			var me = this;
+			// Try to respect the original promise otherwise will create one.
+			var promise = when.isPromiseLike(promiseOrResolver)
+					? promiseOrResolver
+					: when.promise(promiseOrResolver);
+			promise.ensure(function () {
+				task[FINISHED] = +new Date();
+			});
 
-			var promise = when
-				.promise(resolver)
-				.ensure(function () {
-					promise[FINISHED] = new Date();
-				});
+			// Create a task
+			var task = {};
+			task[CONTEXT] = me;
+			task[STARTED] = +new Date();
+			task[NAME] = name || TASK;
+			task[PROMISE] = promise;
 
-			promise[CONTEXT] = me;
-			promise[STARTED] = new Date();
-			promise[NAME] = name || TASK;
-
-			return me.signal(TASK, promise).yield(promise);
+			// make sure the promise survives as a regular argument, rather than
+			return me.signal(TASK, task).yield(promise);
 		}
 	});
 });

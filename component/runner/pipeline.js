@@ -63,6 +63,7 @@ define([ "when" ], function PipelineModule(when) {
 			/*jshint curly:false*/
 			var candidate;
 			var type;
+			var callback;
 
 			// Check that result is not UNDEFINED and not equals to args
 			if (result !== UNDEFINED && result !== args) {
@@ -74,9 +75,13 @@ define([ "when" ], function PipelineModule(when) {
 			}
 
 			// Return promise of next callback, or promise resolved with args
-			return (candidate = candidates[candidatesCount++]) !== UNDEFINED
-				? when(candidate[CALLBACK].apply(candidate[CONTEXT], args), next)
-				: when.resolve(args);
+			if ((candidate = candidates[candidatesCount++]) !== UNDEFINED) {
+				// make sure the first handler is always called inside of a promise
+				callback = when.lift(candidate[CALLBACK]);
+				return when(callback.apply(candidate[CONTEXT], args), next);
+			} else {
+				return when.resolve(args);
+			}
 		};
 
 		return next(args);
