@@ -466,7 +466,7 @@ define([
 		 * @param {...*} [args] signal arguments
 		 * @return {Promise}
 		 */
-		"signal": function signal(_signal, args) {
+		"signal": function signal(_signal) {
 			var me = this;
 
 			// Modify first argument
@@ -483,7 +483,7 @@ define([
 		 * @fires sig/initialize
 		 * @fires sig/start
 		 */
-		"start" : function start(args) {
+		"start" : function start() {
 			var me = this;
 			var signal = me.signal;
 			var phase;
@@ -494,7 +494,7 @@ define([
 			}
 
 			// Modify args to change signal (and store in PHASE)
-			args = [ me[PHASE] = INITIALIZE ];
+			var args = [ me[PHASE] = INITIALIZE ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
@@ -520,7 +520,7 @@ define([
 		 * @fires sig/stop
 		 * @fires sig/finalize
 		 */
-		"stop" : function stop(args) {
+		"stop" : function stop() {
 			var me = this;
 			var signal = me.signal;
 
@@ -530,7 +530,7 @@ define([
 			}
 
 			// Modify args to change signal (and store in PHASE)
-			args = [ me[PHASE] = STOP ];
+			var args = [ me[PHASE] = STOP ];
 
 			// Add signal to arguments
 			ARRAY_PUSH.apply(args, arguments);
