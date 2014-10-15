@@ -1,7 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([ "poly/array" ], function SequenceModule() {
+define([ "poly/array" ], function () {
 	"use strict";
 
 	/**
@@ -34,13 +34,12 @@ define([ "poly/array" ], function SequenceModule() {
 
 		// Iterate handlers
 		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
-			// Filter candidate[CONTEXT] if we have context
-			if (context !== UNDEFINED && candidate[CONTEXT] !== context) {
-				continue;
-			}
-
-			// Filter candidate[CALLBACK] if we have callback
-			if (callback && candidate[CALLBACK] !== callback) {
+			if (
+				// Filter `candidate[CONTEXT]` if we have `context`
+				(context !== UNDEFINED && candidate[CONTEXT] !== context) ||
+					// Filter `candidate[CALLBACK]` if we have `callback`
+				(callback !== UNDEFINED && candidate[CALLBACK] !== callback)
+			) {
 				continue;
 			}
 
