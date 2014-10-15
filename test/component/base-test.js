@@ -5,7 +5,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 	var assert = buster.referee.assert;
 	var sinon = buster.sinon;
 
-	require( [ "troopjs-core/component/base", "when", "when/delay" ], function (Component, when, delay) {
+	require( [ "troopjs-core/component/base", "when/delay" ] , function (Component, delay) {
 
 		var PHASES = {
 			"INITIAL": undefined,
@@ -211,10 +211,10 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				bar.on(evt, handler, eventData);
 				assert.calledOnce(add);
 				assert.calledWith(add, sinon.match.any, evt, handler, eventData);
-				bar.emit(evt);
+				return bar.emit(evt);
 			},
 
-			"event handlers - off - prevent default": function() {
+			"event handlers - remove - prevent default": function() {
 				var handle = this.spy();
 				function handler() {
 					handle();
@@ -238,7 +238,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				bar.off(evt, handler);
 				assert.calledOnce(off);
 				assert.calledWith(off, sinon.match.any, evt, handler);
-				return bar.emit(evt).then(function() {
+				return bar.emit(evt).then(function () {
 					assert.calledOnce(handle);
 				});
 			}

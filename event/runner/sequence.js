@@ -1,7 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([ "when" ], function SequenceModule(when) {
+define([ "when" ], function (when) {
 	"use strict";
 
 	/**
@@ -25,8 +25,6 @@ define([ "when" ], function SequenceModule(when) {
 	 * @return {Promise}
 	 */
 	return function sequence(event, handlers, args) {
-		var results = [];
-		var resultsCount = 0;
 		var candidates = [];
 		var candidatesCount = 0;
 		var handler;
@@ -36,38 +34,15 @@ define([ "when" ], function SequenceModule(when) {
 			candidates[candidatesCount++] = handler;
 		}
 
-		// Reset candidate count
-		candidatesCount = 0;
-
-		/**
-		 * Internal function for sequential execution of candidates
-		 * @ignore
-		 * @param {Array} [result] result from previous handler callback
-		 * @param {Boolean} [skip] flag indicating if this result should be skipped
-		 * @return {Promise} promise of next handler callback execution
-		 */
-		var next = function (result, skip) {
-			/*jshint curly:false*/
-			var candidate;
-			var callback;
-
-			// Store result if no skip
-			if (skip !== true) {
-				results[resultsCount++] = result;
-			}
-
-			if((candidate = candidates[candidatesCount++]) !== UNDEFINED){
-				// make sure the first handler is always called inside of a promise
-				callback = when.lift(candidate[CALLBACK]);
-
-				// Return promise of next callback, or a promise resolved with result
-				return when(callback.apply(candidate[CONTEXT], args), next)
-			}
-			else {
-				return when.resolve(results);
-			}
-		};
-
-		return next(args, true);
+		// Reduce `candidates`
+		return when.reduce(candidates, function (results, candidate, index) {
+			// Apply `candidate[CALLBACK]` with `candidate[CONTEXT]` passing `args`
+			// Pass result from apply to `when` and onwards to store in `results`
+			return when(candidate[CALLBACK].apply(candidate[CONTEXT], args), function (result) {
+				results[index] = result;
+			})
+			// `yield` results for next execution
+			.yield(results);
+		}, candidates);
 	}
 });

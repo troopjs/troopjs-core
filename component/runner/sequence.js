@@ -13,6 +13,7 @@ define([ "poly/array" ], function () {
 	 */
 
 	var UNDEFINED;
+	var FALSE = false;
 	var HEAD = "head";
 	var NEXT = "next";
 	var CALLBACK = "callback";
@@ -30,7 +31,6 @@ define([ "poly/array" ], function () {
 		var candidate;
 		var candidates = [];
 		var candidatesCount = 0;
-		var result;
 
 		// Iterate handlers
 		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
@@ -48,14 +48,12 @@ define([ "poly/array" ], function () {
 
 		// Reduce and return
 		return candidates.reduce(function (current, candidate) {
-			// Store result if not UNDEFINED
-			if (current !== UNDEFINED) {
-				result = current;
-			}
-
-			// If result is _not_ false, return result of candidate[CALLBACK], otherwise just false
-			return result !== false
+			var result = current !== FALSE
 				? candidate[CALLBACK].apply(candidate[CONTEXT], args)
+				: current;
+
+			return result === UNDEFINED
+				? current
 				: result;
 		}, UNDEFINED);
 	}
