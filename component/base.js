@@ -447,14 +447,14 @@ define([
 		 * @param {...*} [args] signal arguments
 		 * @return {Promise}
 		 */
-		"signal": function signal() {
+		"signal": function signal(_signal) {
 			var me = this;
 
 			// Slice `arguments`
 			var args = ARRAY_SLICE.call(arguments);
 
 			// Modify first argument
-			args[0] = "sig/" + args[0];
+			args[0] = "sig/" + _signal;
 
 			// Emit
 			return me.emit.apply(me, args);
