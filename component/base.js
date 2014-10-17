@@ -76,7 +76,6 @@ define([
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
-	var TASK = "task";
 	var PROMISE = "promise";
 	var SIG = "sig";
 	var SIG_SETUP = SIG + "/setup";
@@ -489,7 +488,7 @@ define([
 			var task = taskFactory.call(me, promiseOrResolver, name);
 
 			// Signal `TASK` and yield `task[PROMISE]`
-			return me.signal(TASK, task).yield(task[PROMISE]);
+			return me.signal("task", task).yield(task[PROMISE]);
 		},
 
 		/**
