@@ -8,12 +8,12 @@ define([
 	"./signal/finalize",
 	"troopjs-compose/mixin/config",
 	"./registry",
-	"../task/registry",
+	"../task/factory",
 	"troopjs-util/merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, start, finalize, COMPOSE_CONF, componentRegistry, taskRegistry, merge, around, when) {
+], function ComponentModule(Emitter, sequence, start, finalize, COMPOSE_CONF, componentRegistry, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
@@ -73,14 +73,11 @@ define([
 	var HANDLERS = "handlers";
 	var HEAD = "head";
 	var TAIL = "tail";
-	var CONTEXT = "context";
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
 	var TASK = "task";
-	var STARTED = "started";
 	var PROMISE = "promise";
-	var FINISHED = "finished";
 	var SIG = "sig";
 	var SIG_SETUP = SIG + "/setup";
 	var SIG_ADD = SIG + "/add";
@@ -299,23 +296,6 @@ define([
 		},
 
 		/**
-		 * Handles a component task
-		 * @handler sig/task
-		 * @inheritdoc #event-sig/task
-		 * @template
-		 * @return {Promise}
-		 */
-		"sig/task": function (task) {
-			// Compute task key
-			var key = task[NAME] + "@" + task[STARTED];
-
-			// Register task with remove callback
-			return taskRegistry.access(key, task[PROMISE].ensure(function () {
-				taskRegistry.remove(key);
-			}));
-		},
-
-		/**
 		 * Add to the component {@link #configuration configuration}, possibly {@link util.merge merge} with the existing one.
 		 *
 		 * 		var List = Component.extend({
@@ -505,21 +485,11 @@ define([
 		"task" : function (promiseOrResolver, name) {
 			var me = this;
 
-			// Try to respect the original promise otherwise will create one.
-			var promise = when.isPromiseLike(promiseOrResolver)
-				? promiseOrResolver
-				: when.promise(promiseOrResolver);
+			// Create task
+			var task = taskFactory.call(me, promiseOrResolver, name);
 
-			// Create a task
-			var task = {};
-			task[CONTEXT] = me;
-			task[STARTED] = +new Date();
-			task[NAME] = name || TASK;
-			task[PROMISE] = promise = promise.ensure(function () {
-				task[FINISHED] = +new Date();
-			});
-
-			return me.signal(TASK, task).yield(promise);
+			// Signal `TASK` and yield `task[PROMISE]`
+			return me.signal(TASK, task).yield(task[PROMISE]);
 		},
 
 		/**

@@ -153,9 +153,13 @@ define([
 			}
 		},
 
+
 		/**
-		 * @inheritdoc
+		 * Handles a component task
+		 * @inheritdoc #event-sig/task
 		 * @localdoc Publishes `task` on the {@link core.pubsub.hub hub} whenever a {@link #event-sig/task task} event is emitted
+		 * @return {Promise}
+		 * @template
 		 * @handler
 		 */
 		"sig/task" : function onTask(task) {
