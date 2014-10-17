@@ -25,6 +25,7 @@ define([
 	 */
 
 	var UNDEFINED;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var MEMORY = "memory";
 	var HANDLERS = "handlers";
 	var RUNNER = "runner";
@@ -90,7 +91,7 @@ define([
 		 * Handlers are run in a pipeline, in which each handler will receive muted
 		 * data params depending on the return value of the previous handler:
 		 *
-		 *   - The original data params from {@link #publish} if this's the first handler, or the previous handler returns `undefined`.
+		 *   - The original data params from {@link #publish} if this is the first handler, or the previous handler returns `undefined`.
 		 *   - One value as the single argument if the previous handler return a non-array.
 		 *   - Each argument value deconstructed from the returning array of the previous handler.
 		 *
@@ -98,7 +99,7 @@ define([
 		 * @param {...*} [args] Additional params that are passed to the handler function.
 		 * @return {Promise}
 		 */
-		"publish" : function publish(type, args) {
+		"publish" : function publish(type) {
 			var me = this;
 
 			// Prepare event object
@@ -106,11 +107,14 @@ define([
 			event[TYPE] = type;
 			event[RUNNER] = pipeline;
 
-			// Modify first argument
-			arguments[0] = event;
+			// Slice `arguments`
+			var args = ARRAY_SLICE.call(arguments);
+
+			// Modify first `arg`
+			args[0] = event;
 
 			// Delegate the actual emitting to event emitter.
-			return me.emit.apply(me, arguments);
+			return me.emit.apply(me, args);
 		},
 
 		/**
