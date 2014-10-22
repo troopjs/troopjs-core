@@ -1,7 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([ "when" ], function PipelineModule(when) {
+define([ "when" ], function (when) {
 	"use strict";
 
 	/**
@@ -13,9 +13,13 @@ define([ "when" ], function PipelineModule(when) {
 	 */
 
 	var UNDEFINED;
+	var FUNCTION_PROTO = Function.prototype;
+	var APPLY = FUNCTION_PROTO.apply;
+	var CALL = FUNCTION_PROTO.call;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
+	var ARRAY_SLICE = Array.prototype.slice;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var HEAD = "head";
@@ -36,13 +40,12 @@ define([ "when" ], function PipelineModule(when) {
 
 		// Iterate handlers
 		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
-			// Filter candidate[CONTEXT] if we have context
-			if (context !== UNDEFINED && candidate[CONTEXT] !== context) {
-				continue;
-			}
-
-			// Filter candidate[CALLBACK] if we have callback
-			if (callback && candidate[CALLBACK] !== callback) {
+			if (
+				// Filter `candidate[CONTEXT]` if we have `context`
+			(context !== UNDEFINED && candidate[CONTEXT] !== context) ||
+				// Filter `candidate[CALLBACK]` if we have `callback`
+			(callback !== UNDEFINED && candidate[CALLBACK] !== callback)
+			) {
 				continue;
 			}
 
@@ -50,40 +53,31 @@ define([ "when" ], function PipelineModule(when) {
 			candidates[candidatesCount++] = candidate;
 		}
 
-		// Reset candidatesCount
-		candidatesCount = 0;
+		return when
+			// Reduce `candidates`
+			.reduce(candidates, function (current, candidate) {
+				// Get object type
+				var type = OBJECT_TOSTRING.call(current);
 
-		/**
-		 * Internal function for piped execution of candidates candidates
-		 * @ignore
-		 * @param {Array} [result] result from previous candidate callback
-		 * @return {Promise} promise of next candidate callback execution
-		 */
-		var next = function (result) {
-			/*jshint curly:false*/
-			var candidate;
-			var type;
-			var callback;
+				// Calculate method depending on type
+				var method = (type === TOSTRING_ARRAY || type === TOSTRING_ARGUMENTS)
+					? APPLY
+					: CALL;
 
-			// Check that result is not UNDEFINED and not equals to args
-			if (result !== UNDEFINED && result !== args) {
-				// Update args to either result or result wrapped in a new array
-				args = (type = OBJECT_TOSTRING.call(result)) === TOSTRING_ARRAY  // if type is TOSTRING_ARRAY
-					|| type === TOSTRING_ARGUMENTS                                 // or type is TOSTRING_ARGUMENTS
-					? result                                                       // then result is array-like enough to be passed to .apply
-					: [ result ];                                                  // otherwise we should just wrap it in a new array
-			}
+				// Execute `candidate[CALLBACK]` using `method` in `context` passing `current`
+				return method.call(candidate[CALLBACK], context, current);
+			}, args)
+			// Convert result
+			.then(function (result) {
+				// Get object type
+				var type = OBJECT_TOSTRING.call(result);
 
-			// Return promise of next callback, or promise resolved with args
-			if ((candidate = candidates[candidatesCount++]) !== UNDEFINED) {
-				// make sure the first handler is always called inside of a promise
-				callback = when.lift(candidate[CALLBACK]);
-				return when(callback.apply(candidate[CONTEXT], args), next);
-			} else {
-				return when.resolve(args);
-			}
-		};
-
-		return next(args);
+				// Convert and return `result`
+				return type === TOSTRING_ARRAY
+					? result
+					: type === TOSTRING_ARGUMENTS
+						? ARRAY_SLICE.call(result)
+						: [ result ];
+			});
 	}
 });

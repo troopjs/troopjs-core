@@ -4,7 +4,7 @@
 define([
 	"./pattern",
 	"when"
-], function PipelineModule(RE_PHASE, when) {
+], function (RE_PHASE, when) {
 	"use strict";
 
 	/**
@@ -16,9 +16,13 @@ define([
 	 */
 
 	var UNDEFINED;
+	var FUNCTION_PROTO = Function.prototype;
+	var APPLY = FUNCTION_PROTO.apply;
+	var CALL = FUNCTION_PROTO.call;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
+	var ARRAY_SLICE = Array.prototype.slice;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var HEAD = "head";
@@ -41,61 +45,56 @@ define([
 
 		// Iterate handlers
 		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
-			// Filter candidate[CONTEXT] if we have context
-			if (context !== UNDEFINED && candidate[CONTEXT] !== context) {
+			if (
+				// Filter `candidate[CONTEXT]` if we have `context`
+			(context !== UNDEFINED && candidate[CONTEXT] !== context) ||
+				// Filter `candidate[CALLBACK]` if we have `callback`
+			(callback !== UNDEFINED && candidate[CALLBACK] !== callback)
+			) {
 				continue;
 			}
 
-			// Filter candidate[CALLBACK] if we have callback
-			if (callback !== UNDEFINED && candidate[CALLBACK] !== callback) {
-				continue;
-			}
-
-			// Add to candidates
 			candidates[candidatesCount++] = candidate;
 		}
 
-		// Reset candidatesCount
-		candidatesCount = 0;
+		return when
+			// Reduce `candidates`
+			.reduce(candidates, function (current, candidate) {
+				// Let `context` be `candidate[CONTEXT]`
+				var context = candidate[CONTEXT];
 
-		/**
-		 * Internal function for piped execution of candidates candidates
-		 * @ignore
-		 * @param {Array} [result] result from previous candidate callback
-		 * @return {Promise} promise of next candidate callback execution
-		 */
-		var next = function (result) {
-			/*jshint curly:false*/
-			var context;
-			var candidate;
-			var callback;
-			var type;
+				// Return early if `context` is `UNDEFINED` or matches a blocked phase
+				if (context !== UNDEFINED && RE_PHASE.test(context[PHASE])) {
+					return current;
+				}
 
-			// Check that result is not UNDEFINED and not equals to args
-			if (result !== UNDEFINED && result !== args) {
-				// Update args to either result or result wrapped in a new array
-				args = (type = OBJECT_TOSTRING.call(result)) === TOSTRING_ARRAY  // if type is TOSTRING_ARRAY
-					|| type === TOSTRING_ARGUMENTS                                 // or type is TOSTRING_ARGUMENTS
-					? result                                                       // then result is array-like enough to be passed to .apply
-					: [ result ];                                                  // otherwise we should just wrap it in a new array
-			}
+				// Get object type
+				var type = OBJECT_TOSTRING.call(current);
 
-			// TODO Needs cleaner implementation
-			// Iterate until we find a candidate in a blocked phase
-			while ((candidate = candidates[candidatesCount++]) // Has next candidate
-				&& (context = candidate[CONTEXT])                // Has context
-				&& RE_PHASE.test(context[PHASE]));               // In blocked phase
+				// Calculate method depending on type
+				var method = (type === TOSTRING_ARRAY || type === TOSTRING_ARGUMENTS)
+					? APPLY
+					: CALL;
 
-			// Return promise of next callback, or promise resolved with args
-			if (candidate !== UNDEFINED) {
-				// make sure the first handler is always called inside of a promise
-				callback = when.lift(candidate[CALLBACK]);
-				return when(callback.apply(candidate[CONTEXT], args), next);
-			} else {
-				return when.resolve(handlers[MEMORY] = args);
-			}
-		};
+				// Execute `candidate[CALLBACK]` using `method` in `context` passing `current`
+				return when(method.call(candidate[CALLBACK], context, current), function (result) {
+					// Return result defaulting to `current`
+					return result === UNDEFINED
+						? current
+						: result;
+				});
+			}, args)
+			// Convert and remember result
+			.then(function (result) {
+				// Get object type
+				var type = OBJECT_TOSTRING.call(result);
 
-		return next(args);
+				// Convert, store and return `result` in `handlers[MEMORY]`
+				return handlers[MEMORY] = type === TOSTRING_ARRAY
+					? result
+					: type === TOSTRING_ARGUMENTS
+						? ARRAY_SLICE.call(result)
+						: [ result ];
+			});
 	}
 });
