@@ -93,7 +93,6 @@ buster.testCase("troopjs-core/component/base", function (run) {
 			},
 
 			"phase - match": function () {
-				this.timeout = 500;
 				var foo = Component.create({
 					"sig/start": function() {
 						return delay(200);
@@ -105,26 +104,11 @@ buster.testCase("troopjs-core/component/base", function (run) {
 
 				assert.equals(foo.phase, PHASES.INITIAL);
 
-				var started = foo.start().then(function() {
-					assert.equals(foo.phase, PHASES.STARTED);
-					var stopped = foo.stop().then(function() {
-						assert.equals(foo.phase, PHASES.FINALIZED);
-					});
-					assert.equals(foo.phase, PHASES.STOP);
-					return stopped;
-				});
-				assert.equals(foo.phase, PHASES.INITIALIZE);
-				return started;
-			},
-
-			"phase - validation": function () {
-				var foo = Component.create({});
-				foo.phase = "start";
 				return foo.start().then(function() {
-					assert.equals(foo.phase, "start");
-					foo.phase = "finalize";
+					assert.equals(foo.phase, PHASES.STARTED);
+
 					return foo.stop().then(function() {
-						assert.equals(foo.phase, "finalize");
+						assert.equals(foo.phase, PHASES.FINALIZED);
 					});
 				});
 			},

@@ -4,23 +4,27 @@
 define([
 	"../event/emitter",
 	"./runner/sequence",
+	"./signal/start",
+	"./signal/finalize",
 	"troopjs-compose/mixin/config",
 	"./registry",
-	"../task/registry",
+	"../task/factory",
 	"troopjs-util/merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, COMPOSE_CONF, componentRegistry, taskRegistry, merge, around, when) {
+], function ComponentModule(Emitter, sequence, start, finalize, COMPOSE_CONF, componentRegistry, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
 	 * Imagine component as an object that has predefined life-cycle, with the following phases:
 	 *
 	 *   1. initialize
+	 *   1. initialized
 	 *   1. start
 	 *   1. started
 	 *   1. stop
+	 *   1. stopped
 	 *   1. finalize
 	 *   1. finalized
 	 *
@@ -62,24 +66,17 @@ define([
 	var UNDEFINED;
 	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
+	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
 	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
 	var HEAD = "head";
 	var TAIL = "tail";
-	var CONTEXT = "context";
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
-	var PHASE = "phase";
-	var TASK = "task";
-	var STOP = "stop";
-	var INITIALIZE = "initialize";
-	var STARTED = "started";
 	var PROMISE = "promise";
-	var FINALIZED = "finalized";
-	var FINISHED = "finished";
 	var SIG = "sig";
 	var SIG_SETUP = SIG + "/setup";
 	var SIG_ADD = SIG + "/add";
@@ -93,34 +90,6 @@ define([
 	 * @readonly
 	 * @protected
 	 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
-	 */
-
-	/**
-	 * Initialize signal
-	 * @event sig/initialize
-	 * @localdoc Triggered when this component enters the initialize phase
-	 * @param {...*} [args] Initialize arguments
-	 */
-
-	/**
-	 * Start signal
-	 * @event sig/start
-	 * @localdoc Triggered when this component enters the start phase
-	 * @param {...*} [args] Initialize arguments
-	 */
-
-	/**
-	 * Stop signal
-	 * @localdoc Triggered when this component enters the stop phase
-	 * @event sig/stop
-	 * @param {...*} [args] Stop arguments
-	 */
-
-	/**
-	 * Finalize signal
-	 * @event sig/finalize
-	 * @localdoc Triggered when this component enters the finalize phase
-	 * @param {...*} [args] Finalize arguments
 	 */
 
 	/**
@@ -170,9 +139,37 @@ define([
 	 */
 
 	/**
+	 * Initialize signal
+	 * @event sig/initialize
+	 * @localdoc Triggered when this component enters the initialize phase
+	 * @param {...*} [args] Initialize arguments
+	 */
+
+	/**
+	 * Start signal
+	 * @event sig/start
+	 * @localdoc Triggered when this component enters the start phase
+	 * @param {...*} [args] Initialize arguments
+	 */
+
+	/**
+	 * Stop signal
+	 * @localdoc Triggered when this component enters the stop phase
+	 * @event sig/stop
+	 * @param {...*} [args] Stop arguments
+	 */
+
+	/**
+	 * Finalize signal
+	 * @event sig/finalize
+	 * @localdoc Triggered when this component enters the finalize phase
+	 * @param {...*} [args] Finalize arguments
+	 */
+
+	/**
 	 * Task signal
 	 * @event sig/task
-	 * @localdoc Triggered when this component starts a {@link #method-task}.
+	 * @localdoc Triggered when this component task.
 	 * @param {Object} task Task
 	 * @param {Promise} task.promise The Promise that makes up of this task
 	 * @param {Object} task.context from which component the task is issued
@@ -288,30 +285,13 @@ define([
 		"sig/finalize" : function onFinalize() {
 			var me = this;
 
-			// Unregister component
+			// Un-register component
 			componentRegistry.remove(me.toString());
 
-			// Finialize all handlers, in reverse
+			// Finalize all handlers, in reverse
 			return when.map(me[HANDLERS].reverse(), function (handlers) {
 				return me.off(handlers[TYPE]);
 			});
-		},
-
-		/**
-		 * Handles a component task
-		 * @handler sig/task
-		 * @inheritdoc #event-sig/task
-		 * @template
-		 * @return {Promise}
-		 */
-		"sig/task": function onTask(task) {
-			// Compute task key
-			var key = task[NAME] + "@" + task[STARTED];
-
-			// Register task with remove callback
-			return taskRegistry.access(key, task.promise.ensure(function () {
-				taskRegistry.remove(key);
-			}));
 		},
 
 		/**
@@ -469,84 +449,14 @@ define([
 		"signal": function signal(_signal) {
 			var me = this;
 
+			// Slice `arguments`
+			var args = ARRAY_SLICE.call(arguments);
+
 			// Modify first argument
-			arguments[0] = "sig/" + _signal;
+			args[0] = "sig/" + _signal;
 
 			// Emit
-			return me.emit.apply(me, arguments);
-		},
-
-		/**
-		 * Start the component life-cycle, sends out {@link #event-sig/initialize} and then {@link #event-sig/start}.
-		 * @param {...*} [args] arguments
-		 * @return {Promise}
-		 * @fires sig/initialize
-		 * @fires sig/start
-		 */
-		"start" : function start() {
-			var me = this;
-			var signal = me.signal;
-			var phase;
-
-			// Check PHASE
-			if ((phase = me[PHASE]) !== UNDEFINED && phase !== FINALIZED) {
-				return when.resolve(UNDEFINED);
-			}
-
-			// Modify args to change signal (and store in PHASE)
-			var args = [ me[PHASE] = INITIALIZE ];
-
-			// Add signal to arguments
-			ARRAY_PUSH.apply(args, arguments);
-
-			return signal.apply(me, args).then(function initialized(_initialized) {
-				// Modify args to change signal (and store in PHASE)
-				args[0] = me[PHASE] = "start";
-
-				return signal.apply(me, args).then(function started(_started) {
-					// Update phase
-					me[PHASE] = STARTED;
-
-					// Return concatenated result
-					return ARRAY_PROTO.concat(_initialized, _started);
-				});
-			});
-		},
-
-		/**
-		 * Stops the component life-cycle.
-		 * @param {...*} [args] arguments
-		 * @return {Promise}
-		 * @fires sig/stop
-		 * @fires sig/finalize
-		 */
-		"stop" : function stop() {
-			var me = this;
-			var signal = me.signal;
-
-			// Check PHASE
-			if (me[PHASE] !== STARTED) {
-				return when.resolve(UNDEFINED);
-			}
-
-			// Modify args to change signal (and store in PHASE)
-			var args = [ me[PHASE] = STOP ];
-
-			// Add signal to arguments
-			ARRAY_PUSH.apply(args, arguments);
-
-			return signal.apply(me, args).then(function stopped(_stopped) {
-				// Modify args to change signal (and store in PHASE)
-				args[0] = me[PHASE] = "finalize";
-
-				return signal.apply(me, args).then(function finalized(_finalized) {
-					// Update phase
-					me[PHASE] = FINALIZED;
-
-					// Return concatenated result
-					return ARRAY_PROTO.concat(_stopped, _finalized);
-				});
-			});
+			return me.emit.apply(me, args);
 		},
 
 		/**
@@ -566,30 +476,37 @@ define([
 		 * 		$(this.$element).fadeOut(resolve);
 		 * 	}, 'animate');
 		 *
-		 * @param {Resolver} promiseOrResolver The task resolver.
-		 * @param {String} [name]
+		 * @param {Promise|Resolver} promiseOrResolver The task resolver.
+		 * @param {String} [name] Task name
 		 * @return {Promise}
 		 * @fires sig/task
 		 */
-		"task" : function task(promiseOrResolver, name) {
+		"task" : function (promiseOrResolver, name) {
 			var me = this;
-			// Try to respect the original promise otherwise will create one.
-			var promise = when.isPromiseLike(promiseOrResolver)
-					? promiseOrResolver
-					: when.promise(promiseOrResolver);
-			promise.ensure(function () {
-				task[FINISHED] = +new Date();
-			});
 
-			// Create a task
-			var task = {};
-			task[CONTEXT] = me;
-			task[STARTED] = +new Date();
-			task[NAME] = name || TASK;
-			task[PROMISE] = promise;
+			// Create task
+			var task = taskFactory.call(me, promiseOrResolver, name);
 
-			// make sure the promise survives as a regular argument, rather than
-			return me.signal(TASK, task).yield(promise);
-		}
+			// Signal `TASK` and yield `task[PROMISE]`
+			return me.signal("task", task).yield(task[PROMISE]);
+		},
+
+		/**
+		 * Start the component life-cycle, sends out {@link #event-sig/initialize} and then {@link #event-sig/start}.
+		 * @param {...*} [args] arguments
+		 * @return {Promise}
+		 * @fires sig/initialize
+		 * @fires sig/start
+		 */
+		"start" : start,
+
+		/**
+		 * Stops the component life-cycle.
+		 * @param {...*} [args] arguments
+		 * @return {Promise}
+		 * @fires sig/stop
+		 * @fires sig/finalize
+		 */
+		"stop" : finalize
 	});
 });
