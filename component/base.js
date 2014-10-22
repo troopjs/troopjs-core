@@ -9,7 +9,7 @@ define([
 	"troopjs-compose/mixin/config",
 	"./registry",
 	"../task/factory",
-	"troopjs-util/merge",
+	"mu-merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
@@ -66,8 +66,8 @@ define([
 	var UNDEFINED;
 	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
+	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
@@ -169,7 +169,7 @@ define([
 	/**
 	 * Task signal
 	 * @event sig/task
-	 * @localdoc Triggered when this component task.
+	 * @localdoc Triggered when this component starts a {@link #method-task}.
 	 * @param {Object} task Task
 	 * @param {Promise} task.promise The Promise that makes up of this task
 	 * @param {Object} task.context from which component the task is issued
@@ -295,7 +295,7 @@ define([
 		},
 
 		/**
-		 * Add to the component {@link #configuration configuration}, possibly {@link util.merge merge} with the existing one.
+		 * Add to the component {@link #configuration configuration}, possibly merge with the existing one.
 		 *
 		 * 		var List = Component.extend({
 		 * 			"sig/start": function start() {
