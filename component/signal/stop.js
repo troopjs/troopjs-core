@@ -10,8 +10,15 @@ define([
 
 	/**
 	 * @class core.component.signal.stop
-	 * @mixin Function
+	 * @implement core.component.signal
 	 * @static
+	 * @alias feature.signal
+	 */
+
+	/**
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Transitions the component {@link core.component.base#phase} to `stopped`
 	 */
 
 	return function stop() {

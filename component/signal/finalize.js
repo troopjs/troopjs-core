@@ -10,10 +10,16 @@ define([
 
 	/**
 	 * @class core.component.signal.finalize
-	 * @mixin Function
+	 * @implement core.component.signal
 	 * @static
+	 * @alias feature.signal
 	 */
 
+	/**
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Transitions the component {@link core.component.base#phase} to `finalized`
+	 */
 	return function finalize() {
 		var me = this;
 		var args = arguments;

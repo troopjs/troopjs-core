@@ -8,8 +8,15 @@ define([ "when" ], function (when) {
 
 	/**
 	 * @class core.component.signal.initialize
-	 * @mixin Function
+	 * @implement core.component.signal
 	 * @static
+	 * @alias feature.signal
+	 */
+
+	/**
+	 * @method constructor
+	 * @inheritdoc
+	 * @localdoc Transitions the component {@link core.component.base#phase} to `initialized`
 	 */
 
 	return function initialize() {
