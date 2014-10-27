@@ -13,7 +13,7 @@ define([
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
-], function ComponentModule(Emitter, sequence, start, finalize, COMPOSE_CONF, componentRegistry, taskFactory, merge, around, when) {
+], function (Emitter, sequence, start, finalize, COMPOSE_CONF, componentRegistry, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
@@ -262,7 +262,7 @@ define([
 		 * @handler
 		 * @return {Promise}
 		 */
-		"sig/initialize" : function onInitialize() {
+		"sig/initialize" : function () {
 			var me = this;
 
 			// Register component
@@ -281,7 +281,7 @@ define([
 		 * @handler
 		 * @return {Promise}
 		 */
-		"sig/finalize" : function onFinalize() {
+		"sig/finalize" : function () {
 			var me = this;
 
 			// Un-register component
@@ -328,7 +328,7 @@ define([
 		 * @param {...Object} [config] Config(s) to add.
 		 * @return {Object} The new configuration.
 		 */
-		"configure" : function configure(config) {
+		"configure" : function (config) {
 			return merge.apply(this[CONFIGURATION], arguments);
 		},
 
@@ -445,7 +445,7 @@ define([
 		 * @param {...*} [args] signal arguments
 		 * @return {Promise}
 		 */
-		"signal": function signal(_signal) {
+		"signal": function (_signal) {
 			var me = this;
 
 			// Slice `arguments`

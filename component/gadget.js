@@ -7,7 +7,7 @@ define([
 	"troopjs-compose/mixin/config",
 	"when",
 	"../pubsub/hub"
-],function GadgetModule(Component, pipeline, COMPOSE_CONF, when, hub) {
+],function (Component, pipeline, COMPOSE_CONF, when, hub) {
 	"use strict";
 
 	/**
@@ -44,6 +44,7 @@ define([
 	 *
 	 * @class core.component.gadget
 	 * @extend core.component.base
+	 * @localdoc Adds convenience methods and specials to interact with the hub
 	 */
 
 	var UNDEFINED;
@@ -53,7 +54,6 @@ define([
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var ARGS = "args";
-	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
 	var HUB = "hub";
@@ -79,7 +79,7 @@ define([
 		 * @localdoc Registers event handlers declared HUB specials
 		 * @handler
 		 */
-		"sig/initialize" : function onInitialize() {
+		"sig/initialize" : function () {
 			var me = this;
 
 			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
@@ -92,7 +92,7 @@ define([
 		 * @localdoc Triggers memorized values on HUB specials
 		 * @handler
 		 */
-		"sig/start" : function onStart() {
+		"sig/start" : function () {
 			var me = this;
 			var empty = {};
 			var specials = me.constructor.specials[HUB] || ARRAY_PROTO;
@@ -130,7 +130,7 @@ define([
 		 * @localdoc Registers subscription on the {@link core.pubsub.hub hub} for matching callbacks
 		 * @handler
 		 */
-		"sig/add": function onAdd(handlers, type, callback) {
+		"sig/add": function (handlers, type, callback) {
 			var me = this;
 			var matches;
 
@@ -144,7 +144,7 @@ define([
 		 * @localdoc Removes remote subscription from the {@link core.pubsub.hub hub} that was previously registered in {@link #handler-sig/add}
 		 * @handler
 		 */
-		"sig/remove": function onRemove(handlers, type, callback) {
+		"sig/remove": function (handlers, type, callback) {
 			var me = this;
 			var matches;
 
@@ -162,14 +162,14 @@ define([
 		 * @template
 		 * @handler
 		 */
-		"sig/task" : function onTask(task) {
+		"sig/task" : function (task) {
 			return this.publish("task", task);
 		},
 
 		/**
 		 * @inheritdoc core.pubsub.hub#publish
 		 */
-		"publish" : function publish() {
+		"publish" : function () {
 			return hub.publish.apply(hub, arguments);
 		},
 
@@ -178,7 +178,7 @@ define([
 		 * @inheritdoc core.pubsub.hub#subscribe
 		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
 		 */
-		"subscribe" : function subscribe(event, callback, data) {
+		"subscribe" : function (event, callback, data) {
 			return this.on(HUB + "/" + event, callback, data);
 		},
 
@@ -187,14 +187,14 @@ define([
 		 * @inheritdoc core.pubsub.hub#unsubscribe
 		 * @localdoc Unsubscribe from public events in context of this component.
 		 */
-		"unsubscribe" : function unsubscribe(event, callback) {
+		"unsubscribe" : function (event, callback) {
 			return this.off(HUB + "/" + event, callback);
 		},
 
 		/**
 		 * @inheritdoc core.pubsub.hub#peek
 		 */
-		"peek" : function peek(event, value) {
+		"peek" : function (event, value) {
 			return hub.peek(event, value);
 		}
 	});

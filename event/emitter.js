@@ -4,7 +4,7 @@
 define([
 	"../mixin/base",
 	"./runner/sequence"
-], function EventEmitterModule(Base, sequence) {
+], function (Base, sequence) {
 	"use strict";
 
 	/**
@@ -43,7 +43,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Base.extend(function Emitter() {
+	return Base.extend(function () {
 		/**
 		 * Handlers attached to this component, addressable either by key or index
 		 * @protected
@@ -62,7 +62,7 @@ define([
 		 * @param {Function} callback The event listener function.
 		 * @param {*} [data] Handler data
 		 */
-		"on" : function on(type, context, callback, data) {
+		"on" : function (type, context, callback, data) {
 			var me = this;
 			var handlers;
 			var handler;
@@ -118,7 +118,7 @@ define([
 		 * @param {Object} [context] The context to scope the callback to remove
 		 * @param {Function} [callback] The event listener function to remove
 		 */
-		"off" : function off(type, context, callback) {
+		"off" : function (type, context, callback) {
 			var me = this;
 			var handlers;
 			var handler;
@@ -192,7 +192,7 @@ define([
 		 * @param {...*} [args] Data params that are passed to the listener function.
 		 * @return {*} Result returned from runner.
 		 */
-		"emit" : function emit(event, args) {
+		"emit" : function (event, args) {
 			var me = this;
 			var type = event;
 			var handlers;

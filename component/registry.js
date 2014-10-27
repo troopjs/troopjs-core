@@ -4,7 +4,7 @@
 define([
 	"../registry/component",
 	"../pubsub/hub"
-], function ComponentRegistryModule(Registry, hub) {
+], function (Registry, hub) {
 	"use strict";
 
 	/**
@@ -30,7 +30,7 @@ define([
 	 * @hide
 	 */
 
-	return Registry.create(function ComponentRegistry() {
+	return Registry.create(function () {
 		var me = this;
 
 		// Register the hub

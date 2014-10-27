@@ -5,7 +5,7 @@ define([
 	"../event/emitter",
 	"./runner/pipeline",
 	"troopjs-compose/decorator/from"
-], function HubModule(Emitter, pipeline, from) {
+], function (Emitter, pipeline, from) {
 	"use strict";
 
 	/**
@@ -99,7 +99,7 @@ define([
 		 * @param {...*} [args] Additional params that are passed to the handler function.
 		 * @return {Promise}
 		 */
-		"publish" : function publish(type) {
+		"publish" : function (type) {
 			var me = this;
 
 			// Prepare event object
@@ -123,7 +123,7 @@ define([
 		 * @param {*} [value] Value to use _only_ if no memory has been recorder
 		 * @return {*} Value in MEMORY
 		 */
-		"peek": function peek(type, value) {
+		"peek": function (type, value) {
 			var handlers;
 
 			return (handlers = this[HANDLERS][type]) === UNDEFINED || !(MEMORY in handlers)

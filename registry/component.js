@@ -4,7 +4,7 @@
 define([
 	"../mixin/base",
 	"poly/array"
-], function RegistryModule(Base) {
+], function (Base) {
 	"use strict";
 
 	/**
@@ -28,7 +28,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Base.extend(function Registry() {
+	return Base.extend(function () {
 		/**
 		 * Registry key storage
 		 * @private
@@ -66,7 +66,7 @@ define([
 		 * @return {*} All values if no key, current value for key if no value provided, otherwise the provided value if a new entry is created
 		 * @throws Error if a new entry is created and key is not of type String
 		 */
-		"access": function access(key, value) {
+		"access": function (key, value) {
 			var index_key = this[INDEX_KEY];
 			var index_pos = this[INDEX_POS];
 			var result;
@@ -80,7 +80,7 @@ define([
 			}
 			// query registry by keys
 			else if (OBJECT_TOSTRING.call(key) === REGEXP_STRING && value === UNDEFINED){
-				result = Object.keys(index_key).filter(function filterByDisplayName(name) {
+				result = Object.keys(index_key).filter(function (name) {
 						return key.test(name);
 				}).map(function map(key) {
 					return index_key[key][VALUE];
@@ -124,7 +124,7 @@ define([
 		 * @param {String|Number} [key] Entry key or index
 		 *
 		 */
-		"remove": function remove(key) {
+		"remove": function (key) {
 			var me = this;
 			var result;
 			var index_key = me[INDEX_KEY];
@@ -142,7 +142,7 @@ define([
 			}
 		},
 
-		"compact": function compact() {
+		"compact": function () {
 
 		}
 	});
