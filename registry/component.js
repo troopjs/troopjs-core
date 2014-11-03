@@ -58,10 +58,10 @@ define([
 		 *
 		 * - If no key is provided, all entries in the registry are returned.
 		 * - If no value is provided, it depends on the **key**
-		 *   - if key is string, current value under this key is returned.
+		 *   - if key is string or number, current value under this key is returned.
 		 *   - if key is regexp, all values whose key match this pattern are returned
 		 * - If value is provided it replaces the current value for the key
-		 * @param {String|Number} [key] Entry key or index
+		 * @param {String|Number|RegExp} [key] Entry key, index or pattern
 		 * @param {*} [value] Entry value
 		 * @return {*} All values if no key, current value for key if no value provided, otherwise the provided value if a new entry is created
 		 * @throws Error if a new entry is created and key is not of type String
