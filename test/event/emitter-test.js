@@ -235,6 +235,21 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					});
 			},
 
+			"one": function ()  {
+				var emitter = Emitter();
+				var spy = this.spy();
+
+				return emitter
+					.one("test", this, spy)
+					.emit("test")
+					.then(function () {
+						return emitter.emit("test");
+					})
+					.then(function () {
+						assert.calledOnce(spy);
+					});
+			},
+
 			"bug out in the first event handler": function() {
 				var emitter = Emitter();
 				var err = new Error("bug out");
