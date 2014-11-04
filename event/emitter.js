@@ -40,6 +40,28 @@ define([
 	var NEXT = "next";
 
 	/**
+	 * Creates a callback proxy that `off` the original callback before executing
+	 * @inheritdoc #off
+	 * @return {Function}
+	 * @ignore
+	 */
+	function proxy(type, context, callback) {
+		// Let `me` be `this`
+		var me = this;
+
+		// Let `proxied` be the proxied callback
+		var proxied = function () {
+			// First `off` the proxied function ...
+			me.off(type, context, proxied);
+			// ... then return result of applying `callback`
+			return callback.apply(this, arguments);
+		};
+
+		// Return `proxied`
+		return proxied;
+	}
+
+	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
@@ -108,6 +130,20 @@ define([
 			}
 
 			return me;
+		},
+
+		/**
+		 * Adds a listener for the specified event type that is only triggered once.
+		 * @inheritdoc #on
+		 * @chainable
+		 */
+		"one": function (type, context, callback, data) {
+			// Let `me` be `this`
+			var me = this;
+
+			// Create a callback proxy
+			// Call `me.on` with proxied arguments
+			return me.on(type, context, proxy.call(me, type, context, callback), data);
 		},
 
 		/**
