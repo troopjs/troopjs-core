@@ -65,7 +65,7 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				});
 			},
 
-			"declarative event async": function () {
+			"declarative - on": function () {
 				var count = 0;
 
 				function onEvent(arg1, arg2) {
@@ -88,6 +88,22 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				return bar.start().then(function () {
 					return bar.emit("foo", 123, "abc").then(function () {
 						assert.equals(count, 2);
+					});
+				});
+			},
+
+			"declarative - one": function () {
+				var spy = this.spy();
+
+				var foo = Component.create({
+					"one/foo": spy
+				});
+
+				return foo.start().then(function () {
+					return foo.emit("foo").then(function () {
+						return foo.emit("foo").then(function () {
+							assert.calledOnce(spy);
+						});
 					});
 				});
 			},
