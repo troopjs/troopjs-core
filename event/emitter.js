@@ -50,28 +50,32 @@ define([
 	function createHandler(type, callback, data) {
 		var me = this;
 		var count = 0;
-		var limit;
 
 		var handler = function () {
-			// Get result for `handler[CALLBACK]`
+			// Let `limit` be `handler[LIMIT]`
+			var limit = handler[LIMIT];
+
+			// Get result from execution of `handler[CALLBACK]`
 			var result = handler[CALLBACK].apply(this, arguments);
 
+			// If there's a `limit` and `++count` is greater or equal to it `off` the callback
 			if (limit !== 0 && ++count >= limit) {
 				me.off(type, callback);
 			}
 
+			// Return
 			return result;
 		};
 
 		if (OBJECT_TOSTRING.call(callback) === TOSTRING_FUNCTION) {
 			handler[CALLBACK] = callback;
 			handler[CONTEXT] = me;
-			limit = 0;
+			handler[LIMIT] = 0;
 		}
 		else {
 			handler[CALLBACK] = callback[CALLBACK];
 			handler[CONTEXT] = callback[CONTEXT] || me;
-			limit = callback[LIMIT];
+			handler[LIMIT] = callback[LIMIT] || 0;
 		}
 
 		handler[DATA] = data;
@@ -155,7 +159,7 @@ define([
 		 * @chainable
 		 * @param {String} type The event type subscribed to
 		 * @param {Function|Object} [callback] The event callback to remove. If callback is a function context will be this, otherwise:
-		 * @param {Function} callback.callback Callback method to match.
+		 * @param {Function} [callback.callback] Callback method to match.
 		 * @param {Object} [callback.context=this] Callback context to match.
 		 */
 		"off" : function (type, callback) {
@@ -177,7 +181,7 @@ define([
 					}
 					else if (callback !== UNDEFINED) {
 						_callback = callback[CALLBACK];
-						_context = callback[CONTEXT] || me;
+						_context = callback[CONTEXT];
 					}
 
 					// Iterate handlers

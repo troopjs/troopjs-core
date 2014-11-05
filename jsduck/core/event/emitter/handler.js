@@ -22,3 +22,8 @@
  * Handler callback
  * @property {Function} callback
  */
+
+/**
+ * Handler limit
+ * @property {Number} limit
+ */
