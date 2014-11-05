@@ -61,7 +61,7 @@ define([
 
 	// Add pragma for HUB special
 	COMPOSE_CONF.pragmas.push({
-		"pattern": /^hub(?:\:(memory))?\/(.+)/,
+		"pattern": /^hub(?::(memory))?\/(.+)/,
 		"replace": function ($0, $1, $2) {
 			return HUB + "(\"" + $2 + "\", " + !!$1 + ")";
 		}
@@ -133,9 +133,16 @@ define([
 		"sig/add": function (handlers, type, callback) {
 			var me = this;
 			var matches;
+			var _callback;
 
 			if ((matches = RE.exec(type)) !== NULL) {
-				hub.subscribe(matches[1], me, callback);
+				// Let `_callback` be `{}` and initialize
+				_callback = {};
+				_callback[CONTEXT] = me;
+				_callback[CALLBACK] = callback;
+
+				// Subscribe to the hub
+				hub.subscribe(matches[1], _callback);
 			}
 		},
 
@@ -147,9 +154,16 @@ define([
 		"sig/remove": function (handlers, type, callback) {
 			var me = this;
 			var matches;
+			var _callback;
 
 			if ((matches = RE.exec(type)) !== NULL) {
-				hub.unsubscribe(matches[1], me, callback);
+				// Let `_callback` be `{}` and initialize
+				_callback = {};
+				_callback[CONTEXT] = me;
+				_callback[CALLBACK] = callback;
+
+				// Unsubscribe from the hub
+				hub.unsubscribe(matches[1], _callback);
 			}
 		},
 

@@ -226,6 +226,14 @@ define([
 	 * @return {*|Boolean}
 	 */
 
+	/**
+	 * @method one
+	 * @chainable
+	 * @inheritdoc
+	 * @fires sig/setup
+	 * @fires sig/add
+	 */
+
 	// Add pragma for signals and events.
 	COMPOSE_CONF.pragmas.push({
 		"pattern": /^(?:sig|on)\/.+/,
@@ -336,15 +344,12 @@ define([
 		 * @chainable
 		 * @method
 		 * @inheritdoc
-		 * @localdoc Context of the callback will always be **this** object.
-		 * @param {String} type The event type to subscribe to.
-		 * @param {Function} callback The event listener function.
-		 * @param {*} [data] Handler data
+		 * @localdoc Adds support for {@link #event-sig/setup} and {@link #event-sig/add}.
 		 * @fires sig/setup
 		 * @fires sig/add
 		 */
 		"on": around(function (fn) {
-			return function on(type, callback, data) {
+			return function (type, callback, data) {
 				var me = this;
 				var event;
 				var handlers;
@@ -383,7 +388,7 @@ define([
 
 				// If we were not interrupted return result from super.on, otherwise just this
 				return result !== FALSE
-						? fn.call(me, type, me, callback, data)
+						? fn.call(me, type, callback, data)
 						: me;
 			};
 		}),
@@ -392,9 +397,7 @@ define([
 		 * @chainable
 		 * @method
 		 * @inheritdoc
-		 * @localdoc Context of the callback will always be **this** object.
-		 * @param {String} type The event type subscribed to
-		 * @param {Function} [callback] The event listener function to remove
+		 * @localdoc Adds support for {@link #event-sig/remove} and {@link #event-sig/teardown}.
 		 * @fires sig/remove
 		 * @fires sig/teardown
 		 */
@@ -434,7 +437,7 @@ define([
 
 				// If we were not interrupted return result from super.off, otherwise just this
 				return result !== FALSE
-					? fn.call(me, type, me, callback)
+					? fn.call(me, type, callback)
 					: me;
 			};
 		}),

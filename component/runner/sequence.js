@@ -49,7 +49,7 @@ define([ "poly/array" ], function () {
 		// Reduce and return
 		return candidates.reduce(function (current, candidate) {
 			var result = current !== FALSE
-				? candidate[CALLBACK].apply(candidate[CONTEXT], args)
+				? candidate.apply(candidate[CONTEXT], args)
 				: current;
 
 			return result === UNDEFINED

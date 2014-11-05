@@ -61,9 +61,9 @@ define([
 					return results;
 				}
 
-				// Apply `candidate[CALLBACK]` with `candidate[CONTEXT]` passing `args`
+				// Apply `candidate` with `candidate[CONTEXT]` passing `args`
 				// Pass result from apply to `when` and onwards to store in `results`
-				return when(candidate[CALLBACK].apply(candidate[CONTEXT], args), function (result) {
+				return when(candidate.apply(candidate[CONTEXT], args), function (result) {
 					results[index] = result;
 				})
 					// `yield` results for next execution

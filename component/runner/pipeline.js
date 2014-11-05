@@ -64,8 +64,8 @@ define([ "when" ], function (when) {
 					? APPLY
 					: CALL;
 
-				// Execute `candidate[CALLBACK]` using `method` in `context` passing `current`
-				return method.call(candidate[CALLBACK], context, current);
+				// Execute `candidate` using `method` in `context` passing `current`
+				return method.call(candidate, context, current);
 			}, args)
 			// Convert result
 			.then(function (result) {
