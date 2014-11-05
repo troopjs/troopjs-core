@@ -1,7 +1,7 @@
 /**
  * @class core.event.emitter.handler
  * @mixin Function
- * @protected
+ * @private
  */
 
 /**

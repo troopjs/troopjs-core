@@ -97,7 +97,7 @@ define([
 	return Base.extend(function () {
 		/**
 		 * Handlers attached to this component, addressable either by key or index
-		 * @protected
+		 * @private
 		 * @readonly
 		 * @property {core.event.emitter.handler[]} handlers
 		 */
