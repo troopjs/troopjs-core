@@ -167,7 +167,6 @@ define([
 			}
 		},
 
-
 		/**
 		 * Handles a component task
 		 * @inheritdoc #event-sig/task

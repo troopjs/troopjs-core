@@ -231,6 +231,7 @@ define([
 	 * @method one
 	 * @chainable
 	 * @inheritdoc
+	 * @localdoc Adds support for {@link #event-sig/setup} and {@link #event-sig/add}.
 	 * @fires sig/setup
 	 * @fires sig/add
 	 */

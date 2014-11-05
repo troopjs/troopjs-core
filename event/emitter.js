@@ -109,7 +109,7 @@ define([
 		 * Adds a listener for the specified event type.
 		 * @chainable
 		 * @param {String} type The event type to subscribe to.
-		 * @param {Function|Object} callback The event callback to add. If callback is a function context will be this, otherwise:
+		 * @param {Function|Object} callback The event callback to add. If callback is a function defaults from below will be used:
 		 * @param {Function} callback.callback Callback method.
 		 * @param {Object} [callback.context=this] Callback context.
 		 * @param {Number} [callback.limit=0] Callback limit.
