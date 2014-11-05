@@ -82,6 +82,7 @@ define([
 	var SIG_REMOVE = SIG + "/remove";
 	var SIG_TEARDOWN = SIG + "/teardown";
 	var ON = "on";
+	var ONE = "one";
 	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
 
 	/**
@@ -236,7 +237,7 @@ define([
 
 	// Add pragma for signals and events.
 	COMPOSE_CONF.pragmas.push({
-		"pattern": /^(?:sig|on)\/.+/,
+		"pattern": /^(?:sig|one?)\/.+/,
 		"replace": "$&()"
 	});
 
@@ -272,14 +273,23 @@ define([
 		 */
 		"sig/initialize" : function () {
 			var me = this;
+			var specials = me.constructor.specials;
 
 			// Register component
 			componentRegistry.access(me.toString(), me);
 
 			// Initialize ON specials
-			return when.map(me.constructor.specials[ON] || ARRAY_PROTO, function (special) {
+			var specials_on = when.map(specials[ON] || ARRAY_PROTO, function (special) {
 				return me.on(special[TYPE], special[VALUE]);
 			});
+
+			// Initialize ONE specials
+			var specials_one = when.map(specials[ONE] || ARRAY_PROTO, function (special) {
+				return me.one(special[TYPE], special[VALUE]);
+			});
+
+			// Join and return
+			return when.join(specials_on, specials_one);
 		},
 
 		/**
