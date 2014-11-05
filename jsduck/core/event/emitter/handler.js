@@ -2,6 +2,7 @@
  * @class core.event.emitter.handler
  * @mixin Function
  * @private
+ * @interface
  */
 
 /**
