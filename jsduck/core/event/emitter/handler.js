@@ -1,16 +1,13 @@
 /**
- * The handler interface
  * @class core.event.emitter.handler
  * @mixin Function
- * @interface
  * @protected
  */
 
 /**
- * Executes handler callback.
+ * Executes {@link #callback} and does some house keeping.
  * @method constructor
- * @abstract
- * @param {...*} args Callback arguments
+ * @param {...*} args {@link #callback Callback} arguments
  */
 
 /**
