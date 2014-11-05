@@ -76,8 +76,8 @@ define([
 					? APPLY
 					: CALL;
 
-				// Execute `candidate[CALLBACK]` using `method` in `context` passing `current`
-				return when(method.call(candidate[CALLBACK], context, current), function (result) {
+				// Execute `candidate` using `method` in `context` passing `current`
+				return when(method.call(candidate, context, current), function (result) {
 					// Return result defaulting to `current`
 					return result === UNDEFINED
 						? current

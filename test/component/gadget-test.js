@@ -27,14 +27,14 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 			"publish/subscribe": {
 				setUp: function(){
 					var me = this;
-					me.timeout = 500;
 
 					var insts = me.instances = [];
 
 					me.registerInstance = function(instance){
 						var found = false;
+						var l;
 
-						for(var l = insts.length; l--;){
+						for(l = insts.length; l--;){
 							var inst = insts[l];
 
 							if (inst === instance){
@@ -71,6 +71,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					};
 				},
+
 				tearDown: function(){
 					var me = this;
 					var insts = me.instances;
@@ -105,6 +106,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						assert(true);
 					});
 				},
+
 				"different topics should not interfere with each other": function(){
 					var g1 = new Gadget();
 
@@ -118,6 +120,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					return g1.publish(TOPIC, true);
 				},
+
 				"with args" : function () {
 					var g1 = new Gadget();
 
@@ -127,6 +130,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					return g1.publish.apply(g1, APPLY_ARGS);
 				},
+
 				"multiple times and in order" : function () {
 					var g1 = new Gadget();
 
@@ -143,6 +147,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					return g1.publish.apply(g1, APPLY_ARGS);
 				},
+
 				"cross gadget" : function () {
 
 					var g1 = new Gadget();
@@ -155,13 +160,16 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 					return g2.publish.apply(g2, APPLY_ARGS);
 				}
 			},
+
 			"on/off/emit": {
 				"emit to a topic that no handler is listening": function(){
 					var g1 = new Gadget();
 
-					g1.emit.apply(g1, TEST_ARGS);
-					assert(true);
+					return g1.emit.apply(g1, TEST_ARGS).then(function () {
+						assert(true);
+					});
 				},
+
 				"without exception": function(){
 					var g1 = new Gadget();
 
@@ -171,6 +179,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					return g1.emit.apply(g1, APPLY_ARGS);
 				},
+
 				"on multiple instance should not interfere with each other": function(){
 					var g1 = new Gadget();
 					var g2 = new Gadget();
@@ -184,6 +193,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					return g1.emit.apply(g1, APPLY_ARGS);
 				},
+
 				"on() multiple times and the handler received in order": function(){
 					var g1 = new Gadget();
 					var g2 = new Gadget();
@@ -203,7 +213,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 				}
 			},
 
-			"publish/subscribe - context matches *this* ": function (done) {
+			"publish/subscribe - matches context": function () {
 
 				var count = 0;
 				var g1 = Gadget.create({
@@ -220,13 +230,12 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 					}
 				});
 
-				var g3 = Gadget.create({});
+				var g3 = Gadget.create();
 
 				return g1.start().then(function () {
-					g2.start().then(function () {
-						g3.publish('foo').then(function () {
+					return g2.start().then(function () {
+						return g3.publish('foo').then(function () {
 							assert.same(2, count);
-							done();
 						});
 					})
 				});
@@ -246,13 +255,11 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 				});
 
 				return g1.publish("foo/bar", "foo", "bar").then(function() {
-
 					// None of them should be called because component not yet started.
 					refute.called(spy1);
 					refute.called(spy2);
 
 					return g1.start().then(function() {
-
 						// Only the handler declared with memory if is called.
 						assert.calledWithExactly(spy1, "foo", "bar");
 						refute.called(spy2);

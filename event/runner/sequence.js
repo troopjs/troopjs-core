@@ -38,7 +38,7 @@ define([ "when" ], function (when) {
 		return when.reduce(candidates, function (results, candidate, index) {
 			// Apply `candidate[CALLBACK]` with `candidate[CONTEXT]` passing `args`
 			// Pass result from apply to `when` and onwards to store in `results`
-			return when(candidate[CALLBACK].apply(candidate[CONTEXT], args), function (result) {
+			return when(candidate.apply(candidate[CONTEXT], args), function (result) {
 				results[index] = result;
 			})
 			// `yield` results for next execution

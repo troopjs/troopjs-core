@@ -9,10 +9,9 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 		run({
 			"on/emit" : function () {
 				var arg = "TEST";
-				var context = this;
 
 				return Emitter()
-					.on("test", context, function onTest(test) {
+					.on("test", function onTest(test) {
 						assert.same(arg, test);
 					})
 					.emit("test", arg);
@@ -20,13 +19,11 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"on/emit again": function() {
 				var arg = "TEST";
-				var context = this;
-
 				var emitter = Emitter();
 				var count = 0;
 
 				return emitter
-					.on("test", context, function() {
+					.on("test", function() {
 						count++;
 					})
 					.emit("test", arg)
@@ -40,11 +37,10 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"on/emit again with different arg": function() {
 				var emitter = Emitter();
-				var context = this;
 				var last;
 
 				return emitter
-					.on("test", context, function(test) {
+					.on("test", function(test) {
 						last = test;
 					})
 					.emit("test", "test")
@@ -60,13 +56,11 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				var emitter1 = Emitter();
 				var emitter2 = Emitter();
 
-				var context = this;
-
-				emitter1.on("one", context, function(arg) {
+				emitter1.on("one", function(arg) {
 					assert.same(arg, "one");
 				});
 
-				emitter2.on("two", context, function(arg) {
+				emitter2.on("two", function(arg) {
 					assert.same(arg, 2);
 				});
 
@@ -83,8 +77,15 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					assert.same(++count === 1? ctx1 : ctx2, this);
 				};
 
-				emitter.on("one", ctx1, handler);
-				emitter.on("one", ctx2, handler);
+				emitter
+					.on("one", {
+						"context": ctx1,
+						"callback": handler
+					})
+					.on("one", {
+						"context": ctx2,
+						"callback": handler
+					});
 
 				return emitter.emit("one").then(function () {
 					assert.same(2, count);
@@ -93,19 +94,18 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"on/emit async subscribers": function() {
 				var emitter = Emitter();
-				var context = this;
 
 				this.timeout = 1500;
 				var count = 0;
 
 				return emitter
-					.on("one", context, function () {
+					.on("one", function () {
 						return ++count;
 					})
-					.on("one", context, function () {
+					.on("one", function () {
 						return delay(500, ++count);
 					})
-					.on("one", context, function () {
+					.on("one", function () {
 						return delay(500, ++count);
 					})
 					.emit("one")
@@ -118,7 +118,6 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"off/emit with context and callback": function() {
 				var emitter = Emitter();
-				var context = this;
 				var last;
 
 				var one = function() {
@@ -130,14 +129,14 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				};
 
 				return emitter
-					.on("test", context, one)
-					.on("test", context, two)
+					.on("test", one)
+					.on("test", two)
 					.emit("test")
 					.then(function () {
 						assert.equals(last, "two");
 
 						return emitter
-							.off("test", context, two)
+							.off("test", two)
 							.emit("test")
 							.then(function () {
 								assert.equals(last, "one");
@@ -147,7 +146,8 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"off/emit with context": function() {
 				var emitter = Emitter();
-				var context = this;
+				var ctx1 = {};
+				var ctx2 = {};
 				var last;
 
 				var one = function() {
@@ -159,14 +159,22 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				};
 
 				return emitter
-					.on("test", {}, one)
-					.on("test", context, two)
+					.on("test", {
+						"context": ctx1,
+						"callback": one
+					})
+					.on("test", {
+						"context": ctx2,
+						"callback": two
+					})
 					.emit("test")
 					.then(function () {
 						assert.equals(last, "two");
 
 						return emitter
-							.off("test", context)
+							.off("test", {
+								"context": ctx2
+							})
 							.emit("test")
 							.then(function () {
 								assert.equals(last, "one");
@@ -176,7 +184,6 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"off/emit": function() {
 				var emitter = Emitter();
-				var context = this;
 				var last;
 
 				var one = function() {
@@ -188,8 +195,8 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 				};
 
 				return emitter
-					.on("test", context, one)
-					.on("test", context, two)
+					.on("test", one)
+					.on("test", two)
 					.emit("test")
 					.then(function () {
 						assert.equals(last, "two");
@@ -207,15 +214,14 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 			"on/emit reject": function () {
 				var emitter = Emitter();
-				var context = this;
 
 				return emitter
-					.on("test", context, function (pass) {
+					.on("test", function (pass) {
 						return pass
 							? when.resolve()
 							: when.reject();
 					})
-					.on("test", context, function (pass) {
+					.on("test", function (pass) {
 						assert.isTrue(pass);
 					})
 					.emit("test", false)
@@ -235,12 +241,12 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					});
 			},
 
-			"one": function ()  {
+			"limit - one": function ()  {
 				var emitter = Emitter();
 				var spy = this.spy();
 
 				return emitter
-					.one("test", this, spy)
+					.one("test", spy)
 					.emit("test")
 					.then(function () {
 						return emitter.emit("test");
@@ -250,10 +256,32 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 					});
 			},
 
+			"limit - many": function () {
+				var emitter = Emitter();
+				var spy = this.spy();
+
+				return emitter
+					.on("test", {
+						"callback": spy,
+						"context": emitter,
+						"limit": 2
+					})
+					.emit("test")
+					.then(function () {
+						return emitter.emit("test");
+					})
+					.then(function () {
+						return emitter.emit("test");
+					})
+					.then(function () {
+						assert.calledTwice(spy);
+					});
+			},
+
 			"bug out in the first event handler": function() {
 				var emitter = Emitter();
 				var err = new Error("bug out");
-				return emitter.on("foo", this, function() {
+				return emitter.on("foo", function() {
 					throw err;
 				})
 				.emit("foo").otherwise(function(error) {

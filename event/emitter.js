@@ -28,6 +28,7 @@ define([
 	var ARRAY_SLICE = Array.prototype.slice;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_STRING = "[object String]";
+	var TOSTRING_FUNCTION = "[object Function]";
 	var HANDLERS = "handlers";
 	var LENGTH = "length";
 	var TYPE = "type";
@@ -38,28 +39,52 @@ define([
 	var HEAD = "head";
 	var TAIL = "tail";
 	var NEXT = "next";
+	var LIMIT = "limit";
 
 	/**
-	 * Creates a callback proxy that `off` the original callback before executing
-	 * @inheritdoc #off
-	 * @return {Function}
+	 * Creates a new handler
+	 * @inheritdoc #on
+	 * @return {core.event.emitter.handler} Handler
 	 * @ignore
 	 */
-	function proxy(type, context, callback) {
-		// Let `me` be `this`
+	function createHandler(type, callback, data) {
 		var me = this;
+		var count = 0;
+		var limit;
 
-		// Let `proxied` be the proxied callback
-		var proxied = function () {
-			// First `off` the proxied function ...
-			me.off(type, context, proxied);
-			// ... then return result of applying `callback`
-			return callback.apply(this, arguments);
+		var handler = function () {
+			// Get result for `handler[CALLBACK]`
+			var result = handler[CALLBACK].apply(this, arguments);
+
+			if (limit !== 0 && ++count >= limit) {
+				me.off(type, callback);
+			}
+
+			return result;
 		};
 
-		// Return `proxied`
-		return proxied;
+		if (OBJECT_TOSTRING.call(callback) === TOSTRING_FUNCTION) {
+			handler[CALLBACK] = callback;
+			handler[CONTEXT] = me;
+			limit = 0;
+		}
+		else {
+			handler[CALLBACK] = callback[CALLBACK];
+			handler[CONTEXT] = callback[CONTEXT] || me;
+			limit = callback[LIMIT];
+		}
+
+		handler[DATA] = data;
+
+		return handler;
 	}
+
+	/**
+	 * Adds a listener for the specified event type exactly once.
+	 * @method one
+	 * @chainable
+	 * @inheritdoc #on
+	 */
 
 	/**
 	 * @method constructor
@@ -70,7 +95,7 @@ define([
 		 * Handlers attached to this component, addressable either by key or index
 		 * @protected
 		 * @readonly
-		 * @property {Array} handlers
+		 * @property {core.event.emitter.handler[]} handlers
 		 */
 		this[HANDLERS] = [];
 	}, {
@@ -80,11 +105,13 @@ define([
 		 * Adds a listener for the specified event type.
 		 * @chainable
 		 * @param {String} type The event type to subscribe to.
-		 * @param {Object} context The context to scope the callback to.
-		 * @param {Function} callback The event listener function.
+		 * @param {Function|Object} callback The event callback to add. If callback is a function context will be this, otherwise:
+		 * @param {Function} callback.callback Callback method.
+		 * @param {Object} [callback.context=this] Callback context.
+		 * @param {Number} [callback.limit=0] Callback limit.
 		 * @param {*} [data] Handler data
 		 */
-		"on" : function (type, context, callback, data) {
+		"on" : function (type, callback, data) {
 			var me = this;
 			var handlers;
 			var handler;
@@ -94,16 +121,11 @@ define([
 				throw new Error("no callback provided");
 			}
 
+			// Create new handler
+			handler = createHandler.call(me, type, callback, data);
+
 			// Have handlers
 			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {
-				// Create new handler
-				handler = {};
-
-				// Prepare handler
-				handler[CALLBACK] = callback;
-				handler[CONTEXT] = context;
-				handler[DATA] = data;
-
 				// Set tail handler
 				handlers[TAIL] = TAIL in handlers
 					// Have tail, update handlers[TAIL][NEXT] to point to handler
@@ -121,29 +143,10 @@ define([
 
 				// Prepare handlers
 				handlers[TYPE] = type;
-				handlers[HEAD] = handlers[TAIL] = handler = {};
-
-				// Prepare handler
-				handler[CALLBACK] = callback;
-				handler[CONTEXT] = context;
-				handler[DATA] = data;
+				handlers[HEAD] = handlers[TAIL] = handler;
 			}
 
 			return me;
-		},
-
-		/**
-		 * Adds a listener for the specified event type that is only triggered once.
-		 * @inheritdoc #on
-		 * @chainable
-		 */
-		"one": function (type, context, callback, data) {
-			// Let `me` be `this`
-			var me = this;
-
-			// Create a callback proxy
-			// Call `me.on` with proxied arguments
-			return me.on(type, context, proxy.call(me, type, context, callback), data);
 		},
 
 		/**
@@ -151,11 +154,14 @@ define([
 		 * remove all callbacks of this type.
 		 * @chainable
 		 * @param {String} type The event type subscribed to
-		 * @param {Object} [context] The context to scope the callback to remove
-		 * @param {Function} [callback] The event listener function to remove
+		 * @param {Function|Object} [callback] The event callback to remove. If callback is a function context will be this, otherwise:
+		 * @param {Function} callback.callback Callback method to match.
+		 * @param {Object} [callback.context=this] Callback context to match.
 		 */
-		"off" : function (type, context, callback) {
+		"off" : function (type, callback) {
 			var me = this;
+			var _callback;
+			var _context;
 			var handlers;
 			var handler;
 			var head;
@@ -165,17 +171,26 @@ define([
 			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {
 				// Have HEAD in handlers
 				if (HEAD in handlers) {
+					if (OBJECT_TOSTRING.call(callback) === TOSTRING_FUNCTION) {
+						_callback = callback;
+						_context = me;
+					}
+					else if (callback !== UNDEFINED) {
+						_callback = callback[CALLBACK];
+						_context = callback[CONTEXT] || me;
+					}
+
 					// Iterate handlers
 					for (handler = handlers[HEAD]; handler !== UNDEFINED; handler = handler[NEXT]) {
 						// Should we remove?
 						remove : {
 							// If no context or context does not match we should break
-							if (context && handler[CONTEXT] !== context) {
+							if (_context && handler[CONTEXT] !== _context) {
 								break remove;
 							}
 
 							// If no callback or callback does not match we should break
-							if (callback && handler[CALLBACK] !== callback) {
+							if (_callback && handler[CALLBACK] !== _callback) {
 								break remove;
 							}
 
@@ -211,6 +226,25 @@ define([
 			}
 
 			return me;
+		},
+
+		"one": function (type, callback, data) {
+			var me = this;
+			var _callback;
+
+			if (OBJECT_TOSTRING.call(callback) === TOSTRING_FUNCTION) {
+				_callback = {};
+				_callback[CALLBACK] = callback;
+				_callback[CONTEXT] = me;
+				_callback[LIMIT] = 1;
+			}
+			else {
+				_callback = callback;
+				_callback[LIMIT] = 1;
+			}
+
+			// Delegate return to `on`
+			return me.on(type, _callback, data);
 		},
 
 		/**
