@@ -16,6 +16,7 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var SCOPE = "scope";
+	var PARENT = "parent";
 	var COUNT = 0;
 	var RE =/((?:\w+!)?([\w\/\.\-]+)(?:#[^(\s]+)?)(@\w*)?/;
 
@@ -60,8 +61,17 @@ define([
 					: scope[key] = taskFactory.call(me, function (resolve, reject) {
 								// Require `matches[1]`
 								localRequire([ matches[1] ], function (Module) {
-									// Resolve with instantiated `Module`
-									resolve(Module());
+									// Instantiate `Module`
+									var module = Module();
+
+									// Get or create `module[SCOPE]`
+									var module_scope = module[SCOPE] || (module[SCOPE] = {});
+
+									// Let `module_scope[PARENT]` be `scope`
+									module_scope[PARENT] = scope;
+
+									// Resolve with `module`
+									resolve(module);
 								}, reject);
 						});
 			}
