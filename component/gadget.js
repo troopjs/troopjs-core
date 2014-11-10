@@ -2,16 +2,16 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"./base",
+	"./gizmo",
 	"./runner/pipeline",
 	"troopjs-compose/mixin/config",
 	"when",
 	"../pubsub/hub"
-],function (Component, pipeline, COMPOSE_CONF, when, hub) {
+],function (Gizmo, pipeline, COMPOSE_CONF, when, hub) {
 	"use strict";
 
 	/**
-	 * Component that provides signal and hub features.
+	 * Component that provides hub features.
 	 *
 	 * 	var one = Gadget.create({
 	 * 		"hub/kick/start": function(foo) {
@@ -43,7 +43,7 @@ define([
 	 * 	});
 	 *
 	 * @class core.component.gadget
-	 * @extend core.component.base
+	 * @extend core.component.gizmo
 	 * @localdoc Adds convenience methods and specials to interact with the hub
 	 */
 
@@ -71,7 +71,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Component.extend({
+	return Gizmo.extend({
 		"displayName" : "core/component/gadget",
 
 		/**
