@@ -40,6 +40,8 @@ define([
 	var TAIL = "tail";
 	var NEXT = "next";
 	var LIMIT = "limit";
+	var ON = "on";
+	var OFF = "off";
 
 	/**
 	 * Creates a new handler
@@ -76,6 +78,13 @@ define([
 			handler[CALLBACK] = callback[CALLBACK];
 			handler[CONTEXT] = callback[CONTEXT] || me;
 			handler[LIMIT] = callback[LIMIT] || 0;
+
+			if (callback.hasOwnProperty(ON)) {
+				handler[ON] = callback[ON];
+			}
+			if (callback.hasOwnProperty(OFF)) {
+				handler[OFF] = callback[OFF];
+			}
 		}
 
 		handler[DATA] = data;
@@ -113,6 +122,8 @@ define([
 		 * @param {Function} callback.callback Callback method.
 		 * @param {Object} [callback.context=this] Callback context.
 		 * @param {Number} [callback.limit=0] Callback limit.
+		 * @param {Function} [callback.on] Will be called once this handler is added to the handlers list.
+		 * @param {Function} [callback.on] Will be called once this handler is removed from the handlers list.
 		 * @param {*} [data] Handler data
 		 */
 		"on" : function (type, callback, data) {
@@ -148,6 +159,12 @@ define([
 				// Prepare handlers
 				handlers[TYPE] = type;
 				handlers[HEAD] = handlers[TAIL] = handler;
+			}
+
+			// If we have an `ON` callback ...
+			if (handler.hasOwnProperty(ON)) {
+				// .. call it in the context of `me`
+				handler[ON].call(me, handler, handlers);
 			}
 
 			return me;
@@ -196,6 +213,12 @@ define([
 							// If no callback or callback does not match we should break
 							if (_callback && handler[CALLBACK] !== _callback) {
 								break remove;
+							}
+
+							// If we have an `OFF` callback ...
+							if (handler.hasOwnProperty(OFF)) {
+								// .. call it in the context of `me`
+								handler[OFF].call(me, handler, handlers);
 							}
 
 							// Remove this handler, just continue
