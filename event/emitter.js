@@ -93,13 +93,6 @@ define([
 	}
 
 	/**
-	 * Adds a listener for the specified event type exactly once.
-	 * @method one
-	 * @chainable
-	 * @inheritdoc #on
-	 */
-
-	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
@@ -122,8 +115,12 @@ define([
 		 * @param {Function} callback.callback Callback method.
 		 * @param {Object} [callback.context=this] Callback context.
 		 * @param {Number} [callback.limit=0] Callback limit.
-		 * @param {Function} [callback.on] Will be called once this handler is added to the handlers list.
-		 * @param {Function} [callback.on] Will be called once this handler is removed from the handlers list.
+		 * @param {Function} [callback.on=undefined] Will be called once this handler is added to the handlers list.
+		 * @param {core.event.emitter.handler} [callback.on.handler] The handler that was just added.
+		 * @param {Object} [callback.on.handlers] The list of handlers the handler was added to.
+		 * @param {Function} [callback.off=undefined] Will be called once this handler is removed from the handlers list.
+		 * @param {core.event.emitter.handler} [callback.off.handler] The handler that was just removed.
+		 * @param {Object} [callback.off.handlers] The list of handlers the handler was removed from.
 		 * @param {*} [data] Handler data
 		 */
 		"on" : function (type, callback, data) {
@@ -255,6 +252,12 @@ define([
 			return me;
 		},
 
+		/**
+		 * Adds a listener for the specified event type exactly once.
+		 * @method one
+		 * @chainable
+		 * @inheritdoc #on
+		 */
 		"one": function (type, callback, data) {
 			var me = this;
 			var _callback;
