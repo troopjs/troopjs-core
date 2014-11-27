@@ -239,7 +239,6 @@ define([
 			if (OBJECT_TOSTRING.call(callback) === TOSTRING_FUNCTION) {
 				_callback = {};
 				_callback[CALLBACK] = callback;
-				_callback[CONTEXT] = me;
 				_callback[LIMIT] = 1;
 			}
 			else {
