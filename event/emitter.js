@@ -254,7 +254,6 @@ define([
 
 		/**
 		 * Adds a listener for the specified event type exactly once.
-		 * @method one
 		 * @chainable
 		 * @inheritdoc #on
 		 */
