@@ -40,6 +40,8 @@ define([
 	var TAIL = "tail";
 	var NEXT = "next";
 	var LIMIT = "limit";
+	var ON = "on";
+	var OFF = "off";
 
 	/**
 	 * Creates a new handler
@@ -76,19 +78,19 @@ define([
 			handler[CALLBACK] = callback[CALLBACK];
 			handler[CONTEXT] = callback[CONTEXT] || me;
 			handler[LIMIT] = callback[LIMIT] || 0;
+
+			if (callback.hasOwnProperty(ON)) {
+				handler[ON] = callback[ON];
+			}
+			if (callback.hasOwnProperty(OFF)) {
+				handler[OFF] = callback[OFF];
+			}
 		}
 
 		handler[DATA] = data;
 
 		return handler;
 	}
-
-	/**
-	 * Adds a listener for the specified event type exactly once.
-	 * @method one
-	 * @chainable
-	 * @inheritdoc #on
-	 */
 
 	/**
 	 * @method constructor
@@ -113,6 +115,12 @@ define([
 		 * @param {Function} callback.callback Callback method.
 		 * @param {Object} [callback.context=this] Callback context.
 		 * @param {Number} [callback.limit=0] Callback limit.
+		 * @param {Function} [callback.on=undefined] Will be called once this handler is added to the handlers list.
+		 * @param {core.event.emitter.handler} [callback.on.handler] The handler that was just added.
+		 * @param {Object} [callback.on.handlers] The list of handlers the handler was added to.
+		 * @param {Function} [callback.off=undefined] Will be called once this handler is removed from the handlers list.
+		 * @param {core.event.emitter.handler} [callback.off.handler] The handler that was just removed.
+		 * @param {Object} [callback.off.handlers] The list of handlers the handler was removed from.
 		 * @param {*} [data] Handler data
 		 */
 		"on" : function (type, callback, data) {
@@ -148,6 +156,12 @@ define([
 				// Prepare handlers
 				handlers[TYPE] = type;
 				handlers[HEAD] = handlers[TAIL] = handler;
+			}
+
+			// If we have an `ON` callback ...
+			if (handler.hasOwnProperty(ON)) {
+				// .. call it in the context of `me`
+				handler[ON].call(me, handler, handlers);
 			}
 
 			return me;
@@ -198,6 +212,12 @@ define([
 								break remove;
 							}
 
+							// If we have an `OFF` callback ...
+							if (handler.hasOwnProperty(OFF)) {
+								// .. call it in the context of `me`
+								handler[OFF].call(me, handler, handlers);
+							}
+
 							// Remove this handler, just continue
 							continue;
 						}
@@ -232,6 +252,12 @@ define([
 			return me;
 		},
 
+		/**
+		 * Adds a listener for the specified event type exactly once.
+		 * @method one
+		 * @chainable
+		 * @inheritdoc #on
+		 */
 		"one": function (type, callback, data) {
 			var me = this;
 			var _callback;
