@@ -1,10 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([
-	"../registry/component",
-	"../pubsub/hub"
-], function (Registry, hub) {
+define([ "../registry/component" ], function (Registry) {
 	"use strict";
 
 	/**
@@ -30,15 +27,7 @@ define([
 	 * @hide
 	 */
 
-	return Registry.create(function () {
-		var me = this;
-
-		// Register the hub
-		me.access(hub.toString(), hub);
-
-		// Register ourselves
-		me.access(me.toString(), me);
-	}, {
+	return Registry.create({
 		"displayName": "core/component/registry"
 	});
 });
