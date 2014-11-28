@@ -1,10 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([
-	"../registry/component",
-	"../component/registry"
-], function (Registry, componentRegistry) {
+define([ "../registry/component" ], function (Registry) {
 	"use strict";
 
 	/**
@@ -30,12 +27,7 @@ define([
 	 * @hide
 	 */
 
-	return Registry.create(function () {
-		var me = this;
-
-		// Register ourselves
-		componentRegistry.access(me.toString(), me);
-	}, {
+	return Registry.create({
 		"displayName": "core/task/registry"
 	});
 });
