@@ -20,51 +20,6 @@ buster.testCase("troopjs-core/component/base", function (run) {
 				this.timeout = 500;
 			},
 
-			"signal sync": function () {
-				var count = 0;
-
-				function onSignal(arg1, arg2) {
-					count++;
-					assert.equals(arg1, 123);
-					assert.equals(arg2, "abc");
-				}
-
-				var Foo = Component.extend({
-					"sig/foo": onSignal
-				});
-
-				var Bar = Foo.extend({
-					"sig/foo": onSignal
-				});
-
-				return Bar().signal("foo", 123, "abc").then(function () {
-					assert.equals(count, 2);
-				});
-			},
-
-			"signal async": function () {
-				var count = 0;
-
-				function onSignal(arg1, arg2) {
-					count++;
-					assert.equals(arg1, 123);
-					assert.equals(arg2, "abc");
-					return delay(200);
-				}
-
-				var Foo = Component.extend({
-					"sig/foo": onSignal
-				});
-
-				var Bar = Foo.extend({
-					"sig/foo": onSignal
-				});
-
-				return Bar().signal("foo", 123, "abc").then(function () {
-					assert.equals(count, 2);
-				});
-			},
-
 			"declarative - on": function () {
 				var count = 0;
 
