@@ -2,14 +2,15 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"./pattern",
+	"../config",
 	"when"
-], function (RE_PHASE, when) {
+], function (config, when) {
 	"use strict";
 
 	/**
 	 * @class core.pubsub.runner.pipeline
 	 * @implement core.event.emitter.runner
+	 * @mixin core.pubsub.config
 	 * @private
 	 * @static
 	 * @alias feature.runner
@@ -20,9 +21,10 @@ define([
 	var APPLY = FUNCTION_PROTO.apply;
 	var CALL = FUNCTION_PROTO.call;
 	var OBJECT_TOSTRING = Object.prototype.toString;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
-	var ARRAY_SLICE = Array.prototype.slice;
+	var SKIP = config.skip;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var HEAD = "head";
@@ -64,7 +66,7 @@ define([
 				var context = candidate[CONTEXT];
 
 				// Return early if `context` is `UNDEFINED` or matches a blocked phase
-				if (context !== UNDEFINED && RE_PHASE.test(context[PHASE])) {
+				if (context !== UNDEFINED && SKIP.test(context[PHASE])) {
 					return current;
 				}
 
