@@ -28,12 +28,12 @@ define([ "when" ], function (when) {
 
 			if (phase === UNDEFINED) {
 				// Let `me[PHASE]` be `"initialize"`
-				// Let `_args` be `[ "initialize" ]`
+				// Let `_args` be `[ "sig/initialize" ]`
 				// Push `args` on `_args`
-				ARRAY_PUSH.apply(_args = [ me[PHASE] = "initialize" ], args);
+				ARRAY_PUSH.apply(_args = [ "sig/" + (me[PHASE] = "initialize") ], args);
 
 				return me
-					.signal.apply(me, _args)
+					.emit.apply(me, _args)
 					.then(function() {
 						// Let `me[PHASE]` be `"initialized"`
 						return me[PHASE] = "initialized";

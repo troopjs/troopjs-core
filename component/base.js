@@ -454,25 +454,6 @@ define([
 		}),
 
 		/**
-		 * Signals the component
-		 * @param {String} _signal Signal
-		 * @param {...*} [args] signal arguments
-		 * @return {Promise}
-		 */
-		"signal": function (_signal) {
-			var me = this;
-
-			// Slice `arguments`
-			var args = ARRAY_SLICE.call(arguments);
-
-			// Modify first argument
-			args[0] = "sig/" + _signal;
-
-			// Emit
-			return me.emit.apply(me, args);
-		},
-
-		/**
 		 * Schedule a new promise that runs on this component, sends a {@link #event-sig/task} once finished.
 		 *
 		 * **Note:** It's recommended to use **this method instead of an ad-hoc promise** to do async lift on this component,
@@ -501,7 +482,7 @@ define([
 			var task = taskFactory.call(me, promiseOrResolver, name);
 
 			// Signal `TASK` and yield `task`
-			return me.signal("task", task).yield(task);
+			return me.emit("sig/task", task).yield(task);
 		},
 
 		/**
