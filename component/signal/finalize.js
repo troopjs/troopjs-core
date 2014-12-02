@@ -3,14 +3,20 @@
  */
 define([
 	"./stop",
+	"../config",
 	"when"
-], function (stop, when) {
+], function (stop, config, when) {
 	var ARRAY_PUSH = Array.prototype.push;
 	var PHASE = "phase";
+	var STOPPED = config.phase.stopped;
+	var FINALIZE = config.phase.finalize;
+	var FINALIZED = config.phase.finalized;
+	var SIG_FINALIZE = "sig/" + config.signal.finalize;
 
 	/**
 	 * @class core.component.signal.finalize
 	 * @implement core.component.signal
+	 * @mixin core.component.config
 	 * @static
 	 * @alias feature.signal
 	 */
@@ -27,17 +33,19 @@ define([
 		return when(stop.apply(me, args), function (phase) {
 			var _args;
 
-			if (phase === "stopped") {
-				// Let `me[PHASE]` be `"finalize"`
-				// Let `_args` be `[ "sig/finalize" ]`
+			if (phase === STOPPED) {
+				// Let `me[PHASE]` be `FINALIZE`
+				me[PHASE] = FINALIZE;
+
+				// Let `_args` be `[ SIG_FINALIZE ]`
 				// Push `args` on `_args`
-				ARRAY_PUSH.apply(_args = [ "sig/" + (me[PHASE] = "finalize") ], args);
+				ARRAY_PUSH.apply(_args = [ SIG_FINALIZE ], args);
 
 				return me
 					.emit.apply(me, _args)
 					.then(function() {
-						// Let `me[PHASE]` be `"finalized"`
-						return me[PHASE] = "finalized";
+						// Let `me[PHASE]` be `FINALIZED`
+						return me[PHASE] = FINALIZED;
 					});
 			}
 			else {
