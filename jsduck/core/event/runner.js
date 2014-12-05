@@ -1,9 +1,9 @@
 /**
  * The runner interface
- * @class core.event.emitter.runner
+ * @class core.event.runner
  * @mixin Function
  * @interface
- * @protected
+ * @private
  */
 
 /**

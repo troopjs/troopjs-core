@@ -6,7 +6,7 @@ define([ "when" ], function (when) {
 
 	/**
 	 * @class core.component.runner.pipeline
-	 * @implement core.event.emitter.runner
+	 * @implement core.event.runner
 	 * @private
 	 * @static
 	 * @alias feature.runner

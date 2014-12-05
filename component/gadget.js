@@ -2,12 +2,12 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"./base",
-	"./config",
+	"./emitter",
+	"../config",
 	"./runner/pipeline",
 	"../pubsub/hub",
 	"when"
-],function (Component, config, pipeline, hub, when) {
+],function (Emitter, config, pipeline, hub, when) {
 	"use strict";
 
 	/**
@@ -43,7 +43,7 @@ define([
 	 * 	});
 	 *
 	 * @class core.component.gadget
-	 * @extend core.component.base
+	 * @extend core.component.emitter
 	 * @localdoc Adds convenience methods and specials to interact with the hub
 	 * @alias feature.component
 	 */
@@ -72,7 +72,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Component.extend({
+	return Emitter.extend({
 		"displayName" : "core/component/gadget",
 
 		/**

@@ -1,11 +1,11 @@
 /*globals buster:false*/
-buster.testCase("troopjs-core/component/base", function (run) {
+buster.testCase("troopjs-core/component/emitter", function (run) {
 	"use strict";
 
 	var assert = buster.referee.assert;
 	var sinon = buster.sinon;
 
-	require( [ "troopjs-core/component/base", "when/delay" ] , function (Component, delay) {
+	require( [ "troopjs-core/component/emitter", "when/delay" ] , function (Component, delay) {
 
 		var PHASES = {
 			"INITIAL": undefined,

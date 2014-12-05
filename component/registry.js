@@ -1,12 +1,12 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([ "../registry/component" ], function (Registry) {
+define([ "../registry/composition" ], function (Registry) {
 	"use strict";
 
 	/**
 	 * @class core.component.registry
-	 * @extend core.registry.component
+	 * @extend core.registry.composition
 	 * @singleton
 	 */
 

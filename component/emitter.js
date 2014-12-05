@@ -3,7 +3,7 @@
  */
 define([
 	"../event/emitter",
-	"./config",
+	"../config",
 	"./registry",
 	"./runner/sequence",
 	"./signal/start",
@@ -59,9 +59,9 @@ define([
 	 * 	  app.end();
 	 * 	});
 	 *
-	 * @class core.component.base
+	 * @class core.component.emitter
 	 * @extend core.event.emitter
-	 * @mixin core.component.config
+	 * @mixin core.config
 	 * @alias feature.component
 	 */
 
@@ -89,7 +89,7 @@ define([
 
 	/**
 	 * Current lifecycle phase
-	 * @localdoc See {@link core.component.config#phase} for valid phases.
+	 * @localdoc See {@link core.config#phase} for valid phases.
 	 * @protected
 	 * @readonly
 	 * @property {String} phase

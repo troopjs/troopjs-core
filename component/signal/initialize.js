@@ -2,7 +2,7 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../config",
+	"../../config",
 	"when"
 ], function (config, when) {
 	var UNDEFINED;
@@ -15,15 +15,16 @@ define([
 	/**
 	 * @class core.component.signal.initialize
 	 * @implement core.component.signal
-	 * @mixin core.component.config
+	 * @mixin core.config
 	 * @static
 	 * @alias feature.signal
+	 * @private
 	 */
 
 	/**
 	 * @method constructor
 	 * @inheritdoc
-	 * @localdoc Transitions the component {@link core.component.base#property-phase} to `initialized`
+	 * @localdoc Transitions the component {@link core.component.emitter#property-phase} to `initialized`
 	 */
 
 	return function initialize() {
