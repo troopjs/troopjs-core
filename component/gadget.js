@@ -3,11 +3,11 @@
  */
 define([
 	"./base",
+	"./config",
 	"./runner/pipeline",
-	"troopjs-compose/mixin/config",
-	"when",
-	"../pubsub/hub"
-],function (Component, pipeline, COMPOSE_CONF, when, hub) {
+	"../pubsub/hub",
+	"when"
+],function (Component, config, pipeline, hub, when) {
 	"use strict";
 
 	/**
@@ -60,7 +60,7 @@ define([
 	var RE = new RegExp("^" + HUB + "/(.+)");
 
 	// Add pragma for HUB special
-	COMPOSE_CONF.pragmas.push({
+	config.pragmas.push({
 		"pattern": /^hub(?::(memory))?\/(.+)/,
 		"replace": function ($0, $1, $2) {
 			return HUB + "(\"" + $2 + "\", " + !!$1 + ")";
