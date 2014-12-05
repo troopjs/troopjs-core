@@ -49,7 +49,7 @@ define([
 
 		/**
 		 * The hierarchical namespace for this component that indicates it's functionality.
-		 * @private
+		 * @protected
 		 * @readonly
 		 * @property {String}
 		 */

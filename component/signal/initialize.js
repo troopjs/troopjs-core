@@ -23,7 +23,7 @@ define([
 	/**
 	 * @method constructor
 	 * @inheritdoc
-	 * @localdoc Transitions the component {@link core.component.base#phase} to `initialized`
+	 * @localdoc Transitions the component {@link core.component.base#property-phase} to `initialized`
 	 */
 
 	return function initialize() {
