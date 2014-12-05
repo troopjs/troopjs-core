@@ -3,30 +3,42 @@
  */
 define([
 	"module",
+	"troopjs-compose/mixin/config",
 	"mu-merge"
-], function (module, merge) {
+], function (module, config, merge) {
 	"use strict";
 
 	/**
 	 * Component configuration
 	 * @class core.component.config
+	 * @extends compose.mixin.config
 	 * @protected
 	 * @alias feature.config
 	 */
 
-	return merge.call({
+	return merge.call(config, {
 		/**
 		 * @cfg signal Signal related configuration.
+		 * @cfg {String} signal.setup=setup Signal emitted first time an event handler is added.
+		 * @cfg {String} signal.add=add Signal emitted each time an event handler is added.
+		 * @cfg {String} signal.remove=remove Signal emitted each time an event handler is removed.
+		 * @cfg {String} signal.initialize=teardown Signal emitted last time an event handler is removed.
 		 * @cfg {String} signal.initialize=initialize Signal emitted when component initializes.
 		 * @cfg {String} signal.start=start Signal emitted when component starts.
 		 * @cfg {String} signal.stop=stop Signal emitted when component stops.
 		 * @cfg {String} signal.finalize=finalize Signal emitted when component finalizes.
+		 * @cfg {String} signal.task=task Signal emitted when component starts a task.
 		 */
 		"signal": {
+			"setup": "setup",
+			"add": "add",
+			"remove": "remove",
+			"teardown": "teardown",
 			"initialize": "initialize",
 			"start": "start",
 			"stop": "stop",
-			"finalize": "finalize"
+			"finalize": "finalize",
+			"task": "task"
 		},
 
 		/**

@@ -3,17 +3,17 @@
  */
 define([
 	"../event/emitter",
+	"./config",
+	"./registry",
 	"./runner/sequence",
 	"./signal/start",
 	"./signal/finalize",
-	"troopjs-compose/mixin/config",
-	"./registry",
 	"../task/factory",
 	"mu-merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
-], function (Emitter, sequence, start, finalize, COMPOSE_CONF, componentRegistry, taskFactory, merge, around, when) {
+], function (Emitter, config, registry, sequence, start, finalize, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
@@ -67,7 +67,6 @@ define([
 	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var ARRAY_SLICE = ARRAY_PROTO.slice;
 	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
@@ -76,14 +75,15 @@ define([
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
-	var SIG = "sig";
-	var SIG_SETUP = SIG + "/setup";
-	var SIG_ADD = SIG + "/add";
-	var SIG_REMOVE = SIG + "/remove";
-	var SIG_TEARDOWN = SIG + "/teardown";
 	var ON = "on";
 	var ONE = "one";
-	var EVENT_TYPE_SIG = new RegExp("^" + SIG + "/(.+)");
+	var SIG = "sig";
+	var SIG_SETUP = SIG + "/" + config.signal.setup;
+	var SIG_ADD = SIG + "/" + config.signal.add;
+	var SIG_REMOVE = SIG + "/" + config.signal.remove;
+	var SIG_TEARDOWN = SIG + "/" + config.signal.teardown;
+	var SIG_TASK = SIG + "/" + config.signal.task;
+	var SIG_PATTERN = new RegExp("^" + SIG + "/(.+)");
 
 	/**
 	 * Current lifecycle phase
@@ -237,7 +237,7 @@ define([
 	 */
 
 	// Add pragma for signals and events.
-	COMPOSE_CONF.pragmas.push({
+	config.pragmas.push({
 		"pattern": /^(?:sig|one?)\/.+/,
 		"replace": "$&()"
 	});
@@ -277,7 +277,7 @@ define([
 			var specials = me.constructor.specials;
 
 			// Register component
-			componentRegistry.access(me.toString(), me);
+			registry.access(me.toString(), me);
 
 			// Initialize ON specials
 			var specials_on = when.map(specials[ON] || ARRAY_PROTO, function (special) {
@@ -304,7 +304,7 @@ define([
 			var me = this;
 
 			// Un-register component
-			componentRegistry.remove(me.toString());
+			registry.remove(me.toString());
 
 			// Finalize all handlers, in reverse
 			return when.map(me[HANDLERS].reverse(), function (handlers) {
@@ -367,7 +367,7 @@ define([
 				var result;
 
 				// If this type is NOT a signal we don't have to event try
-				if (!EVENT_TYPE_SIG.test(type)) {
+				if (!SIG_PATTERN.test(type)) {
 					// Initialize the handlers for this type if they don't exist.
 					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
 						handlers = {};
@@ -419,7 +419,7 @@ define([
 				var handlers;
 				var result;
 
-				if (!EVENT_TYPE_SIG.test(type)) {
+				if (!SIG_PATTERN.test(type)) {
 					// Initialize the handlers for this type if they don't exist.
 					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
 						handlers = {};
@@ -482,7 +482,7 @@ define([
 			var task = taskFactory.call(me, promiseOrResolver, name);
 
 			// Signal `TASK` and yield `task`
-			return me.emit("sig/task", task).yield(task);
+			return me.emit(SIG_TASK, task).yield(task);
 		},
 
 		/**
