@@ -2,15 +2,15 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../mixin/base",
+	"../composition",
 	"poly/array"
-], function (Base) {
+], function (Composition) {
 	"use strict";
 
 	/**
 	 * A light weight implementation to register key/value pairs by key and index
-	 * @class core.registry.component
-	 * @extend core.mixin.base
+	 * @class core.registry.composition
+	 * @extend core.composition
 	 */
 
 	var UNDEFINED;
@@ -28,7 +28,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Base.extend(function () {
+	return Composition.extend(function () {
 		/**
 		 * Registry key storage
 		 * @private

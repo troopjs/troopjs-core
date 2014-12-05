@@ -3,15 +3,15 @@
  */
 define([
 	"module",
-	"troopjs-compose/mixin/config",
+	"troopjs-compose/config",
 	"mu-merge"
 ], function (module, config, merge) {
 	"use strict";
 
 	/**
 	 * Component configuration
-	 * @class core.component.config
-	 * @extends compose.mixin.config
+	 * @class core.config
+	 * @extends compose.config
 	 * @protected
 	 * @alias feature.config
 	 */

@@ -1,11 +1,11 @@
 /*globals buster:false*/
-buster.testCase("troopjs-core/registry/component", function (run) {
+buster.testCase("troopjs-core/registry/composition", function (run) {
 	"use strict";
 
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
 
-	require( [ "troopjs-core/registry/component" ] , function (Registry) {
+	require( [ "troopjs-core/registry/composition" ] , function (Registry) {
 		run({
 			"when starting from scratch": {
 				"setUp": function () {

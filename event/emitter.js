@@ -2,9 +2,9 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../mixin/base",
+	"../composition",
 	"./runner/sequence"
-], function (Base, sequence) {
+], function (Composition, sequence) {
 	"use strict";
 
 	/**
@@ -21,7 +21,7 @@ define([
 	 *  - pipeline: where a handler receives the return value of the previous one.
 	 *
 	 * @class core.event.emitter
-	 * @extend core.mixin.base
+	 * @extend core.composition
 	 */
 
 	var UNDEFINED;
@@ -96,7 +96,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Base.extend(function () {
+	return Composition.extend(function () {
 		/**
 		 * Handlers attached to this component, addressable either by key or index
 		 * @private

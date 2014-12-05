@@ -3,7 +3,7 @@
  */
 define([
 	"./start",
-	"../config",
+	"../../config",
 	"when"
 ], function (start, config, when) {
 	var ARRAY_PUSH = Array.prototype.push;
@@ -16,15 +16,16 @@ define([
 	/**
 	 * @class core.component.signal.stop
 	 * @implement core.component.signal
-	 * @mixin core.component.config
+	 * @mixin core.config
 	 * @static
 	 * @alias feature.signal
+	 * @private
 	 */
 
 	/**
 	 * @method constructor
 	 * @inheritdoc
-	 * @localdoc Transitions the component {@link core.component.base#property-phase} to `stopped`
+	 * @localdoc Transitions the component {@link core.component.emitter#property-phase} to `stopped`
 	 */
 
 	return function stop() {

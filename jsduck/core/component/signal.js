@@ -3,7 +3,7 @@
  * @class core.component.signal
  * @mixin Function
  * @interface
- * @protected
+ * @private
  */
 
 /**

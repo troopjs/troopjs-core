@@ -6,7 +6,7 @@ define([ "poly/array" ], function () {
 
 	/**
 	 * @class core.component.runner.sequence
-	 * @implement core.event.emitter.runner
+	 * @implement core.event.runner
 	 * @private
 	 * @static
 	 * @alias feature.runner

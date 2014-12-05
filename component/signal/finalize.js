@@ -3,7 +3,7 @@
  */
 define([
 	"./stop",
-	"../config",
+	"../../config",
 	"when"
 ], function (stop, config, when) {
 	var ARRAY_PUSH = Array.prototype.push;
@@ -16,15 +16,16 @@ define([
 	/**
 	 * @class core.component.signal.finalize
 	 * @implement core.component.signal
-	 * @mixin core.component.config
+	 * @mixin core.config
 	 * @static
 	 * @alias feature.signal
+	 * @private
 	 */
 
 	/**
 	 * @method constructor
 	 * @inheritdoc
-	 * @localdoc Transitions the component {@link core.component.base#property-phase} to `finalized`
+	 * @localdoc Transitions the component {@link core.component.emitter#property-phase} to `finalized`
 	 */
 	return function finalize() {
 		var me = this;

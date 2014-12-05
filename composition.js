@@ -2,16 +2,16 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"troopjs-compose/mixin/factory",
+	"troopjs-compose/factory",
 	"troopjs-log/logger"
 ], function ObjectBaseModule(Factory, logger) {
 	var INSTANCE_COUNTER = 0;
 	var INSTANCE_COUNT = "instanceCount";
 
 	/**
-	 * Base object with instance count.
-	 * @class core.mixin.base
-	 * @implement compose.mixin
+	 * Base composition with instance count.
+	 * @class core.composition
+	 * @implement compose.composition
 	 * @mixin log.logger
 	 */
 
@@ -20,7 +20,7 @@ define([
 	 * @static
 	 * @inheritable
 	 * @inheritdoc
-	 * @return {core.mixin.base} Instance of this class
+	 * @return {core.composition} Instance of this class
 	 */
 
 	/**
@@ -28,7 +28,7 @@ define([
 	 * @static
 	 * @inheritable
 	 * @inheritdoc
-	 * @return {core.mixin.base} The extended subclass
+	 * @return {core.composition} The extended subclass
 	 */
 
 	/**
@@ -53,7 +53,7 @@ define([
 		 * @readonly
 		 * @property {String}
 		 */
-		"displayName" : "core/mixin/base",
+		"displayName" : "core/composition",
 
 		/**
 		 * Gives string representation of this component instance.

@@ -2,15 +2,15 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../../component/config",
+	"../../config",
 	"when"
 ], function (config, when) {
 	"use strict";
 
 	/**
 	 * @class core.pubsub.runner.sequence
-	 * @implement core.event.emitter.runner
-	 * @mixin core.component.config
+	 * @implement core.event.runner
+	 * @mixin core.config
 	 * @private
 	 * @static
 	 * @alias feature.runner

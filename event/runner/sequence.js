@@ -6,7 +6,7 @@ define([ "when" ], function (when) {
 
 	/**
 	 * @class core.event.runner.sequence
-	 * @implement core.event.emitter.runner
+	 * @implement core.event.runner
 	 * @private
 	 * @static
 	 * @alias feature.runner
@@ -15,7 +15,6 @@ define([ "when" ], function (when) {
 	var UNDEFINED;
 	var HEAD = "head";
 	var NEXT = "next";
-	var CALLBACK = "callback";
 	var CONTEXT = "context";
 
 	/**
