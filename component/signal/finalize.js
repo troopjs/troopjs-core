@@ -24,7 +24,7 @@ define([
 	/**
 	 * @method constructor
 	 * @inheritdoc
-	 * @localdoc Transitions the component {@link core.component.base#phase} to `finalized`
+	 * @localdoc Transitions the component {@link core.component.base#property-phase} to `finalized`
 	 */
 	return function finalize() {
 		var me = this;

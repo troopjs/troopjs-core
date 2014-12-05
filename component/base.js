@@ -61,6 +61,8 @@ define([
 	 *
 	 * @class core.component.base
 	 * @extend core.event.emitter
+	 * @mixin core.component.config
+	 * @alias feature.component
 	 */
 
 	var UNDEFINED;
@@ -87,9 +89,10 @@ define([
 
 	/**
 	 * Current lifecycle phase
-	 * @readonly
+	 * @localdoc See {@link core.component.config#phase} for valid phases.
 	 * @protected
-	 * @property {"initialized"|"started"|"stopped"|"finalized"} phase
+	 * @readonly
+	 * @property {String} phase
 	 */
 
 	/**

@@ -45,6 +45,7 @@ define([
 	 * @class core.component.gadget
 	 * @extend core.component.base
 	 * @localdoc Adds convenience methods and specials to interact with the hub
+	 * @alias feature.component
 	 */
 
 	var UNDEFINED;

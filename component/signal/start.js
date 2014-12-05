@@ -24,7 +24,7 @@ define([
 	/**
 	 * @method constructor
 	 * @inheritdoc
-	 * @localdoc Transitions the component {@link core.component.base#phase} to `started`
+	 * @localdoc Transitions the component {@link core.component.base#property-phase} to `started`
 	 */
 
 	return function start() {
