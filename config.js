@@ -12,11 +12,11 @@ define([
 	 * Component configuration
 	 * @class core.config
 	 * @extends compose.config
-	 * @protected
+	 * @private
 	 * @alias feature.config
 	 */
 
-	return merge.call(config, {
+	return merge.call({}, config, {
 		"signal": {
 			/**
 			 * @cfg {Object} signal Signal related configuration.
