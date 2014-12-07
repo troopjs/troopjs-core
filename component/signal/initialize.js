@@ -10,7 +10,7 @@ define([
 	var PHASE = "phase";
 	var INITIALIZE = config.phase.initialize;
 	var INITIALIZED = config.phase.initialized;
-	var SIG_INITIALIZE = "sig/" + config.signal.initialize;
+	var SIG_INITIALIZE = config.signal.initialize;
 
 	/**
 	 * @class core.component.signal.initialize

@@ -80,19 +80,18 @@ define([
 	var ON = "on";
 	var ONE = "one";
 	var SIG = "sig";
-	var SIG_SETUP = SIG + "/" + config.signal.setup;
-	var SIG_ADD = SIG + "/" + config.signal.add;
-	var SIG_REMOVE = SIG + "/" + config.signal.remove;
-	var SIG_TEARDOWN = SIG + "/" + config.signal.teardown;
-	var SIG_TASK = SIG + "/" + config.signal.task;
+	var SIG_SETUP = config.signal.setup;
+	var SIG_ADD = config.signal.add;
+	var SIG_REMOVE = config.signal.remove;
+	var SIG_TEARDOWN = config.signal.teardown;
+	var SIG_TASK = config.signal.task;
 	var SIG_PATTERN = new RegExp("^" + SIG + "/(.+)");
 
 	/**
 	 * Current lifecycle phase
-	 * @localdoc See {@link core.config#phase} for valid phases.
 	 * @protected
 	 * @readonly
-	 * @property {String} phase
+	 * @property {core.config.phase} phase
 	 */
 
 	/**
@@ -157,8 +156,8 @@ define([
 
 	/**
 	 * Stop signal
-	 * @localdoc Triggered when this component enters the stop phase
 	 * @event sig/stop
+	 * @localdoc Triggered when this component enters the stop phase
 	 * @param {...*} [args] Stop arguments
 	 */
 

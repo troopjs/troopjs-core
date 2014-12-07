@@ -11,7 +11,7 @@ define([
 	var STOPPED = config.phase.stopped;
 	var FINALIZE = config.phase.finalize;
 	var FINALIZED = config.phase.finalized;
-	var SIG_FINALIZE = "sig/" + config.signal.finalize;
+	var SIG_FINALIZE = config.signal.finalize;
 
 	/**
 	 * @class core.component.signal.finalize
