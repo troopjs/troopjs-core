@@ -35,7 +35,7 @@ define([
 	 * Creates a new component instance
 	 * @method constructor
 	 */
-	return Factory(function ObjectBase() {
+	return Factory(function () {
 		// Update instance count
 		this[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
 	}, logger, {
