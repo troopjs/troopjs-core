@@ -11,7 +11,7 @@ define([
 	var INITIALIZED = config.phase.initialized;
 	var START = config.phase.start;
 	var STARTED = config.phase.started;
-	var SIG_START = "sig/" + config.signal.start;
+	var SIG_START = config.signal.start;
 
 	/**
 	 * @class core.component.signal.start

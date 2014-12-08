@@ -11,7 +11,7 @@ define([
 	var STARTED = config.phase.started;
 	var STOP = config.phase.stop;
 	var STOPPED = config.phase.stopped;
-	var SIG_STOP = "sig/" + config.signal.stop;
+	var SIG_STOP = config.signal.stop;
 
 	/**
 	 * @class core.component.signal.stop

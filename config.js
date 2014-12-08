@@ -9,6 +9,94 @@ define([
 	"use strict";
 
 	/**
+	 * @class core.config.phase
+	 * @enum
+	 * @private
+	 */
+	var PHASE = {
+		/**
+		 * Protected phases
+		 */
+		"skip": /^(?:initi|fin)alized?$/,
+		/**
+		 * Phase while component is initializing.
+		 */
+		"initialize": "initialize",
+		/**
+		 * Phase when component is initialized.
+		 */
+		"initialized": "initialized",
+		/**
+		 * Phase while component is starting.
+		 */
+		"start": "start",
+		/**
+		 * Phase when component is started.
+		 */
+		"started": "started",
+		/**
+		 * Phase while component is stopping.
+		 */
+		"stop": "stop",
+		/**
+		 * Phase when component is stopped.
+		 */
+		"stopped": "stopped",
+		/**
+		 * Phase while component is finalizing.
+		 */
+		"finalize": "finalize",
+		/**
+		 * Phase when component is finalized.
+		 */
+		"finalized": "finalized"
+	};
+
+	/**
+	 * @class core.config.signal
+	 * @enum {String}
+	 * @private
+	 */
+	var SIGNAL = {
+		/**
+		 * Signal emitted first time an event handler is added.
+		 */
+		"setup": "sig/setup",
+		/**
+		 * Signal emitted each time an event handler is added.
+		 */
+		"add": "sig/add",
+		/**
+		 * Signal emitted each time an event handler is removed.
+		 */
+		"remove": "sig/remove",
+		/**
+		 * Signal emitted last time an event handler is removed.
+		 */
+		"teardown": "sig/teardown",
+		/**
+		 * Signal emitted when component initializes.
+		 */
+		"initialize": "sig/initialize",
+		/**
+		 * Signal emitted when component starts.
+		 */
+		"start": "sig/start",
+		/**
+		 * Signal emitted when component stops.
+		 */
+		"stop": "sig/stop",
+		/**
+		 * Signal emitted when component finalizes.
+		 */
+		"finalize": "sig/finalize",
+		/**
+		 * Signal emitted when component starts a task.
+		 */
+		"task": "sig/task"
+	};
+
+	/**
 	 * Component configuration
 	 * @class core.config
 	 * @extends compose.config
@@ -17,54 +105,18 @@ define([
 	 */
 
 	return merge.call({}, config, {
-		"signal": {
-			/**
-			 * @cfg {Object} signal Signal related configuration.
-			 * @cfg {String} signal.setup=setup Signal emitted first time an event handler is added.
-			 * @cfg {String} signal.add=add Signal emitted each time an event handler is added.
-			 * @cfg {String} signal.remove=remove Signal emitted each time an event handler is removed.
-			 * @cfg {String} signal.initialize=teardown Signal emitted last time an event handler is removed.
-			 * @cfg {String} signal.initialize=initialize Signal emitted when component initializes.
-			 * @cfg {String} signal.start=start Signal emitted when component starts.
-			 * @cfg {String} signal.stop=stop Signal emitted when component stops.
-			 * @cfg {String} signal.finalize=finalize Signal emitted when component finalizes.
-			 * @cfg {String} signal.task=task Signal emitted when component starts a task.
-			 * @protected
-			 */
-			"setup": "setup",
-			"add": "add",
-			"remove": "remove",
-			"teardown": "teardown",
-			"initialize": "initialize",
-			"start": "start",
-			"stop": "stop",
-			"finalize": "finalize",
-			"task": "task"
-		},
-
 		/**
-		 * @cfg {Object} phase Phase related configuration.
-		 * @cfg {RegExp} phase.skip=^(?:initi|fin)alized?$ Pattern of protected phases.
-		 * @cfg {String} phase.initialize=initialize Phase while component is initializing.
-		 * @cfg {String} phase.initialized=initialized Phase when component is initialized.
-		 * @cfg {String} phase.start=start Phase while component is starting.
-		 * @cfg {String} phase.started=started Phase when component is started.
-		 * @cfg {String} phase.stop=stop Phase while component is stopping.
-		 * @cfg {String} phase.stopped=stopped Phase when component is stopped.
-		 * @cfg {String} phase.finalize=finalize Phase while component is finalizing.
-		 * @cfg {String} phase.finalized=finalized Phase when component is finalized.
+		 * Component signals
+		 * @cfg {core.config.signal}
 		 * @protected
 		 */
-		"phase": {
-			"skip" : /^(?:initi|fin)alized?$/,
-			"initialize": "initialize",
-			"initialized": "initialized",
-			"start": "start",
-			"started": "started",
-			"stop": "stop",
-			"stopped": "stopped",
-			"finalize": "finalize",
-			"finalized": "finalized"
-		}
+		"signal": SIGNAL,
+
+		/**
+		 * Component phases
+		 * @cfg {core.config.phase}
+		 * @protected
+		 */
+		"phase": PHASE
 	}, module.config());
 });
