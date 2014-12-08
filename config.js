@@ -91,6 +91,14 @@ define([
 		 */
 		"finalize": "sig/finalize",
 		/**
+		 * Signal emitted during registration.
+		 */
+		"register": "sig/register",
+		/**
+		 * Signal emitted during un-registeration.
+		 */
+		"unregister": "sig/unregister",
+		/**
 		 * Signal emitted when component starts a task.
 		 */
 		"task": "sig/task"

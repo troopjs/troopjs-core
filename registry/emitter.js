@@ -2,18 +2,22 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../composition",
+	"../event/emitter",
+	"../config",
+	"../component/runner/sequence",
 	"poly/array"
-], function (Composition) {
+], function (Emitter, config, sequence) {
 	"use strict";
 
 	/**
 	 * A light weight implementation to register key/value pairs by key and index
-	 * @class core.registry.composition
-	 * @extend core.composition
+	 * @class core.registry.emitter
+	 * @extend core.event.emitter
 	 */
 
 	var UNDEFINED;
+	var TYPE = "type";
+	var RUNNER = "runner";
 	var LENGTH = "length";
 	var INDEX = "index";
 	var KEY = "key";
@@ -23,12 +27,32 @@ define([
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_STRING = "[object String]";
 	var REGEXP_STRING = "[object RegExp]";
+	var SIG_REGISTER = config.signal.register;
+	var SIG_UNREGISTER = config.signal.unregister;
+
+	/**
+	 * Register signal
+	 * @event sig/register
+	 * @localdoc Triggered when something is registered via {@link #method-access}.
+	 * @since 3.0
+	 * @param {String|Number} key
+	 * @param {*} value
+	 */
+
+	/**
+	 * Un-register signal
+	 * @event sig/unregister
+	 * @localdoc Triggered when something is un-registered via {@link #method-access}.
+	 * @since 3.0
+	 * @param {String|Number} key
+	 * @param {*} value
+	 */
 
 	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Composition.extend(function () {
+	return Emitter.extend(function () {
 		/**
 		 * Registry key storage
 		 * @private
@@ -51,7 +75,7 @@ define([
 		 */
 		this[INDEX_POS] = [];
 	}, {
-		"displayName": "core/registry/component",
+		"displayName": "core/registry/emitter",
 
 		/**
 		 * Either gets or puts values into the registry.
@@ -67,10 +91,12 @@ define([
 		 * @throws Error if a new entry is created and key is not of type String
 		 */
 		"access": function (key, value) {
-			var index_key = this[INDEX_KEY];
-			var index_pos = this[INDEX_POS];
+			var me = this;
+			var index_key = me[INDEX_KEY];
+			var index_pos = me[INDEX_POS];
 			var result;
 			var argc;
+			var event;
 
 			// Reading _all_
 			if ((argc = arguments[LENGTH]) === 0) {
@@ -109,6 +135,15 @@ define([
 						result = index_key[result[KEY] = key] = index_pos[result[INDEX] = index_pos[LENGTH]] = result;
 						result = result[VALUE] = value;
 					}
+
+					// Let `event` be `{}`
+					event = {};
+					// Let `event[RUNNER]` be `sequence`
+					event[RUNNER] = sequence;
+					// Let `event[TYPE` be `SIG_REGISTER`
+					event[TYPE] = SIG_REGISTER;
+					// Emit
+					me.emit(event, key, result);
 				}
 			}
 
@@ -129,6 +164,7 @@ define([
 			var result;
 			var index_key = me[INDEX_KEY];
 			var index_pos = me[INDEX_POS];
+			var event;
 
 			// Remove all entries
 			if (arguments[LENGTH] === 0) {
@@ -139,11 +175,16 @@ define([
 			else if ((result = index_key[key]) !== UNDEFINED) {
 				delete index_key[result[KEY]];
 				delete index_pos[result[INDEX]];
+
+				// Let `event` be `{}`
+				event = {};
+				// Let `event[RUNNER]` be `sequence`
+				event[RUNNER] = sequence;
+				// Let `event[TYPE` be `SIG_UNREGISTER`
+				event[TYPE] = SIG_UNREGISTER;
+				// Emit
+				me.emit(event, key, result[VALUE]);
 			}
-		},
-
-		"compact": function () {
-
 		}
 	});
 });
