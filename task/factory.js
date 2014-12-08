@@ -13,41 +13,29 @@ define([
 	 * @static
 	 */
 
-	var NAME = "name";
-	var CONTEXT = "context";
-	var STARTED = "started";
-	var FINISHED = "finished";
+	var TASK_COUNTER = 0;
 
 	/**
 	 * Creates and registers a task
 	 * @method constructor
 	 * @param {Promise|Resolver} promiseOrResolver The task resolver.
-	 * @param {String} [name] Task name
+	 * @param {String} [name=task] Task name
 	 * @return {Promise}
 	 */
 	return function factory(promiseOrResolver, name) {
-		var task = when.isPromiseLike(promiseOrResolver)
+		// Get promise
+		var promise = when.isPromiseLike(promiseOrResolver)
 			? when(promiseOrResolver)
 			: when.promise(promiseOrResolver);
 
-		task[CONTEXT] = this;
-		task[NAME] = name || "task";
-		task[STARTED] = new Date();
+		// Create key
+		var key = (name || "task") + "@" + ++TASK_COUNTER;
 
-		// Compute task `key`
-		var key = task[NAME] + "@" + task[STARTED];
-
+		// Ensure un-registration
 		// Register task
-		registry.register(key, task);
-
-		return task
-			// Cleanup
-			.ensure(function () {
-				// Let `task[FINISHED]` be `new Date()`
-				task[FINISHED] = new Date();
-
-				// Un-register task
-				registry.unregister(key)
-			});
+		// Return
+		return registry.register(key, promise.ensure(function () {
+			registry.unregister(key);
+		}));
 	};
 });
