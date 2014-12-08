@@ -279,7 +279,7 @@ define([
 			var specials = me.constructor.specials;
 
 			// Register component
-			registry.access(me.toString(), me);
+			registry.register(me.toString(), me);
 
 			// Initialize ON specials
 			var specials_on = when.map(specials[ON] || ARRAY_PROTO, function (special) {
@@ -306,7 +306,7 @@ define([
 			var me = this;
 
 			// Un-register component
-			registry.remove(me.toString());
+			registry.unregister(me.toString(), me);
 
 			// Finalize all handlers, in reverse
 			return when.map(me[HANDLERS].reverse(), function (handlers) {

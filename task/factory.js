@@ -38,7 +38,7 @@ define([
 		var key = task[NAME] + "@" + task[STARTED];
 
 		// Register task
-		registry.access(key, task);
+		registry.register(key, task);
 
 		return task
 			// Cleanup
@@ -47,7 +47,7 @@ define([
 				task[FINISHED] = new Date();
 
 				// Un-register task
-				registry.remove(key)
+				registry.unregister(key)
 			});
 	};
 });
