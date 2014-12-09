@@ -5,7 +5,11 @@ buster.testCase("troopjs-core/component/emitter", function (run) {
 	var assert = buster.referee.assert;
 	var sinon = buster.sinon;
 
-	require( [ "troopjs-core/component/emitter", "when/delay" ] , function (Component, delay) {
+	require( [
+		"troopjs-core/component/emitter",
+		"troopjs-core/component/signal/start",
+		"troopjs-core/component/signal/finalize",
+		"when/delay" ] , function (Component, start, finalize, delay) {
 
 		var PHASES = {
 			"INITIAL": undefined,
@@ -40,7 +44,7 @@ buster.testCase("troopjs-core/component/emitter", function (run) {
 
 				var bar = Bar();
 
-				return bar.start().then(function () {
+				return start.call(bar).then(function () {
 					return bar.emit("foo", 123, "abc").then(function () {
 						assert.equals(count, 2);
 					});
@@ -54,7 +58,7 @@ buster.testCase("troopjs-core/component/emitter", function (run) {
 					"one/foo": spy
 				});
 
-				return foo.start().then(function () {
+				return start.call(foo).then(function () {
 					return foo.emit("foo").then(function () {
 						return foo.emit("foo").then(function () {
 							assert.calledOnce(spy);
@@ -75,10 +79,10 @@ buster.testCase("troopjs-core/component/emitter", function (run) {
 
 				assert.equals(foo.phase, PHASES.INITIAL);
 
-				return foo.start().then(function() {
+				return start.call(foo).then(function() {
 					assert.equals(foo.phase, PHASES.STARTED);
 
-					return foo.stop().then(function() {
+					return finalize.call(foo).then(function() {
 						assert.equals(foo.phase, PHASES.FINALIZED);
 					});
 				});
@@ -91,7 +95,7 @@ buster.testCase("troopjs-core/component/emitter", function (run) {
 						throw err;
 					}
 				});
-				return foo.start().otherwise(function(error) {
+				return start.call(foo).otherwise(function(error) {
 					assert.same(error, err);
 				});
 			},

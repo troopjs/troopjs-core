@@ -28,18 +28,18 @@ define([
 	/**
 	 * Register signal
 	 * @event sig/register
-	 * @localdoc Triggered when something is registered via {@link #method-access}.
+	 * @localdoc Triggered when something is registered via {@link #register}.
 	 * @since 3.0
-	 * @param {String|Number} key
+	 * @param {String} key
 	 * @param {*} value
 	 */
 
 	/**
 	 * Un-register signal
 	 * @event sig/unregister
-	 * @localdoc Triggered when something is un-registered via {@link #method-access}.
+	 * @localdoc Triggered when something is un-registered via {@link #unregister}.
 	 * @since 3.0
-	 * @param {String|Number} key
+	 * @param {String} key
 	 * @param {*} value
 	 */
 
@@ -49,18 +49,22 @@ define([
 	 */
 	return Emitter.extend(function () {
 		/**
-		 * Registry key storage
+		 * Registry index
 		 * @private
 		 * @readonly
-		 * @property {Object[]} index_key
-		 * @property {String} index_key.key Entry key
-		 * @property {Number} index_key.index Entry index
-		 * @property {*} index_key.value Entry value
 		 */
 		this[INDEX] = {};
 	}, {
 		"displayName": "core/registry/emitter",
 
+		/**
+		 * Gets value by key
+		 * @param {String|RegExp} [key] key to filter by
+		 *  - If `String` get value exactly registered for key.
+		 *  - If `RegExp` get value where key matches.
+		 *  - If not provided all values registered are returned
+		 * @return {*|*[]} result(s)
+		 */
 		"get": function (key) {
 			var index = this[INDEX];
 			var result;
@@ -88,6 +92,13 @@ define([
 			return result;
 		},
 
+		/**
+		 * Registers value with key
+		 * @param {String} key Key
+		 * @param {*} value Value
+		 * @fires sig/register
+		 * @return {*} value registered
+		 */
 		"register": function (key, value) {
 			var me = this;
 			var index = me[INDEX];
@@ -109,6 +120,12 @@ define([
 			return value;
 		},
 
+		/**
+		 * Un-registers key
+		 * @param {String} key Key
+		 * @fires sig/unregister
+		 * @return {*} value unregistered
+		 */
 		"unregister": function (key) {
 			var me = this;
 			var index = me[INDEX];
