@@ -6,59 +6,16 @@ define([
 	"../config",
 	"./registry",
 	"./runner/sequence",
-	"./signal/start",
-	"./signal/finalize",
 	"../task/factory",
 	"mu-merge",
 	"troopjs-compose/decorator/around",
 	"when",
 	"poly/array"
-], function (Emitter, config, registry, sequence, start, finalize, taskFactory, merge, around, when) {
+], function (Emitter, config, registry, sequence, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
-	 * Imagine component as an object that has predefined life-cycle, with the following phases:
-	 *
-	 *   1. initialize
-	 *   1. initialized
-	 *   1. start
-	 *   1. started
-	 *   1. stop
-	 *   1. stopped
-	 *   1. finalize
-	 *   1. finalized
-	 *
-	 * Calls on {@link #start} or {@link #stop} method of the component will trigger any defined signal
-	 * handlers declared.
-	 *
-	 * 	var app = Component.extend({
-	 * 		"displayName": "my/component/app",
-	 *
-	 * 		// Signal handler for "start" phase
-	 * 		"sig/start": function start() {
-	 * 			// bind resize handler.
-	 * 			$(window).on('resize.app', $.proxy(this.onResize, this));
-	 * 		},
-	 *
-	 * 		// Signal handler for "finalize" phase
-	 * 		"sig/finalize": function finalize() {
-	 * 			// cleanup the handler.
-	 * 			$(window).off('resize.app');
-	 * 		},
-	 *
-	 * 		"onResize": function onResize(argument) {
-	 * 			// window resized.
-	 * 		}
-	 * 	});
-	 *
-	 * 	$.ready(function on_load() {
-	 * 		app.start();
-	 * 	});
-	 *
-	 * 	$(window).unload(function on_unload (argument) {
-	 * 	  app.end();
-	 * 	});
-	 *
+	 * Component emitter
 	 * @class core.component.emitter
 	 * @extend core.event.emitter
 	 * @mixin core.config
@@ -69,7 +26,6 @@ define([
 	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
 	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var CONFIGURATION = "configuration";
 	var RUNNER = "runner";
 	var HANDLERS = "handlers";
 	var HEAD = "head";
@@ -172,12 +128,8 @@ define([
 	 * Task signal
 	 * @event sig/task
 	 * @localdoc Triggered when this component starts a {@link #method-task}.
-	 * @param {Object} task Task
-	 * @param {Promise} task.promise The Promise that makes up of this task
-	 * @param {Object} task.context from which component the task is issued
-	 * @param {Date} task.started Task start date
-	 * @param {Date} task.finished Task completion date
-	 * @param {String} task.name Task name
+	 * @param {Promise} task Task
+	 * @param {String} name Task name
 	 * @return {Promise}
 	 */
 
@@ -238,12 +190,6 @@ define([
 	 * @fires sig/add
 	 */
 
-	// Add pragma for signals and events.
-	config.pragmas.push({
-		"pattern": /^(?:sig|one?)\/.+/,
-		"replace": "$&()"
-	});
-
 	/**
 	 * @method constructor
 	 * @inheritdoc
@@ -256,14 +202,6 @@ define([
 		specials.forEach(function (special) {
 			me.on(special[NAME], special[VALUE]);
 		});
-
-		/**
-		 * Configuration for this component, access via {@link #configure}
-		 * @private
-		 * @readonly
-		 * @property {Object} configuration
-		 */
-		me[CONFIGURATION] = {};
 	}, {
 		"displayName" : "core/component/base",
 
@@ -312,45 +250,6 @@ define([
 			return when.map(me[HANDLERS].reverse(), function (handlers) {
 				return me.off(handlers[TYPE]);
 			});
-		},
-
-		/**
-		 * Add to the component {@link #configuration configuration}, possibly merge with the existing one.
-		 *
-		 * 		var List = Component.extend({
-		 * 			"sig/start": function start() {
-		 * 				// configure the List.
-		 * 				this.configure({
-		 * 					"type": "list",
-		 * 					"cls": ["list"]
-		 * 				});
-		 * 			}
-		 * 		});
-		 * 		var Dropdown = List.extend({
-		 * 			"sig/start": function start() {
-		 * 				// configure the Dropdown.
-		 * 				this.configure({
-		 * 					"type": "dropdown",
-		 * 					"cls": ["dropdown"],
-		 * 					"shadow": true
-		 * 				});
-		 * 			}
-		 * 		});
-		 *
-		 * 		var dropdown = new Dropdown();
-		 *
-		 * 		// Overwritten: "dropdown"
-		 * 		print(dropdown.configuration.id);
-		 * 		// Augmented: ["list","dropdown"]
-		 * 		print(dropdown.configuration.cls);
-		 * 		// Added: true
-		 * 		print(dropdown.configuration.shadow);
-		 *
-		 * @param {...Object} [config] Config(s) to add.
-		 * @return {Object} The new configuration.
-		 */
-		"configure" : function (config) {
-			return merge.apply(this[CONFIGURATION], arguments);
 		},
 
 		/**
@@ -457,21 +356,6 @@ define([
 
 		/**
 		 * Schedule a new promise that runs on this component, sends a {@link #event-sig/task} once finished.
-		 *
-		 * **Note:** It's recommended to use **this method instead of an ad-hoc promise** to do async lift on this component,
-		 * since in additional to an ordinary promise, it also helps to track the context of any running promise,
-		 * including it's name, completion time and a given ID.
-		 *
-		 * 	var widget = Widget.create({
-		 * 		"sig/task" : function(task) {
-		 * 			print('task %s started at: %s, finished at: %s', task.name, task.started, task.finished);
-		 * 		}
-		 * 	});
-		 *
-		 * 	widget.task(function(resolve) {
-		 * 		$(this.$element).fadeOut(resolve);
-		 * 	}, 'animate');
-		 *
 		 * @param {Promise|Resolver} promiseOrResolver The task resolver.
 		 * @param {String} [name] Task name
 		 * @return {Promise}
@@ -483,26 +367,8 @@ define([
 			// Create task
 			var task = taskFactory.call(me, promiseOrResolver, name);
 
-			// Signal `TASK` and yield `task`
-			return me.emit(SIG_TASK, task).yield(task);
-		},
-
-		/**
-		 * Start the component life-cycle, sends out {@link #event-sig/initialize} and then {@link #event-sig/start}.
-		 * @param {...*} [args] arguments
-		 * @return {Promise}
-		 * @fires sig/initialize
-		 * @fires sig/start
-		 */
-		"start" : start,
-
-		/**
-		 * Stops the component life-cycle.
-		 * @param {...*} [args] arguments
-		 * @return {Promise}
-		 * @fires sig/stop
-		 * @fires sig/finalize
-		 */
-		"stop" : finalize
+			// Signal `SIG_TASK` and yield `task`
+			return me.emit(SIG_TASK, task, name).yield(task);
+		}
 	});
 });

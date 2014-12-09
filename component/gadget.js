@@ -3,11 +3,10 @@
  */
 define([
 	"./emitter",
-	"../config",
 	"./runner/pipeline",
 	"../pubsub/hub",
 	"when"
-],function (Emitter, config, pipeline, hub, when) {
+],function (Emitter, pipeline, hub, when) {
 	"use strict";
 
 	/**
@@ -55,18 +54,11 @@ define([
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var ARGS = "args";
+	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
 	var HUB = "hub";
 	var RE = new RegExp("^" + HUB + "/(.+)");
-
-	// Add pragma for HUB special
-	config.pragmas.push({
-		"pattern": /^hub(?::(memory))?\/(.+)/,
-		"replace": function ($0, $1, $2) {
-			return HUB + "(\"" + $2 + "\", " + !!$1 + ")";
-		}
-	});
 
 	/**
 	 * @method constructor
@@ -84,7 +76,7 @@ define([
 			var me = this;
 
 			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
-				return me.subscribe(special[ARGS][0], special[VALUE]);
+				return me.on(special[NAME], special[VALUE]);
 			});
 		},
 
@@ -103,12 +95,11 @@ define([
 				.map(function (special) {
 					var memory;
 					var result;
-					var topic = special[ARGS][0];
 
-					if (special[ARGS][1] === true && (memory = me.peek(topic, empty)) !== empty) {
+					if (special[ARGS][0] === true && (memory = hub.peek(special[TYPE], empty)) !== empty) {
 						// Redefine result
 						result = {};
-						result[TYPE] = HUB + "/" + topic;
+						result[TYPE] = special[NAME];
 						result[RUNNER] = pipeline;
 						result[CONTEXT] = me;
 						result[CALLBACK] = special[VALUE];
@@ -166,50 +157,6 @@ define([
 				// Unsubscribe from the hub
 				hub.unsubscribe(matches[1], _callback);
 			}
-		},
-
-		/**
-		 * Handles a component task
-		 * @inheritdoc #event-sig/task
-		 * @localdoc Publishes `task` on the {@link core.pubsub.hub hub} whenever a {@link #event-sig/task task} event is emitted
-		 * @return {Promise}
-		 * @template
-		 * @handler
-		 */
-		"sig/task" : function (task) {
-			return this.publish("task", task);
-		},
-
-		/**
-		 * @inheritdoc core.pubsub.hub#publish
-		 */
-		"publish" : function () {
-			return hub.publish.apply(hub, arguments);
-		},
-
-		/**
-		 * @chainable
-		 * @inheritdoc core.pubsub.hub#subscribe
-		 * @localdoc Subscribe to public events from this component, forcing the context of which to be this component.
-		 */
-		"subscribe" : function (event, callback, data) {
-			return this.on(HUB + "/" + event, callback, data);
-		},
-
-		/**
-		 * @chainable
-		 * @inheritdoc core.pubsub.hub#unsubscribe
-		 * @localdoc Unsubscribe from public events in context of this component.
-		 */
-		"unsubscribe" : function (event, callback) {
-			return this.off(HUB + "/" + event, callback);
-		},
-
-		/**
-		 * @inheritdoc core.pubsub.hub#peek
-		 */
-		"peek" : function (event, value) {
-			return hub.peek(event, value);
 		}
 	});
 });

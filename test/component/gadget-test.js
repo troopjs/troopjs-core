@@ -21,7 +21,12 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 		}
 	}
 
-	require( [ "troopjs-core/component/gadget"] , function (Gadget) {
+	require( [
+		"troopjs-core/component/gadget",
+		"troopjs-core/component/signal/start",
+		"troopjs-core/component/signal/finalize",
+		"troopjs-core/pubsub/hub"
+	] , function (Gadget, start, finalize, hub) {
 
 		run({
 			"publish/subscribe": {
@@ -60,7 +65,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						me.registerInstance(context);
 
 						// call the real subscribe
-						context.subscribe(topic, func);
+						context.on("hub/" + topic, func);
 
 						context[NAME_HANDLER].push({
 							topic: topic,
@@ -90,7 +95,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						for(var m = handlers.length; m--;){
 							var handler = handlers[m];
 
-							inst.unsubscribe(handler.topic, handler.func);
+							inst.off("hub/" + handler.topic, handler.func);
 						}
 
 						// pop out instance at last
@@ -102,7 +107,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 				"without exception when there is no subscriber" : function () {
 					var g1 = new Gadget();
 
-					return g1.publish(TOPIC).then(function() {
+					return hub.publish(TOPIC).then(function() {
 						assert(true);
 					});
 				},
@@ -118,7 +123,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						assert(test);
 					});
 
-					return g1.publish(TOPIC, true);
+					return hub.publish(TOPIC, true);
 				},
 
 				"with args" : function () {
@@ -128,7 +133,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						allSame(arguments, TEST_ARGS);
 					});
 
-					return g1.publish.apply(g1, APPLY_ARGS);
+					return hub.publish.apply(g1, APPLY_ARGS);
 				},
 
 				"multiple times and in order" : function () {
@@ -145,7 +150,7 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						allSame(arguments, TEST_ARGS);
 					});
 
-					return g1.publish.apply(g1, APPLY_ARGS);
+					return hub.publish.apply(hub, APPLY_ARGS);
 				},
 
 				"cross gadget" : function () {
@@ -157,8 +162,75 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 						allSame(arguments, TEST_ARGS);
 					});
 
-					return g2.publish.apply(g2, APPLY_ARGS);
+					return hub.publish.apply(hub, APPLY_ARGS);
 				}
+			},
+
+			"publish/subscribe - matches context": function () {
+
+				var count = 0;
+				var g1 = Gadget.create({
+					'hub/foo': function () {
+						count++;
+						assert.same(g1, this);
+					}
+				});
+
+				var g2 = Gadget.create({
+					'hub/foo': function () {
+						count++;
+						assert.same(g2, this);
+					}
+				});
+
+				return start.call(g1).then(function () {
+					return start.call(g2).then(function () {
+						return hub.publish('foo').then(function () {
+							assert.same(2, count);
+						});
+					})
+				});
+			},
+
+			"publish/subscribe - memory" : function() {
+				var spy1 = this.spy();
+				var spy2 = this.spy();
+
+				var g1 = Gadget.create({
+					"hub/foo/bar(true)": function() {
+						spy1.apply(spy1,arguments);
+					},
+					"hub/foo/bar": function() {
+						spy2.apply(spy1, arguments);
+					}
+				});
+
+				return hub.publish("foo/bar", "foo", "bar").then(function() {
+					// None of them should be called because component not yet started.
+					refute.called(spy1);
+					refute.called(spy2);
+
+					return start.call(g1).then(function() {
+						// Only the handler declared with memory if is called.
+						assert.calledWithExactly(spy1, "foo", "bar");
+						refute.called(spy2);
+					});
+				});
+			},
+
+			"publish after called .off": function() {
+				var foo = this.spy();
+				var g1 = Gadget.create({
+					'hub/foo': function() {
+						foo();
+					}
+				});
+				return start.call(g1).then(function() {
+					g1.off("hub/foo");
+					return hub.publish("foo").then(function() {
+						refute.called(foo);
+					})
+				});
 			},
 
 			"on/off/emit": {
@@ -211,75 +283,6 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 
 					return g1.emit.apply(g1, APPLY_ARGS);
 				}
-			},
-
-			"publish/subscribe - matches context": function () {
-
-				var count = 0;
-				var g1 = Gadget.create({
-					'hub/foo': function () {
-						count++;
-						assert.same(g1, this);
-					}
-				});
-
-				var g2 = Gadget.create({
-					'hub/foo': function () {
-						count++;
-						assert.same(g2, this);
-					}
-				});
-
-				var g3 = Gadget.create();
-
-				return g1.start().then(function () {
-					return g2.start().then(function () {
-						return g3.publish('foo').then(function () {
-							assert.same(2, count);
-						});
-					})
-				});
-			},
-
-			"publish/subscribe - memory" : function() {
-				var spy1 = this.spy();
-				var spy2 = this.spy();
-
-				var g1 = Gadget.create({
-					"hub:memory/foo/bar": function() {
-						spy1.apply(spy1,arguments);
-					},
-					"hub/foo/bar": function() {
-						spy2.apply(spy1, arguments);
-					}
-				});
-
-				return g1.publish("foo/bar", "foo", "bar").then(function() {
-					// None of them should be called because component not yet started.
-					refute.called(spy1);
-					refute.called(spy2);
-
-					return g1.start().then(function() {
-						// Only the handler declared with memory if is called.
-						assert.calledWithExactly(spy1, "foo", "bar");
-						refute.called(spy2);
-					});
-				});
-			},
-
-			"publish after called .off": function() {
-				var foo = this.spy();
-				var g1 = Gadget.create({
-					'hub/foo': function() {
-						foo();
-					}
-				});
-				return g1.start().then(function() {
-					g1.unsubscribe("foo");
-					return g1.publish("foo").then(function() {
-						refute.called(foo);
-					})
-				});
 			}
 		});
 	});
