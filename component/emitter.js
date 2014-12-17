@@ -355,10 +355,7 @@ define([
 		}),
 
 		/**
-		 * Schedule a new promise that runs on this component, sends a {@link #event-sig/task} once finished.
-		 * @param {Promise|Resolver} promiseOrResolver The task resolver.
-		 * @param {String} [name] Task name
-		 * @return {Promise}
+		 * @inheritdoc core.task.factory#constructor
 		 * @fires sig/task
 		 */
 		"task" : function (promiseOrResolver, name) {
