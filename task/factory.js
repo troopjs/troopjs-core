@@ -18,7 +18,7 @@ define([
 	/**
 	 * Creates and registers a task
 	 * @method constructor
-	 * @param {Promise|Resolver} promiseOrResolver The task resolver.
+	 * @param {Promise|Function} promiseOrResolver The task resolver.
 	 * @param {String} [name=task] Task name
 	 * @return {Promise}
 	 */
