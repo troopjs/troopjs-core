@@ -5,7 +5,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
 
-	require( [ "troopjs-core/pubsub/hub", "troopjs-core/pubsub/runner/sequence", "jquery", "when", "when/delay" ] , function (hub, sequence, $, when, delay) {
+	require( [ "troopjs-core/pubsub/hub", "troopjs-core/pubsub/runner/sequence", "jquery", "when/when", "when/delay" ] , function (hub, sequence, $, when, delay) {
 
 		run({
 			"setUp" : function () {

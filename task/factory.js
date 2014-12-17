@@ -3,7 +3,7 @@
  */
 define([
 	"./registry",
-	"when"
+	"when/when"
 ], function (registry, when) {
 	"use strict";
 

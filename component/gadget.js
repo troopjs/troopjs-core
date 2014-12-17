@@ -5,7 +5,7 @@ define([
 	"./emitter",
 	"./runner/pipeline",
 	"../pubsub/hub",
-	"when"
+	"when/when"
 ],function (Emitter, pipeline, hub, when) {
 	"use strict";
 

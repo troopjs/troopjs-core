@@ -1,7 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([ "when" ], function (when) {
+define([ "when/when" ], function (when) {
 	"use strict";
 
 	/**

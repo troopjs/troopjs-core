@@ -4,7 +4,7 @@
 define([
 	"./stop",
 	"../../config",
-	"when"
+	"when/when"
 ], function (stop, config, when) {
 	var ARRAY_PUSH = Array.prototype.push;
 	var PHASE = "phase";
