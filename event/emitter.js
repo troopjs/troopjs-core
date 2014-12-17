@@ -3,8 +3,9 @@
  */
 define([
 	"../composition",
+	"./handler",
 	"./runner/sequence"
-], function (Composition, sequence) {
+], function (Composition, Handler, sequence) {
 	"use strict";
 
 	/**
@@ -35,62 +36,12 @@ define([
 	var RUNNER = "runner";
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
-	var DATA = "data";
 	var HEAD = "head";
 	var TAIL = "tail";
 	var NEXT = "next";
 	var LIMIT = "limit";
 	var ON = "on";
 	var OFF = "off";
-
-	/**
-	 * Creates a new handler
-	 * @inheritdoc #on
-	 * @return {core.event.emitter.handler} Handler
-	 * @ignore
-	 */
-	function createHandler(type, callback, data) {
-		var me = this;
-		var count = 0;
-
-		var handler = function () {
-			// Let `limit` be `handler[LIMIT]`
-			var limit = handler[LIMIT];
-
-			// Get result from execution of `handler[CALLBACK]`
-			var result = handler[CALLBACK].apply(this, arguments);
-
-			// If there's a `limit` and `++count` is greater or equal to it `off` the callback
-			if (limit !== 0 && ++count >= limit) {
-				me.off(type, callback);
-			}
-
-			// Return
-			return result;
-		};
-
-		if (OBJECT_TOSTRING.call(callback) === TOSTRING_FUNCTION) {
-			handler[CALLBACK] = callback;
-			handler[CONTEXT] = me;
-			handler[LIMIT] = 0;
-		}
-		else {
-			handler[CALLBACK] = callback[CALLBACK];
-			handler[CONTEXT] = callback[CONTEXT] || me;
-			handler[LIMIT] = callback[LIMIT] || 0;
-
-			if (callback.hasOwnProperty(ON)) {
-				handler[ON] = callback[ON];
-			}
-			if (callback.hasOwnProperty(OFF)) {
-				handler[OFF] = callback[OFF];
-			}
-		}
-
-		handler[DATA] = data;
-
-		return handler;
-	}
 
 	/**
 	 * @method constructor
@@ -101,7 +52,7 @@ define([
 		 * Handlers attached to this component, addressable either by key or index
 		 * @private
 		 * @readonly
-		 * @property {core.event.emitter.handler[]} handlers
+		 * @property {core.event.handler[]} handlers
 		 */
 		this[HANDLERS] = [];
 	}, {
@@ -116,10 +67,10 @@ define([
 		 * @param {Object} [callback.context=this] Callback context.
 		 * @param {Number} [callback.limit=0] Callback limit.
 		 * @param {Function} [callback.on=undefined] Will be called once this handler is added to the handlers list.
-		 * @param {core.event.emitter.handler} [callback.on.handler] The handler that was just added.
+		 * @param {core.event.handler} [callback.on.handler] The handler that was just added.
 		 * @param {Object} [callback.on.handlers] The list of handlers the handler was added to.
 		 * @param {Function} [callback.off=undefined] Will be called once this handler is removed from the handlers list.
-		 * @param {core.event.emitter.handler} [callback.off.handler] The handler that was just removed.
+		 * @param {core.event.handler} [callback.off.handler] The handler that was just removed.
 		 * @param {Object} [callback.off.handlers] The list of handlers the handler was removed from.
 		 * @param {*} [data] Handler data
 		 */
@@ -134,7 +85,7 @@ define([
 			}
 
 			// Create new handler
-			handler = createHandler.call(me, type, callback, data);
+			handler = new Handler(me, type, callback, data);
 
 			// Have handlers
 			if ((handlers = me[HANDLERS][type]) !== UNDEFINED) {

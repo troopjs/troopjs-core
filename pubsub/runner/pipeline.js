@@ -17,9 +17,6 @@ define([
 	 */
 
 	var UNDEFINED;
-	var FUNCTION_PROTO = Function.prototype;
-	var APPLY = FUNCTION_PROTO.apply;
-	var CALL = FUNCTION_PROTO.call;
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var ARRAY_SLICE = Array.prototype.slice;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
@@ -62,41 +59,45 @@ define([
 		return when
 			// Reduce `candidates`
 			.reduce(candidates, function (current, candidate) {
-				// Let `context` be `candidate[CONTEXT]`
-				var context = candidate[CONTEXT];
+				// Let `candidate_context` be `candidate[CONTEXT]`
+				var candidate_context = candidate[CONTEXT];
 
-				// Return early if `context` is `UNDEFINED` or matches a blocked phase
-				if (context !== UNDEFINED && SKIP.test(context[PHASE])) {
+				// Return early if `candidate_context[PHASE]` matches a blocked phase
+				if (candidate_context !== UNDEFINED && SKIP.test(candidate_context[PHASE])) {
 					return current;
 				}
 
-				// Get object type
-				var type = OBJECT_TOSTRING.call(current);
+				// Run `candidate` passing `args`
+				// Pass to `when` to (potentially) update `result`
+				return when(candidate.run(current), function (result) {
+					// If `result` is `UNDEFINED` ...
+					if (result === UNDEFINED) {
+						// ... return `current` ...
+						return current;
+					}
 
-				// Calculate method depending on type
-				var method = (type === TOSTRING_ARRAY || type === TOSTRING_ARGUMENTS)
-					? APPLY
-					: CALL;
+					// Detect `result` type
+					switch (OBJECT_TOSTRING.call(result)) {
+						// `arguments` should be converted to an array
+						case TOSTRING_ARGUMENTS:
+							return ARRAY_SLICE.call(result);
+							break;
 
-				// Execute `candidate` using `method` in `context` passing `current`
-				return when(method.call(candidate, context, current), function (result) {
-					// Return result defaulting to `current`
-					return result === UNDEFINED
-						? current
-						: result;
+						// `array` can be passed as-is
+						case TOSTRING_ARRAY:
+							return result;
+							break;
+
+						// everything else should be wrapped in an array
+						default:
+							return [ result ];
+					}
 				});
 			}, args)
-			// Convert and remember result
-			.then(function (result) {
-				// Get object type
-				var type = OBJECT_TOSTRING.call(result);
-
-				// Convert, store and return `result` in `handlers[MEMORY]`
-				return handlers[MEMORY] = type === TOSTRING_ARRAY
-					? result
-					: type === TOSTRING_ARGUMENTS
-						? ARRAY_SLICE.call(result)
-						: [ result ];
+			// Memorize
+			.tap(function (result) {
+				// Store `result` in `handlers[MEMORY]`
+				handlers[MEMORY] = result;
 			});
 	}
 });

@@ -55,21 +55,21 @@ define([
 		return when
 			// Reduce `candidates`
 			.reduce(candidates, function (results, candidate, index) {
-				// Let `context` be `candidate[CONTEXT]`
-				var context = candidate[CONTEXT];
+				// Let `candidate_context` be `candidate[CONTEXT]`
+				var candidate_context = candidate[CONTEXT];
 
-				// Return early if `context` is `UNDEFINED` or matches a blocked phase
-				if (context !== UNDEFINED && SKIP.test(context[PHASE])) {
+				// Return early if `candidate_context[PHASE]` matches a blocked phase
+				if (candidate_context !== UNDEFINED && SKIP.test(candidate_context[PHASE])) {
 					return results;
 				}
 
-				// Apply `candidate` with `candidate[CONTEXT]` passing `args`
-				// Pass result from apply to `when` and onwards to store in `results`
-				return when(candidate.apply(candidate[CONTEXT], args), function (result) {
+				// Run `candidate` passing `args`
+				// Pass result to `when` and onwards to store in `results`
+				return when(candidate.run(args), function (result) {
 					results[index] = result;
 				})
-					// `yield` results for next execution
-					.yield(results);
+				// yield `results` for next execution
+				.yield(results);
 			}, candidates)
 			// Remember `results`
 			.tap(function (results) {

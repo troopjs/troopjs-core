@@ -15,7 +15,6 @@ define([ "when" ], function (when) {
 	var UNDEFINED;
 	var HEAD = "head";
 	var NEXT = "next";
-	var CONTEXT = "context";
 
 	/**
 	 * @method constructor
@@ -35,12 +34,12 @@ define([ "when" ], function (when) {
 
 		// Reduce `candidates`
 		return when.reduce(candidates, function (results, candidate, index) {
-			// Apply `candidate[CALLBACK]` with `candidate[CONTEXT]` passing `args`
-			// Pass result from apply to `when` and onwards to store in `results`
-			return when(candidate.apply(candidate[CONTEXT], args), function (result) {
+			// Run `candidate` passing `args`
+			// Pass result to `when` and onwards to store in `results`
+			return when(candidate.run(args), function (result) {
 				results[index] = result;
 			})
-			// `yield` results for next execution
+			// yield `results` for next execution
 			.yield(results);
 		}, candidates);
 	}
