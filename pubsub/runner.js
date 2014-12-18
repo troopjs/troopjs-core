@@ -1,12 +1,16 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([ "when/when" ], function (when) {
+define([
+	"../config",
+	"when/when"
+], function (config, when) {
 	"use strict";
 
 	/**
-	 * @class core.component.runner.pipeline
-	 * @implement core.event.runner
+	 * @class core.pubsub.runner
+	 * @mixin Function
+	 * @mixin core.config
 	 * @private
 	 * @static
 	 * @alias feature.runner
@@ -14,18 +18,21 @@ define([ "when/when" ], function (when) {
 
 	var UNDEFINED;
 	var OBJECT_TOSTRING = Object.prototype.toString;
+	var ARRAY_SLICE = Array.prototype.slice;
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
-	var ARRAY_SLICE = Array.prototype.slice;
+	var SKIP = config.phase.skip;
 	var CONTEXT = "context";
 	var CALLBACK = "callback";
 	var HEAD = "head";
 	var NEXT = "next";
+	var PHASE = "phase";
+	var MEMORY = "memory";
 
 	/**
 	 * @method constructor
-	 * @inheritdoc
-	 * @localdoc Run event handlers **asynchronously** in "pipeline", passing the resolved return value (unless it's undefined) of the previous listen to the next handler as arguments.
+	 * @inheritdoc core.event.runner#constructor
+	 * @localdoc Runner that filters and executes candidates in pipeline without overlap
 	 * @return {Promise}
 	 */
 	return function pipeline(event, handlers, args) {
@@ -46,13 +53,20 @@ define([ "when/when" ], function (when) {
 				continue;
 			}
 
-			// Add to candidates
 			candidates[candidatesCount++] = candidate;
 		}
 
 		return when
 			// Reduce `candidates`
 			.reduce(candidates, function (current, candidate) {
+				// Let `candidate_context` be `candidate[CONTEXT]`
+				var candidate_context = candidate[CONTEXT];
+
+				// Return early if `candidate_context[PHASE]` matches a blocked phase
+				if (candidate_context !== UNDEFINED && SKIP.test(candidate_context[PHASE])) {
+					return current;
+				}
+
 				// Run `candidate` passing `args`
 				// Pass to `when` to (potentially) update `result`
 				return when(candidate.run(current), function (result) {
@@ -79,6 +93,11 @@ define([ "when/when" ], function (when) {
 							return [ result ];
 					}
 				});
-			}, args);
+			}, args)
+			// Memorize
+			.tap(function (result) {
+				// Store `result` in `handlers[MEMORY]`
+				handlers[MEMORY] = result;
+			});
 	}
 });

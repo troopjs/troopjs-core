@@ -5,7 +5,7 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 	var assert = buster.referee.assert;
 	var refute = buster.referee.refute;
 
-	require( [ "troopjs-core/pubsub/hub", "troopjs-core/pubsub/runner/sequence", "jquery", "when/when", "when/delay" ] , function (hub, sequence, $, when, delay) {
+	require( [ "troopjs-core/pubsub/hub", "jquery", "when/when", "when/delay" ] , function (hub, $, when, delay) {
 
 		run({
 			"setUp" : function () {
@@ -96,32 +96,6 @@ buster.testCase("troopjs-core/pubsub/hub", function (run) {
 						refute.defined(arg2);
 					})
 					.publish("foo/bar", foo);
-			},
-
-			"subscribe/publish - using explicit sequence runner": function () {
-				var foo = "FOO";
-				var bar = "BAR";
-				var count = 0;
-
-				return hub
-					.subscribe("foo/bar", function (arg) {
-						assert.same(foo, arg);
-						count++;
-						return [foo, bar];
-					})
-					.subscribe("foo/bar", function (arg1, arg2) {
-						// Arguments received are to be same as the previous one.
-						assert.same(foo, arg1);
-						refute.defined(arg2);
-						count++;
-					})
-					.emit({
-						"type" : "foo/bar",
-						"runner" : sequence
-					}, foo)
-					.then(function () {
-						assert.same(2, count);
-					});
 			},
 
 			"bug out in first hub subscriber": function() {

@@ -4,22 +4,13 @@
 define([
 	"../composition",
 	"./handler",
-	"./runner/sequence"
-], function (Composition, Handler, sequence) {
+	"./runner"
+], function (Composition, Handler, runner) {
 	"use strict";
 
 	/**
 	 * This event module is heart of all TroopJS event-based whistles, from the API names it's aligned with Node's events module,
-	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism, which makes it supports for both:
-	 *
-	 *  - **synchronous event**: all your event handlers are run in a single loop.
-	 *  - **async event with promise**: you can return a promise where the next handler will be called upon the
-	 *  completion of that promise.
-	 *
-	 * Event runner can even determinate the **parameters passing** strategy among handlers, which forms in two flavours:
-	 *
-	 *  - sequence: where each handler receives the arguments passed to {@link #method-emit}.
-	 *  - pipeline: where a handler receives the return value of the previous one.
+	 * while behind the regularity it's powered by a highly customizable **event runner** mechanism.
 	 *
 	 * @class core.event.emitter
 	 * @extend core.composition
@@ -243,41 +234,41 @@ define([
 		 */
 		"emit" : function (event, args) {
 			var me = this;
-			var type = event;
+			var eventType = event;
+			var eventRunner;
 			var handlers;
-			var runner;
 
 			// If event is a plain string, convert to object with props
 			if (OBJECT_TOSTRING.call(event) === TOSTRING_STRING) {
 				// Recreate event
 				event = {};
-				event[RUNNER] = runner = sequence;
-				event[TYPE] = type;
+				event[RUNNER] = eventRunner = runner;
+				event[TYPE] = eventType;
 			}
 			// If event duck-types an event object we just override or use defaults
 			else if (TYPE in event) {
-				event[RUNNER] = runner = event[RUNNER] || sequence;
-				type = event[TYPE];
+				eventRunner = event[RUNNER] = event[RUNNER] || runner;
+				eventType = event[TYPE];
 			}
 			// Otherwise something is wrong
 			else {
 				throw Error("first argument has to be of type '" + TOSTRING_STRING + "' or have a '" + TYPE + "' property");
 			}
 
-			// Get handlers[type] as handlers
-			if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-				// Get HANDLERS
+			// Let `handlers` be `handlers[eventType]`
+			if ((handlers = me[HANDLERS][eventType]) === UNDEFINED) {
+				// Let `handlers` be `me[HANDLERS]`
 				handlers = me[HANDLERS];
 
 				// Create type handlers
-				handlers = handlers[handlers[LENGTH]] = handlers[type] = {};
+				handlers = handlers[handlers[LENGTH]] = handlers[eventType] = {};
 
 				// Prepare handlers
-				handlers[TYPE] = type;
+				handlers[TYPE] = eventType;
 			}
 
-			// Return result from runner
-			return runner.call(me, event, handlers, ARRAY_SLICE.call(arguments, 1));
+			// Return result from `eventRunner`
+			return eventRunner.call(me, event, handlers, ARRAY_SLICE.call(arguments, 1));
 		}
 	});
 });

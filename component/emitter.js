@@ -5,13 +5,13 @@ define([
 	"../event/emitter",
 	"../config",
 	"./registry",
-	"./runner/sequence",
+	"./runner",
 	"../task/factory",
 	"mu-merge/main",
 	"troopjs-compose/decorator/around",
 	"when/when",
 	"poly/array"
-], function (Emitter, config, registry, sequence, taskFactory, merge, around, when) {
+], function (Emitter, config, registry, runner, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
@@ -277,7 +277,7 @@ define([
 
 					// Initialize event
 					event = {};
-					event[RUNNER] = sequence;
+					event[RUNNER] = runner;
 
 					// If this is the first handler signal SIG_SETUP
 					if (!(HEAD in handlers)) {
@@ -329,7 +329,7 @@ define([
 
 					// Initialize event
 					event = {};
-					event[RUNNER] = sequence;
+					event[RUNNER] = runner;
 
 					// Signal SIG_REMOVE
 					event[TYPE] = SIG_REMOVE;
