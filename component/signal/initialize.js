@@ -3,7 +3,7 @@
  */
 define([
 	"../../config",
-	"when"
+	"when/when"
 ], function (config, when) {
 	var UNDEFINED;
 	var ARRAY_PUSH = Array.prototype.push;

@@ -4,7 +4,7 @@ buster.testCase("troopjs-core/event/emitter", function (run) {
 
 	var assert = buster.referee.assert;
 
-	require( [ "troopjs-core/event/emitter", "when", "when/delay" ] , function (Emitter, when, delay) {
+	require( [ "troopjs-core/event/emitter", "when/when", "when/delay" ] , function (Emitter, when, delay) {
 
 		run({
 			"on/emit" : function () {

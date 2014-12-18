@@ -3,7 +3,7 @@
  */
 define([
 	"../../config",
-	"when"
+	"when/when"
 ], function (config, when) {
 	"use strict";
 

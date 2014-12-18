@@ -4,7 +4,7 @@
 define([
 	"module",
 	"troopjs-compose/config",
-	"mu-merge"
+	"mu-merge/main"
 ], function (module, config, merge) {
 	"use strict";
 

@@ -7,9 +7,9 @@ define([
 	"./registry",
 	"./runner/sequence",
 	"../task/factory",
-	"mu-merge",
+	"mu-merge/main",
 	"troopjs-compose/decorator/around",
-	"when",
+	"when/when",
 	"poly/array"
 ], function (Emitter, config, registry, sequence, taskFactory, merge, around, when) {
 	"use strict";
