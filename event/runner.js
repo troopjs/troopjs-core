@@ -25,8 +25,9 @@ define([ "when/when" ], function (when) {
 	 * @param {Function} event.callback Event callback
 	 * @param {Object} handlers List of handlers
 	 * @param {Array} args Initial arguments
-	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
-	 * @return {Promise}
+	 * @localdoc
+	 * - Run event handlers asynchronously passing each handler `args`.
+	 * @return {Promise} Promise for `[*]`
 	 */
 	return function sequence(event, handlers, args) {
 		var candidates = [];

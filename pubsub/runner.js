@@ -32,8 +32,12 @@ define([
 	/**
 	 * @method constructor
 	 * @inheritdoc core.event.runner#constructor
-	 * @localdoc Runner that filters and executes candidates in pipeline without overlap
-	 * @return {Promise}
+	 * @localdoc
+	 * - Skips handlers who's {@link core.event.handler#context context}.{@link core.component.gadget#property-phase phase} matches {@link core.config.phase#skip}.
+	 * - Executes handlers passing each handler the result from the previous.
+	 * - If a handler returns `undefined` the result from the previous is used.
+	 * - When all handlers are completed the end result is memorized on `handlers`
+	 * @return {Promise} Promise for `[*]`
 	 */
 	return function pipeline(event, handlers, args) {
 		var context = event[CONTEXT];

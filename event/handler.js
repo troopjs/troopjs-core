@@ -30,7 +30,7 @@ define(function () {
 
 	/**
 	 * Handler context
-	 * @property {Object} context
+	 * @property {core.event.emitter} context
 	 */
 
 	/**

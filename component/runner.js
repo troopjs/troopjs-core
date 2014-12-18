@@ -22,8 +22,13 @@ define([ "poly/array" ], function () {
 	/**
 	 * @method constructor
 	 * @inheritdoc core.event.runner#constructor
-	 * @localdoc Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
-	 * @return {*[]} Result from each executed handler
+	 * @localdoc
+	 * - Runs event handlers synchronously passing each handler `args`.
+	 * - Anything returned from a handler except `undefined` will be stored as `result`
+	 * - If a handler returns `undefined` the current `result` will be kept
+	 * - If a handler returns `false` no more handlers will be executed.
+	 *
+	 * @return {*} Stored `result`
 	 */
 	return function sequence(event, handlers, args) {
 		var context = event[CONTEXT];

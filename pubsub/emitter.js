@@ -9,7 +9,7 @@ define([
 	"use strict";
 
 	/**
-	 * A specialized version of {@link core.event.emitter} for memorized events and {@link core.component.gadget#property-phase} protection.
+	 * A specialized version of {@link core.event.emitter} for memorized events and {@link core.component.gadget#property-phase phase} protection.
 	 *
 	 * ## Memorized emitting
 	 *
