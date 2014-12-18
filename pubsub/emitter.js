@@ -3,13 +3,13 @@
  */
 define([
 	"../event/emitter",
-	"./runner/pipeline",
+	"./runner",
 	"troopjs-compose/decorator/from"
-], function (Emitter, pipeline, from) {
+], function (Emitter, runner, from) {
 	"use strict";
 
 	/**
-	 * A specialized version of {@link core.event.emitter emitter} for memorized events.
+	 * A specialized version of {@link core.event.emitter} for memorized events and {@link core.component.gadget#property-phase} protection.
 	 *
 	 * ## Memorized emitting
 	 *
@@ -84,7 +84,7 @@ define([
 			// Prepare event object
 			var event = {};
 			event[TYPE] = type;
-			event[RUNNER] = pipeline;
+			event[RUNNER] = runner;
 
 			// Slice `arguments`
 			var args = ARRAY_SLICE.call(arguments);

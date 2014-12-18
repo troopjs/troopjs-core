@@ -3,10 +3,10 @@
  */
 define([
 	"./emitter",
-	"./runner/pipeline",
 	"../pubsub/hub",
+	"../pubsub/runner",
 	"when/when"
-],function (Emitter, pipeline, hub, when) {
+],function (Emitter, hub, runner, when) {
 	"use strict";
 
 	/**
@@ -100,7 +100,7 @@ define([
 						// Redefine result
 						result = {};
 						result[TYPE] = special[NAME];
-						result[RUNNER] = pipeline;
+						result[RUNNER] = runner;
 						result[CONTEXT] = me;
 						result[CALLBACK] = special[VALUE];
 						result = [ result ].concat(memory);

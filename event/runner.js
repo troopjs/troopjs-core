@@ -5,8 +5,8 @@ define([ "when/when" ], function (when) {
 	"use strict";
 
 	/**
-	 * @class core.event.runner.sequence
-	 * @implement core.event.runner
+	 * @class core.event.runner
+	 * @mixin Function
 	 * @private
 	 * @static
 	 * @alias feature.runner
@@ -17,8 +17,14 @@ define([ "when/when" ], function (when) {
 	var NEXT = "next";
 
 	/**
+	 * Run event handlers.
 	 * @method constructor
-	 * @inheritdoc
+	 * @abstract
+	 * @param {Object} event Event object
+	 * @param {String} event.context Event context
+	 * @param {Function} event.callback Event callback
+	 * @param {Object} handlers List of handlers
+	 * @param {Array} args Initial arguments
 	 * @localdoc Run event handlers **asynchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @return {Promise}
 	 */

@@ -5,8 +5,8 @@ define([ "poly/array" ], function () {
 	"use strict";
 
 	/**
-	 * @class core.component.runner.sequence
-	 * @implement core.event.runner
+	 * @class core.component.runner
+	 * @mixin Function
 	 * @private
 	 * @static
 	 * @alias feature.runner
@@ -21,7 +21,7 @@ define([ "poly/array" ], function () {
 
 	/**
 	 * @method constructor
-	 * @inheritdoc
+	 * @inheritdoc core.event.runner#constructor
 	 * @localdoc Run event handlers **synchronously** in "sequence", passing to each handler the same arguments from emitting.
 	 * @return {*[]} Result from each executed handler
 	 */
