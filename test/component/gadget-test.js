@@ -1,5 +1,9 @@
-/*globals buster:false*/
-buster.testCase("troopjs-core/component/gadget", function (run) {
+define( [
+	"../../component/gadget",
+	"../../component/signal/start",
+	"../../component/signal/finalize",
+	"../../pubsub/hub"
+], function (Gadget, start, finalize, hub) {
 	"use strict";
 
 	var assert = buster.referee.assert;
@@ -21,269 +25,261 @@ buster.testCase("troopjs-core/component/gadget", function (run) {
 		}
 	}
 
-	require( [
-		"troopjs-core/component/gadget",
-		"troopjs-core/component/signal/start",
-		"troopjs-core/component/signal/finalize",
-		"troopjs-core/pubsub/hub"
-	] , function (Gadget, start, finalize, hub) {
+	buster.testCase("troopjs-core/component/gadget", {
+		"publish/subscribe": {
+			setUp: function(){
+				var me = this;
 
-		run({
-			"publish/subscribe": {
-				setUp: function(){
-					var me = this;
+				var insts = me.instances = [];
 
-					var insts = me.instances = [];
+				me.registerInstance = function(instance){
+					var found = false;
+					var l;
 
-					me.registerInstance = function(instance){
-						var found = false;
-						var l;
-
-						for(l = insts.length; l--;){
-							var inst = insts[l];
-
-							if (inst === instance){
-								found = true;
-								break;
-							}
-						}
-
-						if (found){
-							return;
-						}
-
-						me.instances.push(instance);
-					};
-
-					// helper to subscribe topic,
-					// all subscription will be cleaned in teardown
-					me.subscribe = function(context, topic, func){
-						if (!context[NAME_HANDLER]){
-							context[NAME_HANDLER] = [];
-						}
-
-						me.registerInstance(context);
-
-						// call the real subscribe
-						context.on("hub/" + topic, func);
-
-						context[NAME_HANDLER].push({
-							topic: topic,
-							func: func
-						});
-
-						return me;
-
-					};
-				},
-
-				tearDown: function(){
-					var me = this;
-					var insts = me.instances;
-
-					// clear up all subscription
-					for(var l = insts.length; l--;){
-
+					for(l = insts.length; l--;){
 						var inst = insts[l];
 
-						if (!inst[NAME_HANDLER]){
-							continue;
+						if (inst === instance){
+							found = true;
+							break;
 						}
-
-						var handlers = inst[NAME_HANDLER];
-
-						for(var m = handlers.length; m--;){
-							var handler = handlers[m];
-
-							inst.off("hub/" + handler.topic, handler.func);
-						}
-
-						// pop out instance at last
-						insts.pop();
-
 					}
-				},
-				// POSITIVE TESTS
-				"without exception when there is no subscriber" : function () {
-					var g1 = new Gadget();
 
-					return hub.publish(TOPIC).then(function() {
-						assert(true);
-					});
-				},
+					if (found){
+						return;
+					}
 
-				"different topics should not interfere with each other": function(){
-					var g1 = new Gadget();
+					me.instances.push(instance);
+				};
 
-					this
-					.subscribe(g1, TOPIC + "diff", function(){
-						assert(false);
-					})
-					.subscribe(g1, TOPIC, function(test){
-						assert(test);
-					});
+				// helper to subscribe topic,
+				// all subscription will be cleaned in teardown
+				me.subscribe = function(context, topic, func){
+					if (!context[NAME_HANDLER]){
+						context[NAME_HANDLER] = [];
+					}
 
-					return hub.publish(TOPIC, true);
-				},
+					me.registerInstance(context);
 
-				"with args" : function () {
-					var g1 = new Gadget();
+					// call the real subscribe
+					context.on("hub/" + topic, func);
 
-					this.subscribe(g1, TOPIC, function(){
-						allSame(arguments, TEST_ARGS);
+					context[NAME_HANDLER].push({
+						topic: topic,
+						func: func
 					});
 
-					return hub.publish.apply(g1, APPLY_ARGS);
-				},
+					return me;
 
-				"multiple times and in order" : function () {
-					var g1 = new Gadget();
+				};
+			},
 
-					var spy = this.spy();
+			tearDown: function(){
+				var me = this;
+				var insts = me.instances;
 
-					this
-					.subscribe(g1, TOPIC, spy)
-					.subscribe(g1, TOPIC, function(){
+				// clear up all subscription
+				for(var l = insts.length; l--;){
 
-						assert.called(spy);
+					var inst = insts[l];
 
-						allSame(arguments, TEST_ARGS);
-					});
+					if (!inst[NAME_HANDLER]){
+						continue;
+					}
 
-					return hub.publish.apply(hub, APPLY_ARGS);
-				},
+					var handlers = inst[NAME_HANDLER];
 
-				"cross gadget" : function () {
+					for(var m = handlers.length; m--;){
+						var handler = handlers[m];
 
-					var g1 = new Gadget();
-					var g2 = new Gadget();
+						inst.off("hub/" + handler.topic, handler.func);
+					}
 
-					this.subscribe(g1, TOPIC, function(){
-						allSame(arguments, TEST_ARGS);
-					});
+					// pop out instance at last
+					insts.pop();
 
-					return hub.publish.apply(hub, APPLY_ARGS);
 				}
 			},
+			// POSITIVE TESTS
+			"without exception when there is no subscriber" : function () {
+				var g1 = new Gadget();
 
-			"publish/subscribe - matches context": function () {
-
-				var count = 0;
-				var g1 = Gadget.create({
-					'hub/foo': function () {
-						count++;
-						assert.same(g1, this);
-					}
-				});
-
-				var g2 = Gadget.create({
-					'hub/foo': function () {
-						count++;
-						assert.same(g2, this);
-					}
-				});
-
-				return start.call(g1).then(function () {
-					return start.call(g2).then(function () {
-						return hub.publish('foo').then(function () {
-							assert.same(2, count);
-						});
-					})
+				return hub.publish(TOPIC).then(function() {
+					assert(true);
 				});
 			},
 
-			"publish/subscribe - memory" : function() {
-				var spy1 = this.spy();
-				var spy2 = this.spy();
+			"different topics should not interfere with each other": function(){
+				var g1 = new Gadget();
 
-				var g1 = Gadget.create({
-					"hub/foo/bar(true)": function() {
-						spy1.apply(spy1,arguments);
-					},
-					"hub/foo/bar": function() {
-						spy2.apply(spy1, arguments);
-					}
+				this
+				.subscribe(g1, TOPIC + "diff", function(){
+					assert(false);
+				})
+				.subscribe(g1, TOPIC, function(test){
+					assert(test);
 				});
 
-				return hub.publish("foo/bar", "foo", "bar").then(function() {
-					// None of them should be called because component not yet started.
-					refute.called(spy1);
-					refute.called(spy2);
-
-					return start.call(g1).then(function() {
-						// Only the handler declared with memory if is called.
-						assert.calledWithExactly(spy1, "foo", "bar");
-						refute.called(spy2);
-					});
-				});
+				return hub.publish(TOPIC, true);
 			},
 
-			"publish after called .off": function() {
-				var foo = this.spy();
-				var g1 = Gadget.create({
-					'hub/foo': function() {
-						foo();
-					}
+			"//with args" : function () {
+				var g1 = new Gadget();
+
+				this.subscribe(g1, TOPIC, function(){
+					allSame(arguments, TEST_ARGS);
 				});
-				return start.call(g1).then(function() {
-					g1.off("hub/foo");
-					return hub.publish("foo").then(function() {
-						refute.called(foo);
-					})
-				});
+
+				return hub.publish(APPLY_ARGS);
 			},
 
-			"on/off/emit": {
-				"emit to a topic that no handler is listening": function(){
-					var g1 = new Gadget();
+			"multiple times and in order" : function () {
+				var g1 = new Gadget();
 
-					return g1.emit.apply(g1, TEST_ARGS).then(function () {
-						assert(true);
-					});
-				},
+				var spy = this.spy();
 
-				"without exception": function(){
-					var g1 = new Gadget();
+				this
+				.subscribe(g1, TOPIC, spy)
+				.subscribe(g1, TOPIC, function(){
 
-					g1.on(TOPIC, function(){
-						allSame(arguments, TEST_ARGS);
-					});
+					assert.called(spy);
 
-					return g1.emit.apply(g1, APPLY_ARGS);
-				},
+					allSame(arguments, TEST_ARGS);
+				});
 
-				"on multiple instance should not interfere with each other": function(){
-					var g1 = new Gadget();
-					var g2 = new Gadget();
+				return hub.publish.apply(hub, APPLY_ARGS);
+			},
 
-					g1.on(TOPIC, function(){
-						allSame(arguments, TEST_ARGS);
-					});
-					g2.on(TOPIC, function(){
-						assert(false);
-					});
+			"cross gadget" : function () {
 
-					return g1.emit.apply(g1, APPLY_ARGS);
-				},
+				var g1 = new Gadget();
+				var g2 = new Gadget();
 
-				"on() multiple times and the handler received in order": function(){
-					var g1 = new Gadget();
-					var g2 = new Gadget();
+				this.subscribe(g1, TOPIC, function(){
+					allSame(arguments, TEST_ARGS);
+				});
 
-					var spy = this.spy();
-
-					g1.on(TOPIC, spy);
-					g1.on(TOPIC, function(test){
-						assert.called(spy);
-						allSame(arguments, TEST_ARGS);
-					});
-					g2.on(TOPIC, function(){
-						assert(false);
-					});
-
-					return g1.emit.apply(g1, APPLY_ARGS);
-				}
+				return hub.publish.apply(hub, APPLY_ARGS);
 			}
-		});
+		},
+
+		"publish/subscribe - matches context": function () {
+
+			var count = 0;
+			var g1 = Gadget.create({
+				'hub/foo': function () {
+					count++;
+					assert.same(g1, this);
+				}
+			});
+
+			var g2 = Gadget.create({
+				'hub/foo': function () {
+					count++;
+					assert.same(g2, this);
+				}
+			});
+
+			return start.call(g1).then(function () {
+				return start.call(g2).then(function () {
+					return hub.publish('foo').then(function () {
+						assert.same(2, count);
+					});
+				})
+			});
+		},
+
+		"publish/subscribe - memory" : function() {
+			var spy1 = this.spy();
+			var spy2 = this.spy();
+
+			var g1 = Gadget.create({
+				"hub/foo/bar(true)": function() {
+					spy1.apply(spy1,arguments);
+				},
+				"hub/foo/bar": function() {
+					spy2.apply(spy1, arguments);
+				}
+			});
+
+			return hub.publish("foo/bar", "foo", "bar").then(function() {
+				// None of them should be called because component not yet started.
+				refute.called(spy1);
+				refute.called(spy2);
+
+				return start.call(g1).then(function() {
+					// Only the handler declared with memory if is called.
+					assert.calledWithExactly(spy1, "foo", "bar");
+					refute.called(spy2);
+				});
+			});
+		},
+
+		"publish after called .off": function() {
+			var foo = this.spy();
+			var g1 = Gadget.create({
+				'hub/foo': function() {
+					foo();
+				}
+			});
+			return start.call(g1).then(function() {
+				g1.off("hub/foo");
+				return hub.publish("foo").then(function() {
+					refute.called(foo);
+				})
+			});
+		},
+
+		"on/off/emit": {
+			"emit to a topic that no handler is listening": function(){
+				var g1 = new Gadget();
+
+				return g1.emit.apply(g1, TEST_ARGS).then(function () {
+					assert(true);
+				});
+			},
+
+			"without exception": function(){
+				var g1 = new Gadget();
+
+				g1.on(TOPIC, function(){
+					allSame(arguments, TEST_ARGS);
+				});
+
+				return g1.emit.apply(g1, APPLY_ARGS);
+			},
+
+			"on multiple instance should not interfere with each other": function(){
+				var g1 = new Gadget();
+				var g2 = new Gadget();
+
+				g1.on(TOPIC, function(){
+					allSame(arguments, TEST_ARGS);
+				});
+				g2.on(TOPIC, function(){
+					assert(false);
+				});
+
+				return g1.emit.apply(g1, APPLY_ARGS);
+			},
+
+			"on() multiple times and the handler received in order": function(){
+				var g1 = new Gadget();
+				var g2 = new Gadget();
+
+				var spy = this.spy();
+
+				g1.on(TOPIC, spy);
+				g1.on(TOPIC, function(test){
+					assert.called(spy);
+					allSame(arguments, TEST_ARGS);
+				});
+				g2.on(TOPIC, function(){
+					assert(false);
+				});
+
+				return g1.emit.apply(g1, APPLY_ARGS);
+			}
+		}
 	});
 });
