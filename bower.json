@@ -7,7 +7,7 @@
   ],
   "dependencies": {
     "troopjs-log": "^2",
-    "troopjs-compose": "^4",
+    "troopjs-compose": "^4.0.1",
     "poly": "^0.6",
     "when": "^3.4",
     "mu-merge": "^0"
