@@ -14,6 +14,48 @@ define([
 	 * @enum {String}
 	 * @private
 	 */
+	/**
+	 * @property handlers Property name for `handlers`
+	 */
+	/**
+	 * @property emitter Property name for `emitter`
+	 */
+	/**
+	 * @property type Property name for `type`
+	 */
+	/**
+	 * @property callback Property name for `callback`
+	 */
+	/**
+	 * @property data Property name for `data`
+	 */
+	/**
+	 * @property scope Property name for `scope`
+	 */
+	/**
+	 * @property executor Property name for `executor`
+	 */
+	/**
+	 * @property head Property name for `head`
+	 */
+	/**
+	 * @property tail Property name for `tail`
+	 */
+	/**
+	 * @property next Property name for `next`
+	 */
+	/**
+	 * @property count Property name for `count`
+	 */
+	/**
+	 * @property limit Property name for `limit`
+	 */
+	/**
+	 * @property on Property name for `on`
+	 */
+	/**
+	 * @property off Property name for `off`
+	 */
 
 	/**
 	 * @class core.config.phase

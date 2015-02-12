@@ -22,7 +22,11 @@ define([
 	var NEXT = config.emitter.next;
 
 	/**
+	 * Executes an emission
 	 * @method constructor
+	 * @param {Object} event Event object
+	 * @param {Object} handlers List of handlers
+	 * @param {*[]} [args] Handler arguments
 	 * @localdoc
 	 * - Executes event handlers asynchronously passing each handler `args`.
 	 *

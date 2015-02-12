@@ -23,6 +23,20 @@ define([
 	var HANDLERS = config.emitter.handlers;
 
 	/**
+	 * Event executor
+	 * @private
+	 * @readonly
+	 * @property {core.emitter.executor} executor
+	 */
+
+	/**
+	 * Event handlers
+	 * @protected
+	 * @readonly
+	 * @property {Object} handlers Object where the key represents the event type and the value is a list of {@link core.emitter.handler handlers} for that type.
+	 */
+
+	/**
 	 * @method constructor
 	 * @inheritdoc
 	 */
@@ -37,16 +51,17 @@ define([
 
 		/**
 		 * Adds a listener for the specified event type.
+		 * @method
 		 * @param {String} type The event type to subscribe to.
 		 * @param {Function|Object} callback The event callback to add. If callback is a function defaults from below will be used:
 		 * @param {Function} callback.callback Callback method.
 		 * @param {Object} [callback.scope=this] Callback scope.
 		 * @param {Number} [callback.limit=0] Callback limit.
 		 * @param {Function} [callback.on=undefined] Will be called once this handler is added to the handlers list.
-		 * @param {core.event.handler} [callback.on.handler] The handler that was just added.
+		 * @param {core.emitter.handler} [callback.on.handler] The handler that was just added.
 		 * @param {Object} [callback.on.handlers] The list of handlers the handler was added to.
 		 * @param {Function} [callback.off=undefined] Will be called once this handler is removed from the handlers list.
-		 * @param {core.event.handler} [callback.off.handler] The handler that was just removed.
+		 * @param {core.emitter.handler} [callback.off.handler] The handler that was just removed.
 		 * @param {Object} [callback.off.handlers] The list of handlers the handler was removed from.
 		 * @param {*} [data] Handler data
 		 */
@@ -55,6 +70,7 @@ define([
 		/**
 		 * Remove callback(s) from a subscribed event type, if no callback is specified,
 		 * remove all callbacks of this type.
+		 * @method
 		 * @param {String} type The event type subscribed to
 		 * @param {Function|Object} [callback] The event callback to remove. If callback is a function scope will be this, otherwise:
 		 * @param {Function} [callback.callback] Callback method to match.
@@ -64,6 +80,7 @@ define([
 
 		/**
 		 * Adds a listener for the specified event type exactly once.
+		 * @method
 		 * @inheritdoc #on
 		 */
 		"one": from(Emitter),
@@ -76,6 +93,7 @@ define([
 		 *  with the same argument data specified by the {@link #emit} function.
 		 *  Each handler will wait for the completion for the previous one if it returns a promise.
 		 *
+		 * @method
 		 * @param {String|Object} event The event type to emit, or an event object
 		 * @param {String} [event.type] The event type name.
 		 * @param {Function} [event.runner] The runner function that determinate how the handlers are executed, overrides the
