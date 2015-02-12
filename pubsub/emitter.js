@@ -2,30 +2,29 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../event/emitter",
-	"./runner",
+	"../emitter/composition",
+	"../config",
+	"./executor",
 	"troopjs-compose/decorator/from"
-], function (Emitter, runner, from) {
+], function (Emitter, config, executor, from) {
 	"use strict";
 
 	/**
-	 * A specialized version of {@link core.event.emitter} for memorized events and {@link core.component.gadget#property-phase phase} protection.
+	 * A specialized version of {@link core.emitter.composition} for memorized events and {@link core.component.gadget#property-phase phase} protection.
 	 *
 	 * ## Memorized emitting
 	 *
-	 * A emitter event will memorize the "current" value of each event. Each runner may have it's own interpretation
+	 * A emitter event will memorize the "current" value of each event. Each executor may have it's own interpretation
 	 * of what "current" means.
 	 *
 	 * @class core.pubsub.emitter
-	 * @extend core.event.emitter
+	 * @extend core.emitter.composition
 	 */
 
 	var UNDEFINED;
-	var ARRAY_SLICE = Array.prototype.slice;
 	var MEMORY = "memory";
-	var HANDLERS = "handlers";
-	var RUNNER = "runner";
-	var TYPE = "type";
+	var HANDLERS = config.emitter.handlers;
+	var EXECUTOR = config.emitter.executor;
 
 	/**
 	 * @method on
@@ -45,7 +44,11 @@ define([
 	 * @private
 	 */
 
-	return Emitter.extend({
+	return Emitter.extend((function (key, value) {
+		var me = this;
+		me[key] = value;
+		return me;
+	}).call({
 		"displayName": "core/pubsub/emitter",
 
 		/**
@@ -78,23 +81,7 @@ define([
 		 * @param {...*} [args] Additional params that are passed to the handler function.
 		 * @return {Promise}
 		 */
-		"publish" : function (type) {
-			var me = this;
-
-			// Prepare event object
-			var event = {};
-			event[TYPE] = type;
-			event[RUNNER] = runner;
-
-			// Slice `arguments`
-			var args = ARRAY_SLICE.call(arguments);
-
-			// Modify first `arg`
-			args[0] = event;
-
-			// Delegate the actual emitting to event emitter.
-			return me.emit.apply(me, args);
-		},
+		"publish" : from("emit"),
 
 		/**
 		 * Returns value in handlers MEMORY
@@ -105,9 +92,9 @@ define([
 		"peek": function (type, value) {
 			var handlers;
 
-			return (handlers = this[HANDLERS][type]) === UNDEFINED || !(MEMORY in handlers)
+			return (handlers = this[HANDLERS][type]) === UNDEFINED || !handlers.hasOwnProperty(MEMORY)
 				? value
 				: handlers[MEMORY];
 		}
-	});
+	}, EXECUTOR, executor));
 });

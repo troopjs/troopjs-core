@@ -10,7 +10,8 @@
     "troopjs-compose": "^4.0.1",
     "poly": "^0.6",
     "when": "^3.4",
-    "mu-merge": "^0"
+    "mu-merge": "^0",
+    "mu-emitter": "^0"
   },
   "devDependencies": {
     "requirejs": "^2.1",

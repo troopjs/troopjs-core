@@ -2,28 +2,27 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../event/emitter",
+	"../emitter/composition",
 	"../config",
-	"../component/runner",
+	"../component/executor",
 	"poly/array",
 	"poly/object"
-], function (Emitter, config, runner) {
+], function (Emitter, config, executor) {
 	"use strict";
 
 	/**
 	 * A light weight implementation to register key/value pairs by key and index
 	 * @class core.registry.emitter
-	 * @extend core.event.emitter
+	 * @extend core.emitter.composition
 	 */
 
-	var TYPE = "type";
-	var RUNNER = "runner";
 	var LENGTH = "length";
 	var INDEX = "index";
 	var OBJECT_TOSTRING = Object.prototype.toString;
 	var TOSTRING_REGEXP = "[object RegExp]";
 	var SIG_REGISTER = config.signal.register;
 	var SIG_UNREGISTER = config.signal.unregister;
+	var EXECUTOR = config.emitter.executor;
 
 	/**
 	 * Register signal
@@ -54,7 +53,11 @@ define([
 		 * @readonly
 		 */
 		this[INDEX] = {};
-	}, {
+	}, (function (key, value) {
+		var me = this;
+		me[key] = value;
+		return me;
+	}).call({
 		"displayName": "core/registry/emitter",
 
 		/**
@@ -102,7 +105,6 @@ define([
 		"register": function (key, value) {
 			var me = this;
 			var index = me[INDEX];
-			var event;
 
 			if (index[key] !== value) {
 
@@ -110,11 +112,7 @@ define([
 					me.unregister(key);
 				}
 
-				event = {};
-				event[TYPE] = SIG_REGISTER;
-				event[RUNNER] = runner;
-
-				me.emit(event, key, index[key] = value);
+				me.emit(SIG_REGISTER, key, index[key] = value);
 			}
 
 			return value;
@@ -130,22 +128,17 @@ define([
 			var me = this;
 			var index = me[INDEX];
 			var value;
-			var event;
 
 			if (index.hasOwnProperty(key)) {
 
 				value = index[key];
 
 				if (delete index[key]) {
-					event = {};
-					event[TYPE] = SIG_UNREGISTER;
-					event[RUNNER] = runner;
-
-					me.emit(event, key, value);
+					me.emit(SIG_UNREGISTER, key, value);
 				}
 			}
 
 			return value;
 		}
-	});
+	}, EXECUTOR, executor));
 });

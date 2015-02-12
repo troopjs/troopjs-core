@@ -3,10 +3,11 @@
  */
 define([
 	"./emitter",
+	"../config",
 	"../pubsub/hub",
-	"../pubsub/runner",
+	"../pubsub/executor",
 	"when/when"
-],function (Emitter, hub, runner, when) {
+],function (Emitter, config, hub, executor, when) {
 	"use strict";
 
 	/**
@@ -50,9 +51,9 @@ define([
 	var UNDEFINED;
 	var NULL = null;
 	var ARRAY_PROTO = Array.prototype;
-	var RUNNER = "runner";
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
+	var EXECUTOR = config.emitter.executor;
+	var SCOPE = config.emitter.scope;
+	var CALLBACK = config.emitter.callback;
 	var ARGS = "args";
 	var NAME = "name";
 	var TYPE = "type";
@@ -100,8 +101,8 @@ define([
 						// Redefine result
 						result = {};
 						result[TYPE] = special[NAME];
-						result[RUNNER] = runner;
-						result[CONTEXT] = me;
+						result[EXECUTOR] = executor;
+						result[SCOPE] = me;
 						result[CALLBACK] = special[VALUE];
 						result = [ result ].concat(memory);
 					}
@@ -130,7 +131,7 @@ define([
 			if ((matches = RE.exec(type)) !== NULL) {
 				// Let `_callback` be `{}` and initialize
 				_callback = {};
-				_callback[CONTEXT] = me;
+				_callback[SCOPE] = me;
 				_callback[CALLBACK] = callback;
 
 				// Subscribe to the hub
@@ -151,7 +152,7 @@ define([
 			if ((matches = RE.exec(type)) !== NULL) {
 				// Let `_callback` be `{}` and initialize
 				_callback = {};
-				_callback[CONTEXT] = me;
+				_callback[SCOPE] = me;
 				_callback[CALLBACK] = callback;
 
 				// Unsubscribe from the hub

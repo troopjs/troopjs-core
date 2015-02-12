@@ -23,28 +23,24 @@ define([
 		},
 
 		"declarative - on": function () {
-			var count = 0;
-
-			function onEvent(arg1, arg2) {
-				count++;
-				assert.equals(arg1, 123);
-				assert.equals(arg2, "abc");
+			var callback = this.spy(function () {
 				return delay(200);
-			}
+			});
 
 			var Foo = Component.extend({
-				"on/foo": onEvent
+				"on/foo": callback
 			});
 
 			var Bar = Foo.extend({
-				"on/foo": onEvent
+				"on/foo": callback
 			});
 
 			var bar = Bar();
 
 			return start.call(bar).then(function () {
 				return bar.emit("foo", 123, "abc").then(function () {
-					assert.equals(count, 2);
+					assert.calledTwice(callback);
+					assert.calledWith(callback, 123, "abc");
 				});
 			});
 		},
@@ -113,37 +109,38 @@ define([
 			function handler1() {}
 			function handler2() {}
 
+			var FOO = "foo";
 			var setup = this.spy();
 			var add = this.spy();
 			var remove = this.spy();
 			var teardown = this.spy();
 
 			var foo = Component.create({
+				"displayName": FOO,
 				"sig/setup": setup,
 				"sig/add": add,
 				"sig/remove": remove,
 				"sig/teardown": teardown
 			});
 
-			foo
-				.on("foo", handler1)
-				.on("foo", handler2)
-				.off("foo", handler1)
-				.off("foo", handler2);
+			foo.on(FOO, handler1);
+			foo.on(FOO, handler2);
+			foo.off(FOO, handler1);
+			foo.off(FOO, handler2);
 
-			var handlers = foo.handlers["foo"];
+			var handlers = foo.handlers[FOO];
 
 			assert.calledOnce(setup);
 			assert.calledTwice(add);
 			assert.calledTwice(remove);
 			assert.calledOnce(teardown);
 
-			assert.calledWith(setup, handlers, "foo", handler1);
-			assert.calledWith(add, handlers, "foo", handler1);
-			assert.calledWith(add, handlers, "foo", handler2);
-			assert.calledWith(remove, handlers, "foo", handler1);
-			assert.calledWith(remove, handlers, "foo", handler2);
-			assert.calledWith(teardown, handlers, "foo", handler2);
+			assert.calledWith(setup, handlers, FOO, handler1);
+			assert.calledWith(add, handlers, FOO, handler1);
+			assert.calledWith(add, handlers, FOO, handler2);
+			assert.calledWith(remove, handlers, FOO, handler1);
+			assert.calledWith(remove, handlers, FOO, handler2);
+			assert.calledWith(teardown, handlers, FOO, handler2);
 		},
 
 		"event handlers - add - prevent default": function() {
@@ -173,6 +170,7 @@ define([
 
 		"event handlers - remove - prevent default": function() {
 			var handle = this.spy();
+
 			function handler() {
 				handle();
 			}

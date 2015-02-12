@@ -4,9 +4,16 @@
 define([
 	"module",
 	"troopjs-compose/config",
+	"mu-emitter/config",
 	"mu-merge/main"
-], function (module, config, merge) {
+], function (module, config, emitterConfig, merge) {
 	"use strict";
+
+	/**
+	 * @class core.config.emitter
+	 * @enum {String}
+	 * @private
+	 */
 
 	/**
 	 * @class core.config.phase
@@ -125,6 +132,13 @@ define([
 		 * @cfg {core.config.phase}
 		 * @protected
 		 */
-		"phase": PHASE
+		"phase": PHASE,
+
+		/**
+		 * Emitter properties
+		 * @cfg {core.config.emitter}
+		 * @protected
+		 */
+		"emitter": emitterConfig
 	}, module.config());
 });

@@ -2,45 +2,43 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([
-	"../event/emitter",
+	"../emitter/composition",
 	"../config",
 	"./registry",
-	"./runner",
+	"./executor",
 	"../task/factory",
 	"mu-merge/main",
 	"troopjs-compose/decorator/around",
 	"when/when",
 	"poly/array"
-], function (Emitter, config, registry, runner, taskFactory, merge, around, when) {
+], function (Emitter, config, registry, executor, taskFactory, merge, around, when) {
 	"use strict";
 
 	/**
 	 * Component emitter
 	 * @class core.component.emitter
-	 * @extend core.event.emitter
+	 * @extend core.emitter.composition
 	 * @mixin core.config
 	 * @alias feature.component
 	 */
 
-	var UNDEFINED;
 	var FALSE = false;
 	var ARRAY_PROTO = Array.prototype;
-	var ARRAY_PUSH = ARRAY_PROTO.push;
-	var RUNNER = "runner";
-	var HANDLERS = "handlers";
-	var HEAD = "head";
-	var TAIL = "tail";
+	var EXECUTOR = config.emitter.executor;
+	var HANDLERS = config.emitter.handlers;
+	var HEAD = config.emitter.head;
+	var TAIL = config.emitter.tail;
+	var SIG_SETUP = config.signal.setup;
+	var SIG_ADD = config.signal.add;
+	var SIG_REMOVE = config.signal.remove;
+	var SIG_TEARDOWN = config.signal.teardown;
+	var SIG_TASK = config.signal.task;
 	var NAME = "name";
 	var TYPE = "type";
 	var VALUE = "value";
 	var ON = "on";
 	var ONE = "one";
 	var SIG = "sig";
-	var SIG_SETUP = config.signal.setup;
-	var SIG_ADD = config.signal.add;
-	var SIG_REMOVE = config.signal.remove;
-	var SIG_TEARDOWN = config.signal.teardown;
-	var SIG_TASK = config.signal.task;
 	var SIG_PATTERN = new RegExp("^" + SIG + "/(.+)");
 
 	/**
@@ -183,7 +181,6 @@ define([
 
 	/**
 	 * @method one
-	 * @chainable
 	 * @inheritdoc
 	 * @localdoc Adds support for {@link #event-sig/setup} and {@link #event-sig/add}.
 	 * @fires sig/setup
@@ -246,14 +243,15 @@ define([
 			// Un-register component
 			registry.unregister(me.toString(), me);
 
-			// Finalize all handlers, in reverse
-			return when.map(me[HANDLERS].reverse(), function (handlers) {
-				return me.off(handlers[TYPE]);
-			});
+			// Finalize all handlers
+			Object
+				.keys(me[HANDLERS])
+				.forEach(function (type) {
+					me.off(type);
+				});
 		},
 
 		/**
-		 * @chainable
 		 * @method
 		 * @inheritdoc
 		 * @localdoc Adds support for {@link #event-sig/setup} and {@link #event-sig/add}.
@@ -263,50 +261,52 @@ define([
 		"on": around(function (fn) {
 			return function (type, callback, data) {
 				var me = this;
+				var handlers = me[HANDLERS];
 				var event;
-				var handlers;
 				var result;
+				var _handlers;
 
 				// If this type is NOT a signal we don't have to event try
 				if (!SIG_PATTERN.test(type)) {
-					// Initialize the handlers for this type if they don't exist.
-					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-						handlers = {};
-						handlers[TYPE] = type;
+					// Get or initialize the handlers for this type
+					if (handlers.hasOwnProperty(type)) {
+						_handlers = handlers[type];
+					} else {
+						_handlers = {};
+						_handlers[TYPE] = type;
 					}
 
 					// Initialize event
 					event = {};
-					event[RUNNER] = runner;
+					event[EXECUTOR] = executor;
 
 					// If this is the first handler signal SIG_SETUP
-					if (!(HEAD in handlers)) {
+					if (!_handlers.hasOwnProperty(HEAD)) {
 						event[TYPE] = SIG_SETUP;
-						result = me.emit(event, handlers, type, callback, data);
+						result = me.emit(event, _handlers, type, callback, data);
 					}
 
 					// If we were not interrupted
 					if (result !== FALSE) {
 						// Signal SIG_ADD
 						event[TYPE] = SIG_ADD;
-						result = me.emit(event, handlers, type, callback, data);
+						result = me.emit(event, _handlers, type, callback, data);
 					}
 
-					// If we were not interrupted and `handlers` is not the list for `type` append it
-					if (result !== FALSE && me[HANDLERS][type] !== handlers) {
-						ARRAY_PUSH.call(me[HANDLERS], me[HANDLERS][type] = handlers);
+					// If we were not interrupted and `type` is not in `handlers`
+					if (result !== FALSE && !handlers.hasOwnProperty(type)) {
+						handlers[type] = _handlers;
 					}
 				}
 
-				// If we were not interrupted return result from super.on, otherwise just this
-				return result !== FALSE
-						? fn.call(me, type, callback, data)
-						: me;
+				// If we were not interrupted call super.on
+				if (result !== FALSE) {
+					fn.call(me, type, callback, data);
+				}
 			};
 		}),
 
 		/**
-		 * @chainable
 		 * @method
 		 * @inheritdoc
 		 * @localdoc Adds support for {@link #event-sig/remove} and {@link #event-sig/teardown}.
@@ -314,43 +314,46 @@ define([
 		 * @fires sig/teardown
 		 */
 		"off": around(function(fn) {
-			return function off(type, callback) {
+			return function (type, callback) {
 				var me = this;
+				var handlers = me[HANDLERS];
 				var event;
-				var handlers;
 				var result;
+				var _handlers;
 
 				if (!SIG_PATTERN.test(type)) {
-					// Initialize the handlers for this type if they don't exist.
-					if ((handlers = me[HANDLERS][type]) === UNDEFINED) {
-						handlers = {};
-						handlers[TYPE] = type;
+					// Get or initialize the handlers for this type
+					if (handlers.hasOwnProperty(type)) {
+						_handlers = handlers[type];
+					} else {
+						_handlers = {};
+						_handlers[TYPE] = type;
 					}
 
 					// Initialize event
 					event = {};
-					event[RUNNER] = runner;
+					event[EXECUTOR] = executor;
 
 					// Signal SIG_REMOVE
 					event[TYPE] = SIG_REMOVE;
-					result = me.emit(event, handlers, type, callback);
+					result = me.emit(event, _handlers, type, callback);
 
 					// If we were not interrupted and this is the last handler signal SIG_TEARDOWN
-					if (result !== FALSE && handlers[HEAD] === handlers[TAIL]) {
+					if (result !== FALSE && _handlers[HEAD] === _handlers[TAIL]) {
 						event[TYPE] = SIG_TEARDOWN;
-						result = me.emit(event, handlers, type, callback);
+						result = me.emit(event, _handlers, type, callback);
 					}
 
-					// If we were not interrupted and `handlers` is not the list for `type` append it
-					if (result !== FALSE && me[HANDLERS][type] !== handlers) {
-						ARRAY_PUSH.call(me[HANDLERS], me[HANDLERS][type] = handlers);
+					// If we were not interrupted and `type` is not in `handlers`
+					if (result !== FALSE && !handlers.hasOwnProperty(type)) {
+						handlers[type] = _handlers;
 					}
 				}
 
-				// If we were not interrupted return result from super.off, otherwise just this
-				return result !== FALSE
-					? fn.call(me, type, callback)
-					: me;
+				// If we were not interrupted call super.off
+				if (result !== FALSE) {
+					fn.call(me, type, callback);
+				}
 			};
 		}),
 

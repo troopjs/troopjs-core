@@ -8,12 +8,12 @@ define([
 	"use strict";
 
 	/**
-	 * @class core.pubsub.runner
+	 * @class core.pubsub.executor
 	 * @mixin Function
 	 * @mixin core.config
 	 * @private
 	 * @static
-	 * @alias feature.runner
+	 * @alias feature.executor
 	 */
 
 	var UNDEFINED;
@@ -22,58 +22,58 @@ define([
 	var TOSTRING_ARGUMENTS = "[object Arguments]";
 	var TOSTRING_ARRAY = "[object Array]";
 	var SKIP = config.phase.skip;
-	var CONTEXT = "context";
-	var CALLBACK = "callback";
-	var HEAD = "head";
-	var NEXT = "next";
+	var SCOPE = config.emitter.scope;
+	var CALLBACK = config.emitter.callback;
+	var HEAD = config.emitter.head;
+	var NEXT = config.emitter.next;
 	var PHASE = "phase";
 	var MEMORY = "memory";
 
 	/**
 	 * @method constructor
-	 * @inheritdoc core.event.runner#constructor
+	 * @inheritdoc core.emitter.executor#constructor
 	 * @localdoc
-	 * - Skips handlers who's {@link core.event.handler#context context}.{@link core.component.gadget#property-phase phase} matches {@link core.config.phase#skip}.
+	 * - Skips handlers who's scope.{@link core.component.gadget#property-phase phase} matches {@link core.config.phase#skip}.
 	 * - Executes handlers passing each handler the result from the previous.
 	 * - If a handler returns `undefined` the result from the previous is used.
 	 * - When all handlers are completed the end result is memorized on `handlers`
+	 *
 	 * @return {Promise} Promise for `[*]`
 	 */
-	return function pipeline(event, handlers, args) {
-		var context = event[CONTEXT];
+	return function (event, handlers, args) {
+		var _handlers = [];
+		var _handlersCount = 0;
+		var scope = event[SCOPE];
 		var callback = event[CALLBACK];
-		var candidate;
-		var candidates = [];
-		var candidatesCount = 0;
+		var handler;
 
 		// Iterate handlers
-		for (candidate = handlers[HEAD]; candidate !== UNDEFINED; candidate = candidate[NEXT]) {
-			if (
-				// Filter `candidate[CONTEXT]` if we have `context`
-			(context !== UNDEFINED && candidate[CONTEXT] !== context) ||
-				// Filter `candidate[CALLBACK]` if we have `callback`
-			(callback !== UNDEFINED && candidate[CALLBACK] !== callback)
-			) {
+		for (handler = handlers[HEAD]; handler !== UNDEFINED; handler = handler[NEXT]) {
+			if (callback && handler[CALLBACK] !== callback) {
 				continue;
 			}
 
-			candidates[candidatesCount++] = candidate;
+			if (scope && handler[SCOPE] !== scope) {
+				continue;
+			}
+
+			_handlers[_handlersCount++] = handler;
 		}
 
 		return when
-			// Reduce `candidates`
-			.reduce(candidates, function (current, candidate) {
-				// Let `candidate_context` be `candidate[CONTEXT]`
-				var candidate_context = candidate[CONTEXT];
+			// Reduce `_handlers`
+			.reduce(_handlers, function (current, _handler) {
+				// Let `_scope` be `handler[SCOPE]`
+				var _scope = _handler[SCOPE];
 
-				// Return early if `candidate_context[PHASE]` matches a blocked phase
-				if (candidate_context !== UNDEFINED && SKIP.test(candidate_context[PHASE])) {
+				// Return early if `_scope[PHASE]` matches a blocked phase
+				if (_scope !== UNDEFINED && SKIP.test(_scope[PHASE])) {
 					return current;
 				}
 
-				// Run `candidate` passing `args`
+				// Run `handler` passing `args`
 				// Pass to `when` to (potentially) update `result`
-				return when(candidate.run(current), function (result) {
+				return when(_handler.handle(current), function (result) {
 					// If `result` is `UNDEFINED` ...
 					if (result === UNDEFINED) {
 						// ... return `current` ...
