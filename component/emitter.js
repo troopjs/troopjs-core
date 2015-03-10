@@ -9,9 +9,8 @@ define([
 	"../task/factory",
 	"mu-merge/main",
 	"troopjs-compose/decorator/around",
-	"when/when",
 	"poly/array"
-], function (Emitter, config, registry, executor, taskFactory, merge, around, when) {
+], function (Emitter, config, registry, executor, taskFactory, merge, around) {
 	"use strict";
 
 	/**
@@ -23,7 +22,6 @@ define([
 	 */
 
 	var FALSE = false;
-	var ARRAY_PROTO = Array.prototype;
 	var EXECUTOR = config.emitter.executor;
 	var HANDLERS = config.emitter.handlers;
 	var HEAD = config.emitter.head;
@@ -193,12 +191,14 @@ define([
 	 */
 	return Emitter.extend(function Component() {
 		var me = this;
-		var specials = me.constructor.specials[SIG] || ARRAY_PROTO;
+		var specials = me.constructor.specials;
 
-		// Iterate specials
-		specials.forEach(function (special) {
-			me.on(special[NAME], special[VALUE]);
-		});
+		// Iterate SIG specials
+		if (specials.hasOwnProperty(SIG)) {
+			specials[SIG].forEach(function (special) {
+				me.on(special[NAME], special[VALUE]);
+			});
+		}
 	}, {
 		"displayName" : "core/component/base",
 
@@ -217,17 +217,18 @@ define([
 			registry.register(me.toString(), me);
 
 			// Initialize ON specials
-			var specials_on = when.map(specials[ON] || ARRAY_PROTO, function (special) {
-				return me.on(special[TYPE], special[VALUE]);
-			});
+			if (specials.hasOwnProperty(ON)) {
+				specials[ON].forEach(function (special) {
+					me.on(special[TYPE], special[VALUE]);
+				});
+			}
 
 			// Initialize ONE specials
-			var specials_one = when.map(specials[ONE] || ARRAY_PROTO, function (special) {
-				return me.one(special[TYPE], special[VALUE]);
-			});
-
-			// Join and return
-			return when.join(specials_on, specials_one);
+			if (specials.hasOwnProperty(ONE)) {
+				specials[ONE].forEach(function (special) {
+					me.one(special[TYPE], special[VALUE]);
+				});
+			}
 		},
 
 		/**
