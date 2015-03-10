@@ -75,10 +75,13 @@ define([
 		 */
 		"sig/initialize" : function () {
 			var me = this;
+			var specials = me.constructor.specials;
 
-			return when.map(me.constructor.specials[HUB] || ARRAY_PROTO, function (special) {
-				return me.on(special[NAME], special[VALUE]);
-			});
+			if (specials.hasOwnProperty(HUB)) {
+				specials[HUB].forEach(function (special) {
+					me.on(special[NAME], special[VALUE]);
+				});
+			}
 		},
 
 		/**
