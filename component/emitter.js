@@ -189,7 +189,7 @@ define([
 	 * @method constructor
 	 * @inheritdoc
 	 */
-	return Emitter.extend(function Component() {
+	return Emitter.extend(function () {
 		var me = this;
 		var specials = me.constructor.specials;
 
