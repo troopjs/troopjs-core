@@ -12,6 +12,13 @@ define([ "troopjs-compose/factory" ], function (Factory) {
 	 */
 
 	/**
+	 * Instance counter
+	 * @private
+	 * @readonly
+	 * @property {Number} instanceCount
+	 */
+
+	/**
 	 * @method create
 	 * @static
 	 * @inheritable
@@ -32,12 +39,6 @@ define([ "troopjs-compose/factory" ], function (Factory) {
 	 * @method constructor
 	 */
 	return Factory(function () {
-		/**
-		 * Instance counter
-		 * @private
-		 * @readonly
-		 * @property {Number}
-		 */
 		this[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
 	}, {
 		/**
