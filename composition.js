@@ -1,10 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([
-	"troopjs-compose/factory",
-	"troopjs-log/logger"
-], function ObjectBaseModule(Factory, logger) {
+define([ "troopjs-compose/factory" ], function (Factory) {
 	var INSTANCE_COUNTER = 0;
 	var INSTANCE_COUNT = "instanceCount";
 
@@ -12,7 +9,6 @@ define([
 	 * Base composition with instance count.
 	 * @class core.composition
 	 * @implement compose.composition
-	 * @mixin log.logger
 	 */
 
 	/**
@@ -43,7 +39,7 @@ define([
 		 * @property {Number}
 		 */
 		this[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
-	}, logger, {
+	}, {
 		/**
 		 * The hierarchical namespace for this component that indicates it's functionality.
 		 * @protected
