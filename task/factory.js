@@ -22,7 +22,7 @@ define([
 	 * @param {String} [name=task] Task name
 	 * @return {Promise}
 	 */
-	return function factory(promiseOrResolver, name) {
+	return function (promiseOrResolver, name) {
 		// Get promise
 		var promise = when.isPromiseLike(promiseOrResolver)
 			? when(promiseOrResolver)

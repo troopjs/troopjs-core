@@ -53,7 +53,7 @@ define([ "troopjs-compose/factory" ], function (Factory) {
 		 * @return {String} {@link #displayName}`@`{@link #instanceCount}
 		 * @protected
 		 */
-		"toString" : function _toString() {
+		"toString" : function () {
 			var me = this;
 
 			return me.displayName + "@" + me[INSTANCE_COUNT];
