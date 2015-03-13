@@ -36,17 +36,14 @@ define([
 	 * @method constructor
 	 */
 	return Factory(function () {
-		// Update instance count
-		this[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
-	}, logger, {
 		/**
 		 * Instance counter
 		 * @private
 		 * @readonly
 		 * @property {Number}
 		 */
-		"instanceCount" : INSTANCE_COUNTER,
-
+		this[INSTANCE_COUNT] = ++INSTANCE_COUNTER;
+	}, logger, {
 		/**
 		 * The hierarchical namespace for this component that indicates it's functionality.
 		 * @protected
