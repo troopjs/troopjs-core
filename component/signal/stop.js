@@ -28,7 +28,7 @@ define([
 	 * @localdoc Transitions the component {@link core.component.emitter#property-phase} to `stopped`
 	 */
 
-	return function stop() {
+	return function () {
 		var me = this;
 		var args = arguments;
 

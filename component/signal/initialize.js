@@ -27,7 +27,7 @@ define([
 	 * @localdoc Transitions the component {@link core.component.emitter#property-phase} to `initialized`
 	 */
 
-	return function initialize() {
+	return function () {
 		var me = this;
 		var args = arguments;
 
