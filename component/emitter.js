@@ -8,8 +8,7 @@ define([
 	"./executor",
 	"../task/factory",
 	"mu-merge/main",
-	"troopjs-compose/decorator/around",
-	"poly/array"
+	"troopjs-compose/decorator/around"
 ], function (Emitter, config, registry, executor, taskFactory, merge, around) {
 	"use strict";
 
