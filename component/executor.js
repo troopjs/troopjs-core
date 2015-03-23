@@ -1,10 +1,7 @@
 /**
  * @license MIT http://troopjs.mit-license.org/
  */
-define([
-	"../config",
-	"poly/array"
-], function (config) {
+define([ "../config" ], function (config) {
 	"use strict";
 
 	/**

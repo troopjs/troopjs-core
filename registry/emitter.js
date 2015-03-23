@@ -4,9 +4,7 @@
 define([
 	"../emitter/composition",
 	"../config",
-	"../component/executor",
-	"poly/array",
-	"poly/object"
+	"../component/executor"
 ], function (Emitter, config, executor) {
 	"use strict";
 
