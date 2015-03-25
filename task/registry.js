@@ -2,32 +2,32 @@
  * @license MIT http://troopjs.mit-license.org/
  */
 define([ "../registry/emitter" ], function (Registry) {
-	"use strict";
+  "use strict";
 
-	/**
-	 * @class core.task.registry
-	 * @extend core.registry.emitter
-	 * @singleton
-	 */
+  /**
+   * @class core.task.registry
+   * @extend core.registry.emitter
+   * @singleton
+   */
 
-	/**
-	 * @method create
-	 * @static
-	 * @hide
-	 */
+  /**
+   * @method create
+   * @static
+   * @hide
+   */
 
-	/**
-	 * @method extend
-	 * @static
-	 * @hide
-	 */
+  /**
+   * @method extend
+   * @static
+   * @hide
+   */
 
-	/**
-	 * @method constructor
-	 * @hide
-	 */
+  /**
+   * @method constructor
+   * @hide
+   */
 
-	return Registry.create({
-		"displayName": "core/task/registry"
-	});
+  return Registry.create({
+    "displayName": "core/task/registry"
+  });
 });
