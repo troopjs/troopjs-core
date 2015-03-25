@@ -1,0 +1,44 @@
+{
+  "env": {
+      "browser": true,
+      "amd": true
+  },
+
+  "rules": {
+    "comma-dangle": [ 2, "never" ],
+    "no-cond-assign": [ 2, "except-parens" ],
+    "new-cap": [ 2, "newIsCap" ],
+    "no-console": 2,
+    "no-extra-parens": 2,
+    "no-reserved-keys": 2,
+    "block-scoped-var": 2,
+    "default-case": 2,
+    "guard-for-in": 2,
+    "no-eq-null": 2,
+    "no-floating-decimal": 2,
+    "no-self-compare": 2,
+    "no-throw-literal": 2,
+    "radix": 2,
+    "vars-on-top": 2,
+    "strict": [ 2, "function" ],
+    "no-catch-shadow": 2,
+    "no-undefined": 2,
+    "no-use-before-define": [ 2, "nofunc" ],
+
+    "indent": [ 2, 2 ],
+    "brace-style": [ 2 , "stroustrup", { "allowSingleLine": true } ],
+    "comma-style": [ 2, "last" ],
+    "consistent-this": [ 2, "me" ],
+    "no-lonely-if": 2,
+    "no-underscore-dangle": 0,
+    "quote-props": 2,
+    "quotes": [ 2, "double" ],
+    "space-after-keywords": 2,
+    "space-before-blocks": 2,
+    "space-before-function-parentheses":  2,
+    "space-in-brackets": [ 2, "always",  { "propertyName": false } ],
+    "space-in-parens": 2,
+    "space-unary-ops": 2,
+    "spaced-line-comment": 2
+  }
+}
