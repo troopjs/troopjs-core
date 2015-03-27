@@ -76,10 +76,8 @@ define([
    * @event sig/added
    * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
    * @since 3.0
-   * @param {Object} handlers
-   * @param {String} type
-   * @param {Function} callback
-   * @param {*} [data]
+   * @param {Object} handlers The list of handlers the handler was added to.
+   * @param {core.emitter.handler} handler The handler that was just added.
    */
 
   /**
@@ -98,9 +96,8 @@ define([
    * @event sig/removed
    * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
    * @since 3.0
-   * @param {Object} handlers
-   * @param {String} type
-   * @param {Function} callback
+   * @param {Object} handlers The list of handlers the handler was removed from.
+   * @param {core.emitter.handler} handler The handler that was just removed.
    */
 
   /**
@@ -329,7 +326,7 @@ define([
 
               // Signal SIG_ADDED
               event[TYPE] = SIG_ADDED;
-              me.emit(event, _handlers, type, callback, data);
+              me.emit(event, _handlers, result);
             }
           }
         }
@@ -397,7 +394,7 @@ define([
 
               // Signal SIG_REMOVED
               event[TYPE] = SIG_REMOVED;
-              me.emit(event, _handlers, type, callback);
+              me.emit(event, _handlers, result);
             }
           }
         }

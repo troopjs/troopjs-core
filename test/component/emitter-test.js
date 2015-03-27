@@ -84,7 +84,7 @@ define([
       });
     },
 
-    "bug out in first sig/initialize handler": function () {
+    "bug out in sig/initialize": function () {
       var err = new Error("bug out");
       var foo = Component.create({
         "sig/initialize": function () {
@@ -96,7 +96,7 @@ define([
       });
     },
 
-    "bug out within task": function () {
+    "bug out in sig/task": function () {
       var err = new Error("bug out");
       return Component.create({
         "sig/task": function () {
@@ -126,13 +126,13 @@ define([
         "sig/teardown": teardown
       });
 
-      function handler1 () {}
-      function handler2 () {}
+      function callback1 () {}
+      function callback2 () {}
 
-      foo.on(FOO, handler1);
-      foo.on(FOO, handler2);
-      foo.off(FOO, handler1);
-      foo.off(FOO, handler2);
+      var handler1 = foo.on(FOO, callback1);
+      var handler2 = foo.on(FOO, callback2);
+      foo.off(FOO, callback1);
+      foo.off(FOO, callback2);
 
       handlers = foo.handlers[FOO];
 
@@ -143,16 +143,16 @@ define([
       assert.calledTwice(removed);
       assert.calledOnce(teardown);
 
-      assert.calledWith(setup, handlers, FOO, handler1);
-      assert.calledWith(add, handlers, FOO, handler1);
-      assert.calledWith(add, handlers, FOO, handler2);
-      assert.calledWith(added, handlers, FOO, handler1);
-      assert.calledWith(added, handlers, FOO, handler2);
-      assert.calledWith(remove, handlers, FOO, handler1);
-      assert.calledWith(remove, handlers, FOO, handler2);
-      assert.calledWith(removed, handlers, FOO, handler1);
-      assert.calledWith(removed, handlers, FOO, handler2);
-      assert.calledWith(teardown, handlers, FOO, handler2);
+      assert.calledWith(setup, handlers, FOO, callback1);
+      assert.calledWith(add, handlers, FOO, callback1);
+      assert.calledWith(add, handlers, FOO, callback2);
+      assert.calledWith(added, handlers, handler1);
+      assert.calledWith(added, handlers, handler2);
+      assert.calledWith(remove, handlers, FOO, callback1);
+      assert.calledWith(remove, handlers, FOO, callback2);
+      assert.calledWith(removed, handlers, [ handler1 ]);
+      assert.calledWith(removed, handlers, [ handler2 ]);
+      assert.calledWith(teardown, handlers, FOO, callback2);
     },
 
     "event handlers - setup - prevent add": function () {
