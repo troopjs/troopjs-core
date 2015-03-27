@@ -377,10 +377,13 @@ define([
           event[TYPE] = SIG_REMOVE;
           result = me.emit(event, _handlers, type, callback);
 
-          // If we were not interrupted and this is the last handler signal SIG_TEARDOWN
-          if (result !== FALSE && _handlers[HEAD] === _handlers[TAIL]) {
-            event[TYPE] = SIG_TEARDOWN;
-            result = me.emit(event, _handlers, type, callback);
+          // If we were not interrupted
+          if (result !== FALSE) {
+            // If this is the last handler signal SIG_TEARDOWN
+            if (_handlers[HEAD] === _handlers[TAIL]) {
+              event[TYPE] = SIG_TEARDOWN;
+              result = me.emit(event, _handlers, type, callback);
+            }
 
             // If we were not interrupted
             if (result !== FALSE) {
