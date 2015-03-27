@@ -57,13 +57,8 @@ define([
      * @param {Function} callback.callback Callback method.
      * @param {Object} [callback.scope=this] Callback scope.
      * @param {Number} [callback.limit=0] Callback limit.
-     * @param {Function} [callback.on=undefined] Will be called once this handler is added to the handlers list.
-     * @param {core.emitter.handler} [callback.on.handler] The handler that was just added.
-     * @param {Object} [callback.on.handlers] The list of handlers the handler was added to.
-     * @param {Function} [callback.off=undefined] Will be called once this handler is removed from the handlers list.
-     * @param {core.emitter.handler} [callback.off.handler] The handler that was just removed.
-     * @param {Object} [callback.off.handlers] The list of handlers the handler was removed from.
      * @param {*} [data] Handler data
+     * @returns {core.emitter.handler} Handler that was added.
      */
     "on": from(Emitter),
 
@@ -75,6 +70,7 @@ define([
      * @param {Function|Object} [callback] The event callback to remove. If callback is a function scope will be this, otherwise:
      * @param {Function} [callback.callback] Callback method to match.
      * @param {Object} [callback.scope=this] Callback scope to match.
+     * @returns {core.emitter.handler[]} Handlers that were removed.
      */
     "off": from(Emitter),
 
