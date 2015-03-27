@@ -8,7 +8,7 @@ define([
   "use strict";
 
   var assert = buster.referee.assert;
-  var sinon = buster.sinon;
+  var refute = buster.referee.refute;
 
   var UNDEFINED;
   var PHASES = {
@@ -107,18 +107,22 @@ define([
       });
     },
 
-    "event handlers - setup/add/remove/teardown": function () {
+    "event handlers - setup/add/added/remove/removed/teardown": function () {
       var handlers;
       var FOO = "foo";
       var setup = this.spy();
       var add = this.spy();
+      var added = this.spy();
       var remove = this.spy();
+      var removed = this.spy();
       var teardown = this.spy();
       var foo = Component.create({
         "displayName": FOO,
         "sig/setup": setup,
         "sig/add": add,
+        "sig/added": added,
         "sig/remove": remove,
+        "sig/removed": removed,
         "sig/teardown": teardown
       });
 
@@ -134,69 +138,93 @@ define([
 
       assert.calledOnce(setup);
       assert.calledTwice(add);
+      assert.calledTwice(added);
       assert.calledTwice(remove);
+      assert.calledTwice(removed);
       assert.calledOnce(teardown);
 
       assert.calledWith(setup, handlers, FOO, handler1);
       assert.calledWith(add, handlers, FOO, handler1);
       assert.calledWith(add, handlers, FOO, handler2);
+      assert.calledWith(added, handlers, FOO, handler1);
+      assert.calledWith(added, handlers, FOO, handler2);
       assert.calledWith(remove, handlers, FOO, handler1);
       assert.calledWith(remove, handlers, FOO, handler2);
+      assert.calledWith(removed, handlers, FOO, handler1);
+      assert.calledWith(removed, handlers, FOO, handler2);
       assert.calledWith(teardown, handlers, FOO, handler2);
     },
 
-    "event handlers - add - prevent default": function () {
-      var evt = "bar";
-      var eventData = {};
+    "event handlers - setup - prevent add": function () {
+      var setup = this.spy(function () {
+        return false;
+      });
       var add = this.spy();
-      var bar = Component.extend({
-        "sig/add": function () {
-          assert(false);
-        }
-      }).create({
-        "sig/add": function () {
-          add.apply(add, arguments);
-          return false;
-        }
+
+      var component = Component.create({
+        "sig/setup": setup,
+        "sig/add": add
       });
 
-      function handler () {
-        assert(false);
-      }
+      component.on("foo", function () {});
 
-      bar.on(evt, handler, eventData);
-      assert.calledOnce(add);
-      assert.calledWith(add, sinon.match.any, evt, handler, eventData);
-
-      return bar.emit(evt);
+      assert.calledOnce(setup);
+      refute.called(add);
     },
 
-    "event handlers - remove - prevent default": function () {
-      var evt = "bar";
-      var handle = this.spy();
-      var off = this.spy();
-      var bar = Component.extend({
-        "sig/remove": function () {
-          assert(false);
-        }
-      }).create({
-        "sig/remove": function () {
-          off.apply(off, arguments);
-          return false;
-        }
+    "event handlers - added - prevent added": function () {
+      var add = this.spy(function () {
+        return false;
+      });
+      var added = this.spy();
+
+      var component = Component.create({
+        "sig/add": add,
+        "sig/added": added
       });
 
-      function handler () {
-        handle();
-      }
+      component.on("foo", function () {});
 
-      bar.on(evt, handler);
-      bar.off(evt, handler);
-      assert.calledOnce(off);
-      assert.calledWith(off, sinon.match.any, evt, handler);
-      return bar.emit(evt).then(function () {
-        assert.calledOnce(handle);
+      assert.calledOnce(add);
+      refute.called(added);
+    },
+
+    "event handlers - remove - prevent teardown": function () {
+      var remove = this.spy(function () {
+        return false;
       });
+      var teardown = this.spy();
+      var handler = this.spy();
+
+      var component = Component.create({
+        "sig/teardown": teardown,
+        "sig/remove": remove
+      });
+
+      component.on("foo", handler);
+      component.off("foo", handler);
+
+      assert.calledOnce(remove);
+      refute.called(teardown);
+    },
+
+    "event handlers - teardown - prevent removed": function () {
+      var teardown = this.spy(function () {
+        return false;
+      });
+      var removed = this.spy();
+      var handler = this.spy();
+
+      var component = Component.create({
+        "sig/teardown": teardown,
+        "sig/removed": removed
+      });
+
+      component.on("foo", handler);
+      component.off("foo", handler);
+
+      assert.calledOnce(teardown);
+      refute.called(removed);
     }
   });
 });

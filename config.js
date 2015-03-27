@@ -112,13 +112,21 @@ define([
      */
     "setup": "sig/setup",
     /**
-     * Signal emitted each time an event handler is added.
+     * Signal emitted before each time an event handler is added.
      */
     "add": "sig/add",
     /**
-     * Signal emitted each time an event handler is removed.
+     * Signal emitted each time an event handler is added.
+     */
+    "added": "sig/added",
+    /**
+     * Signal emitted before each time an event handler is removed.
      */
     "remove": "sig/remove",
+    /**
+     * Signal emitted each time an event handler is removed.
+     */
+    "removed": "sig/removed",
     /**
      * Signal emitted last time an event handler is removed.
      */

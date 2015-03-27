@@ -27,7 +27,9 @@ define([
   var TAIL = config.emitter.tail;
   var SIG_SETUP = config.signal.setup;
   var SIG_ADD = config.signal.add;
+  var SIG_ADDED = config.signal.added;
   var SIG_REMOVE = config.signal.remove;
+  var SIG_REMOVED = config.signal.removed;
   var SIG_TEARDOWN = config.signal.teardown;
   var SIG_TASK = config.signal.task;
   var NAME = "name";
@@ -60,7 +62,7 @@ define([
   /**
    * Add signal
    * @event sig/add
-   * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
+   * @localdoc Triggered before an event handler of a particular type is added via {@link #method-on}.
    * @since 3.0
    * @preventable
    * @param {Object} handlers
@@ -70,11 +72,32 @@ define([
    */
 
   /**
+   * Added signal
+   * @event sig/added
+   * @localdoc Triggered when a event handler of a particular type is added via {@link #method-on}.
+   * @since 3.0
+   * @param {Object} handlers
+   * @param {String} type
+   * @param {Function} callback
+   * @param {*} [data]
+   */
+
+  /**
    * Remove signal
    * @event sig/remove
-   * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
+   * @localdoc Triggered before an event handler of a particular type is removed via {@link #method-off}.
    * @since 3.0
    * @preventable
+   * @param {Object} handlers
+   * @param {String} type
+   * @param {Function} callback
+   */
+
+  /**
+   * Removed signal
+   * @event sig/removed
+   * @localdoc Triggered when a event handler of a particular type is removed via {@link #method-off}.
+   * @since 3.0
    * @param {Object} handlers
    * @param {String} type
    * @param {Function} callback
@@ -254,9 +277,10 @@ define([
     /**
      * @method
      * @inheritdoc
-     * @localdoc Adds support for {@link #event-sig/setup} and {@link #event-sig/add}.
+     * @localdoc Adds support for {@link #event-sig/setup}, {@link #event-sig/add} and {@link #event-sig/added}.
      * @fires sig/setup
      * @fires sig/add
+     * @fires sig/added
      */
     "on": around(function (fn) {
       return function (type, callback, data) {
@@ -266,7 +290,7 @@ define([
         var result;
         var _handlers;
 
-        // If this type is NOT a signal we don't have to event try
+        // If this type is NOT a signal we don't have to event try ...
         if (!SIG_PATTERN.test(type)) {
           // Get or initialize the handlers for this type
           if (handlers.hasOwnProperty(type)) {
@@ -292,26 +316,39 @@ define([
             // Signal SIG_ADD
             event[TYPE] = SIG_ADD;
             result = me.emit(event, _handlers, type, callback, data);
-          }
 
-          // If we were not interrupted and `type` is not in `handlers`
-          if (result !== FALSE && !handlers.hasOwnProperty(type)) {
-            handlers[type] = _handlers;
+            // If we were not interrupted
+            if (result !== FALSE) {
+              // If `type` is not in `handlers` put it there
+              if (!handlers.hasOwnProperty(type)) {
+                handlers[type] = _handlers;
+              }
+
+              // Call `super.on`
+              result = fn.call(me, type, callback, data);
+
+              // Signal SIG_ADDED
+              event[TYPE] = SIG_ADDED;
+              me.emit(event, _handlers, type, callback, data);
+            }
           }
         }
-
-        // If we were not interrupted call super.on
-        if (result !== FALSE) {
-          fn.call(me, type, callback, data);
+        // .. just call `super.on`
+        else {
+          result = fn.call(me, type, callback, data);
         }
+
+        // Return `result`
+        return result;
       };
     }),
 
     /**
      * @method
      * @inheritdoc
-     * @localdoc Adds support for {@link #event-sig/remove} and {@link #event-sig/teardown}.
+     * @localdoc Adds support for {@link #event-sig/remove}, {@link #event-sig/removed} and {@link #event-sig/teardown}.
      * @fires sig/remove
+     * @fires sig/removed
      * @fires sig/teardown
      */
     "off": around(function (fn) {
@@ -344,18 +381,30 @@ define([
           if (result !== FALSE && _handlers[HEAD] === _handlers[TAIL]) {
             event[TYPE] = SIG_TEARDOWN;
             result = me.emit(event, _handlers, type, callback);
-          }
 
-          // If we were not interrupted and `type` is not in `handlers`
-          if (result !== FALSE && !handlers.hasOwnProperty(type)) {
-            handlers[type] = _handlers;
+            // If we were not interrupted
+            if (result !== FALSE) {
+              // If `type` is not in `handlers` put it there
+              if (!handlers.hasOwnProperty(type)) {
+                handlers[type] = _handlers;
+              }
+
+              // Call `super.off`
+              result = fn.call(me, type, callback);
+
+              // Signal SIG_REMOVED
+              event[TYPE] = SIG_REMOVED;
+              me.emit(event, _handlers, type, callback);
+            }
           }
         }
-
-        // If we were not interrupted call super.off
-        if (result !== FALSE) {
-          fn.call(me, type, callback);
+        // ... just call `super.off`
+        else {
+          result = fn.call(me, type, callback);
         }
+
+        // Return `result`
+        return result;
       };
     }),
 
