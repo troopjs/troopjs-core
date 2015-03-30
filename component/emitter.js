@@ -116,28 +116,28 @@ define([
   /**
    * Initialize signal
    * @event sig/initialize
-   * @localdoc Triggered when this component enters the initialize phase
+   * @localdoc Triggered when this component enters the initialize {@link #property-phase}
    * @param {...*} [args] Initialize arguments
    */
 
   /**
    * Start signal
    * @event sig/start
-   * @localdoc Triggered when this component enters the start phase
+   * @localdoc Triggered when this component enters the start {@link #property-phase}
    * @param {...*} [args] Initialize arguments
    */
 
   /**
    * Stop signal
    * @event sig/stop
-   * @localdoc Triggered when this component enters the stop phase
+   * @localdoc Triggered when this component enters the stop {@link #property-phase}
    * @param {...*} [args] Stop arguments
    */
 
   /**
    * Finalize signal
    * @event sig/finalize
-   * @localdoc Triggered when this component enters the finalize phase
+   * @localdoc Triggered when this component enters the finalize {@link #property-phase}
    * @param {...*} [args] Finalize arguments
    */
 
