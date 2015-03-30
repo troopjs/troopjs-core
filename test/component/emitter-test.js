@@ -24,6 +24,13 @@ define([
       this.timeout = 500;
     },
 
+    "initial phase is undefined": function () {
+      var component = Component.create();
+
+      assert(component.hasOwnProperty("phase"));
+      refute.defined(component.phase);
+    },
+
     "declarative - on": function () {
       var callback = this.spy(function () {
         return delay(200);

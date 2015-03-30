@@ -20,6 +20,7 @@ define([
    * @alias feature.component
    */
 
+  var UNDEFINED;
   var FALSE = false;
   var EXECUTOR = config.emitter.executor;
   var HANDLERS = config.emitter.handlers;
@@ -32,6 +33,7 @@ define([
   var SIG_REMOVED = config.signal.removed;
   var SIG_TEARDOWN = config.signal.teardown;
   var SIG_TASK = config.signal.task;
+  var PHASE = "phase";
   var NAME = "name";
   var TYPE = "type";
   var VALUE = "value";
@@ -211,6 +213,9 @@ define([
   return Emitter.extend(function () {
     var me = this;
     var specials = me.constructor.specials;
+
+    // Set initial phase to `UNDEFINED`
+    me[PHASE] = UNDEFINED;
 
     // Iterate SIG specials
     if (specials.hasOwnProperty(SIG)) {
