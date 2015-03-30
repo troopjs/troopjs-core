@@ -150,8 +150,8 @@ define([
       assert.calledWith(added, handlers, handler2);
       assert.calledWith(remove, handlers, FOO, callback1);
       assert.calledWith(remove, handlers, FOO, callback2);
-      assert.calledWith(removed, handlers, [ handler1 ]);
-      assert.calledWith(removed, handlers, [ handler2 ]);
+      assert.calledWith(removed, handlers, handler1);
+      assert.calledWith(removed, handlers, handler2);
       assert.calledWith(teardown, handlers, FOO, callback2);
     },
 

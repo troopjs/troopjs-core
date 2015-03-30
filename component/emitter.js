@@ -394,7 +394,9 @@ define([
 
               // Signal SIG_REMOVED
               event[TYPE] = SIG_REMOVED;
-              me.emit(event, _handlers, result);
+              result.forEach(function (handler) {
+                me.emit(event, _handlers, handler);
+              });
             }
           }
         }
