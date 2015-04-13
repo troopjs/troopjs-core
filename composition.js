@@ -25,7 +25,7 @@ define([ "troopjs-compose/factory" ], function (Factory) {
    * @static
    * @inheritable
    * @inheritdoc
-   * @return {core.composition} Instance of this class
+   * @return {Object} Instance of this class
    */
 
   /**
