@@ -136,10 +136,10 @@ define([
       function callback1 () {}
       function callback2 () {}
 
-      var handler1 = foo.on(FOO, callback1);
-      var handler2 = foo.on(FOO, callback2);
-      foo.off(FOO, callback1);
-      foo.off(FOO, callback2);
+      var handler1 = foo.on(FOO, callback1, 1);
+      var handler2 = foo.on(FOO, callback2, 2);
+      foo.off(FOO, callback1, 11);
+      foo.off(FOO, callback2, 22);
 
       handlers = foo.handlers[FOO];
 
@@ -150,16 +150,16 @@ define([
       assert.calledTwice(removed);
       assert.calledOnce(teardown);
 
-      assert.calledWith(setup, handlers, FOO, callback1);
-      assert.calledWith(add, handlers, FOO, callback1);
-      assert.calledWith(add, handlers, FOO, callback2);
-      assert.calledWith(added, handlers, handler1);
-      assert.calledWith(added, handlers, handler2);
-      assert.calledWith(remove, handlers, FOO, callback1);
-      assert.calledWith(remove, handlers, FOO, callback2);
-      assert.calledWith(removed, handlers, handler1);
-      assert.calledWith(removed, handlers, handler2);
-      assert.calledWith(teardown, handlers, FOO, callback2);
+      assert.calledWith(setup, handlers, FOO, callback1, 1);
+      assert.calledWith(add, handlers, FOO, callback1, 1);
+      assert.calledWith(add, handlers, FOO, callback2, 2);
+      assert.calledWith(added, handlers, handler1, FOO, callback1, 1);
+      assert.calledWith(added, handlers, handler2, FOO, callback2, 2);
+      assert.calledWith(remove, handlers, FOO, callback1, 11);
+      assert.calledWith(remove, handlers, FOO, callback2, 22);
+      assert.calledWith(removed, handlers, handler1, FOO, callback1, 11);
+      assert.calledWith(removed, handlers, handler2, FOO, callback2, 22);
+      assert.calledWith(teardown, handlers, FOO, callback2, 22);
     },
 
     "event handlers - setup - prevent add": function () {

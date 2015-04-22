@@ -34,9 +34,11 @@ define([
   var SIG_TEARDOWN = config.signal.teardown;
   var SIG_TASK = config.signal.task;
   var PHASE = "phase";
+  var ARGS = "args";
   var NAME = "name";
   var TYPE = "type";
   var VALUE = "value";
+  var LENGTH = "length";
   var ON = "on";
   var ONE = "one";
   var SIG = "sig";
@@ -58,7 +60,7 @@ define([
    * @param {Object} handlers
    * @param {String} type
    * @param {Function} callback
-   * @param {*} [data]
+   * @param {...*} [args] Setup arguments
    */
 
   /**
@@ -70,7 +72,7 @@ define([
    * @param {Object} handlers
    * @param {String} type
    * @param {Function} callback
-   * @param {*} [data]
+   * @param {...*} [args] Add arguments
    */
 
   /**
@@ -91,6 +93,7 @@ define([
    * @param {Object} handlers
    * @param {String} type
    * @param {Function} callback
+   * @param {...*} [args] Removed arguments
    */
 
   /**
@@ -111,6 +114,7 @@ define([
    * @param {Object} handlers
    * @param {String} type
    * @param {Function} callback
+   * @param {...*} [args] Teardown arguments
    */
 
   /**
@@ -220,7 +224,14 @@ define([
     // Iterate SIG specials
     if (specials.hasOwnProperty(SIG)) {
       specials[SIG].forEach(function (special) {
-        me.on(special[NAME], special[VALUE]);
+        var args;
+
+        if ((args = special[ARGS]) !== UNDEFINED && args[LENGTH] > 0) {
+          me.on.apply(me, [ special[NAME], special[VALUE] ].concat(special[ARGS]));
+        }
+        else {
+          me.on(special[NAME], special[VALUE]);
+        }
       });
     }
   }, {
@@ -243,14 +254,28 @@ define([
       // Initialize ON specials
       if (specials.hasOwnProperty(ON)) {
         specials[ON].forEach(function (special) {
-          me.on(special[TYPE], special[VALUE]);
+          var args;
+
+          if ((args = special[ARGS]) !== UNDEFINED && args[LENGTH] > 0) {
+            me.on.apply(me, [ special[TYPE], special[VALUE] ].concat(special[ARGS]));
+          }
+          else {
+            me.on(special[TYPE], special[VALUE]);
+          }
         });
       }
 
       // Initialize ONE specials
       if (specials.hasOwnProperty(ONE)) {
         specials[ONE].forEach(function (special) {
-          me.one(special[TYPE], special[VALUE]);
+          var args;
+
+          if ((args = special[ARGS]) !== UNDEFINED && args[LENGTH] > 0) {
+            me.one.apply(me, [ special[TYPE], special[VALUE] ].concat(special[ARGS]));
+          }
+          else {
+            me.one(special[TYPE], special[VALUE]);
+          }
         });
       }
     },
@@ -285,9 +310,11 @@ define([
      * @fires sig/added
      */
     "on": around(function (fn) {
-      return function (type, callback, data) {
+      return function (type, callback) {
         var me = this;
         var handlers = me[HANDLERS];
+        var length;
+        var args;
         var event;
         var result;
         var _handlers;
@@ -307,17 +334,35 @@ define([
           event = {};
           event[EXECUTOR] = executor;
 
+          // Get `arguments[LENGTH]`
+          length = arguments[LENGTH];
+
+          // Check if rest arguments was passed
+          if (length > 2) {
+            // Let `args` be `[ event, _handlers ]`
+            args = [ event, _handlers ];
+
+            // Copy values from `arguments`
+            while (length--) {
+              args[ length + 2 ] = arguments[length];
+            }
+          }
+
           // If this is the first handler signal SIG_SETUP
           if (!_handlers.hasOwnProperty(HEAD)) {
             event[TYPE] = SIG_SETUP;
-            result = me.emit(event, _handlers, type, callback, data);
+            result = args !== UNDEFINED
+              ? me.emit.apply(me, args)
+              : me.emit(event, _handlers, type, callback)
           }
 
           // If we were not interrupted
           if (result !== FALSE) {
             // Signal SIG_ADD
             event[TYPE] = SIG_ADD;
-            result = me.emit(event, _handlers, type, callback, data);
+            result = args !== UNDEFINED
+              ? me.emit.apply(me, args)
+              : me.emit(event, _handlers, type, callback);
 
             // If we were not interrupted
             if (result !== FALSE) {
@@ -327,17 +372,30 @@ define([
               }
 
               // Call `super.on`
-              result = fn.call(me, type, callback, data);
+              result = fn.apply(me, arguments);
 
               // Signal SIG_ADDED
               event[TYPE] = SIG_ADDED;
-              me.emit(event, _handlers, result);
+              if (args !== UNDEFINED) {
+                length = args[LENGTH];
+
+                while (length-- > 2) {
+                  args[length + 1] = args[length];
+                }
+
+                args[2] = result;
+
+                me.emit.apply(me, args);
+              }
+              else {
+                me.emit(event, _handlers, result);
+              }
             }
           }
         }
         // .. just call `super.on`
         else {
-          result = fn.call(me, type, callback, data);
+          result = fn.apply(me, arguments);
         }
 
         // Return `result`
@@ -357,6 +415,8 @@ define([
       return function (type, callback) {
         var me = this;
         var handlers = me[HANDLERS];
+        var length;
+        var args;
         var event;
         var result;
         var _handlers;
@@ -375,16 +435,34 @@ define([
           event = {};
           event[EXECUTOR] = executor;
 
+          // Get `arguments[LENGTH]`
+          length = arguments[LENGTH];
+
+          // Check if rest arguments was passed
+          if (length > 2) {
+            // Let `args` be `[ event, _handlers ]`
+            args = [ event, _handlers ];
+
+            // Copy values from `arguments`
+            while (length--) {
+              args[ length + 2 ] = arguments[length];
+            }
+          }
+
           // Signal SIG_REMOVE
           event[TYPE] = SIG_REMOVE;
-          result = me.emit(event, _handlers, type, callback);
+          result = args !== UNDEFINED
+            ? me.emit.apply(me, args)
+            : me.emit(event, _handlers, type, callback);
 
           // If we were not interrupted
           if (result !== FALSE) {
             // If this is the last handler signal SIG_TEARDOWN
             if (_handlers[HEAD] === _handlers[TAIL]) {
               event[TYPE] = SIG_TEARDOWN;
-              result = me.emit(event, _handlers, type, callback);
+              result = args !== UNDEFINED
+                ? me.emit.apply(me, args)
+                : me.emit(event, _handlers, type, callback);
             }
 
             // If we were not interrupted
@@ -395,19 +473,34 @@ define([
               }
 
               // Call `super.off`
-              result = fn.call(me, type, callback);
+              result = fn.apply(me, arguments);
 
               // Signal SIG_REMOVED
               event[TYPE] = SIG_REMOVED;
-              result.forEach(function (handler) {
-                me.emit(event, _handlers, handler);
-              });
+              if (args !== UNDEFINED) {
+                length = args[LENGTH];
+
+                while (length-- > 2) {
+                  args[length + 1] = args[length];
+                }
+
+                result.forEach(function (handler) {
+                  args[2] = handler;
+
+                  me.emit.apply(me, args);
+                });
+              }
+              else {
+                result.forEach(function (handler) {
+                  me.emit(event, _handlers, handler);
+                });
+              }
             }
           }
         }
         // ... just call `super.off`
         else {
-          result = fn.call(me, type, callback);
+          result = fn.apply(me, arguments);
         }
 
         // Return `result`
