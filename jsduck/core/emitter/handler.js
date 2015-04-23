@@ -22,3 +22,9 @@
  * @param {*[]} args Handler arguments
  * @returns {*} Result from handler
  */
+
+/**
+ * Removes this handler from owning emitter
+ * @method off
+ * @abstract
+ */

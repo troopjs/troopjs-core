@@ -57,7 +57,7 @@ define([
      * @param {Function} callback.callback Callback method.
      * @param {Object} [callback.scope=this] Callback scope.
      * @param {Number} [callback.limit=0] Callback limit.
-     * @param {*} [data] Handler data
+     * @param {...*} [data] Handler data
      * @returns {core.emitter.handler} Handler that was added.
      */
     "on": from(Emitter),
@@ -94,7 +94,7 @@ define([
      * @param {String} [event.type] The event type name.
      * @param {Function} [event.runner] The runner function that determinate how the handlers are executed, overrides the
      * default behaviour of the event emitting.
-     * @param {...*} [args] Data params that are passed to the listener function.
+     * @param {...*} [args] Arguments passed to the handler.
      * @return {*} Result returned from runner.
      */
     "emit": from(Emitter)
