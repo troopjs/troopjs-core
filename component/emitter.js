@@ -344,7 +344,7 @@ define([
 
             // Copy values from `arguments`
             while (length--) {
-              args[ length + 2 ] = arguments[length];
+              args[length + 2] = arguments[length];
             }
           }
 
@@ -353,7 +353,7 @@ define([
             event[TYPE] = SIG_SETUP;
             result = args !== UNDEFINED
               ? me.emit.apply(me, args)
-              : me.emit(event, _handlers, type, callback)
+              : me.emit(event, _handlers, type, callback);
           }
 
           // If we were not interrupted
@@ -445,7 +445,7 @@ define([
 
             // Copy values from `arguments`
             while (length--) {
-              args[ length + 2 ] = arguments[length];
+              args[length + 2] = arguments[length];
             }
           }
 
